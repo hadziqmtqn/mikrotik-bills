@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Afsakar\LeafletMapPicker\LeafletMapPicker;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Exception;
@@ -182,28 +183,28 @@ class UserResource extends Resource
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
-                                        // lat_long json
-                                        TextInput::make('latitude')
-                                            ->label('Latitude')
-                                            ->helperText('Format: -6.200000')
-                                            ->maxLength(20)
-                                            ->dehydrated(false)
-                                            ->placeholder('e.g. -6.200000'),
-
-                                        TextInput::make('longitude')
-                                            ->label('Longitude')
-                                            ->helperText('Format: 106.816666')
-                                            ->maxLength(20)
-                                            ->dehydrated(false)
-                                            ->placeholder('e.g. 106.816666'),
-
-                                        Placeholder::make('lat_long')
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(function ($state, $get) {
-                                                $lat = $get('latitude');
-                                                $long = $get('longitude');
-                                                return ($lat && $long) ? json_encode(['lat' => $lat, 'long' => $long]) : null;
-                                            }),
+                                        LeafletMapPicker::make('lat_long')
+                                            ->label('Lokasi')
+                                            ->height('300px')
+                                            ->defaultLocation([41.01206193115527, 28.969745635986328])
+                                            ->defaultZoom(15)
+                                            ->draggable() // default true
+                                            ->clickable() // default true
+                                            ->myLocationButtonLabel('Go to My Location')
+                                            ->hideTileControl()
+                                            ->tileProvider('openstreetmap') // default options: openstreetmap, google, googleSatellite, googleTerrain, googleHybrid, esri
+                                            ->customTiles([
+                                                'mapbox' => [
+                                                    'url' => 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+                                                    'options' => [
+                                                        'attribution' => '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+                                                        'id' => 'mapbox/streets-v11',
+                                                        'maxZoom' => 19,
+                                                        'accessToken' => config('mapbox.access_token'),
+                                                    ]
+                                                ]
+                                            ])
+                                            ->columnSpanFull(),
                                     ])
                             ]),
 

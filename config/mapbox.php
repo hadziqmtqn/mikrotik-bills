@@ -1,0 +1,5 @@
+<?php
+
+return [
+    'access_token' => env('MAPBOX_ACCESS_TOKEN', 'your_mapbox_access_token_here'),
+];

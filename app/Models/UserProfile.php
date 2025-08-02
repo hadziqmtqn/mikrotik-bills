@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class UserProfile extends Model
@@ -23,5 +24,16 @@ class UserProfile extends Model
         return [
             'lat_long' => 'array',
         ];
+    }
+
+    // TODO Attachments
+    protected function latitude(): Attribute
+    {
+        return Attribute::make(fn() => $this->lat_long ? $this->lat_long['lat'] : null);
+    }
+
+    protected function longitude(): Attribute
+    {
+        return Attribute::make(fn() => $this->lat_long ? $this->lat_long['long'] : null);
     }
 }
