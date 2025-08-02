@@ -191,7 +191,7 @@ class UserResource extends Resource
                                             ->defaultLocation(latitude: -2.83, longitude: 118.30)
                                             ->draggable()
                                             ->clickable(true) // click to move marker
-                                            ->zoom(15)
+                                            ->zoom(10)
                                             ->minZoom(0)
                                             ->maxZoom(28)
                                             ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
@@ -237,13 +237,19 @@ class UserResource extends Resource
 
                                             // Extra Customization
                                             ->extraStyles([
-                                                'min-height: 100vh',
+                                                'min-height: 70vh',
                                             ])
                                             ->extraControl(['customControl' => true])
                                             ->extraTileControl(['customTileOption' => 'value'])
 
                                             // State Management
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
+                                                if (!$state) {
+                                                    $set('latitude', null);
+                                                    $set('longitude', null);
+                                                    return;
+                                                }
+
                                                 $set('latitude', $state['lat']);
                                                 $set('longitude', $state['lng']);
                                             })
