@@ -11,3 +11,13 @@ view_application;YES;NO;NO
 create_application;YES;NO;NO
 update_application;YES;NO;NO
 delete_application;NO;NO;NO
+view_any_user;YES;NO;NO
+view_user;YES;NO;NO
+create_user;YES;NO;NO
+update_user;YES;NO;NO
+delete_user;YES;NO;NO
+delete_any_user;NO;NO;NO
+restore_user;YES;NO;NO
+restore_any_user;YES;NO;NO
+force_delete_user;NO;NO;NO
+force_delete_any_user;NO;NO;NO
