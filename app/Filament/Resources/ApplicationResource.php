@@ -4,24 +4,36 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class ApplicationResource extends Resource
+class ApplicationResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Application::class;
-
     protected static ?string $slug = 'applications';
+    protected static ?string $navigationLabel = 'Aplikasi';
+    protected static ?string $navigationGroup = 'Pengaturan';
+    protected static ?string $navigationIcon = 'heroicon-o-cog';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'view',
+            'create',
+            'update',
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -32,13 +44,28 @@ class ApplicationResource extends Resource
 
                 TextInput::make('full_name'),
 
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?Application $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+                SpatieMediaLibraryFileUpload::make('favicon')
+                    ->label('Favicon')
+                    ->collection('favicon')
+                    ->image()
+                    ->disk('s3')
+                    ->maxSize(50)
+                    ->visibility('private')
+                    ->openable()
+                    ->dehydrated(fn($state) => filled($state))
+                    ->columnSpanFull(),
 
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?Application $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                Grid::make()
+                    ->columns()
+                    ->schema([
+                        Placeholder::make('created_at')
+                            ->label('Created Date')
+                            ->content(fn(?Application $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+
+                        Placeholder::make('updated_at')
+                            ->label('Last Modified Date')
+                            ->content(fn(?Application $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                    ]),
             ]);
     }
 
@@ -46,25 +73,30 @@ class ApplicationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
-                    ->searchable()
-                    ->sortable(),
+                SpatieMediaLibraryImageColumn::make('favicon')
+                    ->label('Favicon')
+                    ->collection('favicon')
+                    ->disk('s3')
+                    ->visibility('private')
+                    ->circular()
+                    ->size(32),
 
-                TextColumn::make('short_name'),
+                TextColumn::make('short_name')
+                    ->label('Nama Singkat')
+                    ->searchable(),
 
-                TextColumn::make('full_name'),
+                TextColumn::make('full_name')
+                    ->label('Nama Lengkap')
+                    ->searchable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 EditAction::make(),
-                DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -72,13 +104,16 @@ class ApplicationResource extends Resource
     {
         return [
             'index' => Pages\ListApplications::route('/'),
-            'create' => Pages\CreateApplication::route('/create'),
-            'edit' => Pages\EditApplication::route('/{record}/edit'),
         ];
     }
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['slug'];
+        return ['short_name', 'full_name'];
+    }
+
+    public static function canCreate(): bool
+    {
+        return Application::count() === 0;
     }
 }

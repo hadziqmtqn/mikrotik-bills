@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Application extends Model
+class Application extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $fillable = [
         'slug',
         'short_name',
@@ -27,5 +32,11 @@ class Application extends Model
         static::creating(function (Application $application) {
             $application->slug = Str::uuid()->toString();
         });
+    }
+
+    // TODO Attributes
+    protected function favicon(): Attribute
+    {
+        return Attribute::make(fn() => $this->hasMedia('favicon') ? $this->getFirstTemporaryUrl(now()->addHour(), 'favicon') : url('https://ui-avatars.com/api/?name=' . urlencode($this->short_name) . '&size=64&background=00bb00&color=ffffff&rounded=true'));
     }
 }
