@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Database\Seeders\Auth\RoleSeeder;
+use Database\Seeders\Auth\SuperAdminSeeder;
+use Database\Seeders\Setting\ApplicationSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,7 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RoleSeeder::class
+            RoleSeeder::class,
+            SuperAdminSeeder::class,
+            ApplicationSeeder::class
         ]);
     }
 }

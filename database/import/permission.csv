@@ -6,3 +6,8 @@ create_role;YES;NO;NO
 update_role;YES;NO;NO
 delete_role;NO;NO;NO
 delete_any_role;NO;NO;NO
+view_any_application;YES;NO;NO
+view_application;YES;NO;NO
+create_application;YES;NO;NO
+update_application;YES;NO;NO
+delete_application;NO;NO;NO
