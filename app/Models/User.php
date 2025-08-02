@@ -3,14 +3,22 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable, HasRoles, SoftDeletes, HasSlug, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -43,6 +51,20 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'deleted_at' => 'datetime',
         ];
+    }
+
+    public function getSlugOptions(): SlugOptions
+    {
+        // TODO: Implement getSlugOptions() method.
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('username');
+    }
+
+    public function userProfile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class, 'user_id');
     }
 }
