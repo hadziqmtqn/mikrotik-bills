@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use Afsakar\LeafletMapPicker\LeafletMapPicker;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use Dotswan\MapPicker\Fields\Map;
 use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -183,28 +184,75 @@ class UserResource extends Resource
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
-                                        LeafletMapPicker::make('lat_long')
-                                            ->label('Lokasi')
-                                            ->height('300px')
-                                            ->defaultLocation([41.01206193115527, 28.969745635986328])
-                                            ->defaultZoom(15)
-                                            ->draggable() // default true
-                                            ->clickable() // default true
-                                            ->myLocationButtonLabel('Go to My Location')
-                                            ->hideTileControl()
-                                            ->tileProvider('openstreetmap') // default options: openstreetmap, google, googleSatellite, googleTerrain, googleHybrid, esri
-                                            ->customTiles([
-                                                'mapbox' => [
-                                                    'url' => 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
-                                                    'options' => [
-                                                        'attribution' => '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-                                                        'id' => 'mapbox/streets-v11',
-                                                        'maxZoom' => 19,
-                                                        'accessToken' => config('mapbox.access_token'),
-                                                    ]
-                                                ]
+                                        Map::make('lat_long')
+                                            ->label('Location')
+                                            ->columnSpanFull()
+                                            // Basic Configuration
+                                            ->defaultLocation(latitude: -2.83, longitude: 118.30)
+                                            ->draggable()
+                                            ->clickable(true) // click to move marker
+                                            ->zoom(15)
+                                            ->minZoom(0)
+                                            ->maxZoom(28)
+                                            ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
+                                            ->detectRetina()
+
+                                            // Marker Configuration
+                                            ->showMarker()
+                                            ->markerColor("#3b82f6")
+                                            ->markerHtml('<div class="custom-marker">...</div>')
+                                            ->markerIconUrl(asset('assets/map-pin.svg'))
+                                            ->markerIconSize([40, 40])
+                                            ->markerIconClassName('my-marker-class')
+                                            ->markerIconAnchor([18, 36])
+
+                                            // Controls
+                                            ->showFullscreenControl()
+                                            ->showZoomControl()
+
+                                            // Location Features
+                                            ->liveLocation(true, true)
+                                            ->showMyLocationButton()
+                                            ->rangeSelectField('distance')
+
+                                            // GeoMan Integration
+                                            ->geoMan()
+                                            ->geoManEditable()
+                                            ->geoManPosition()
+                                            ->drawCircleMarker()
+                                            ->rotateMode()
+                                            ->drawMarker()
+                                            ->drawPolygon()
+                                            ->drawPolyline()
+                                            ->drawCircle()
+                                            ->drawRectangle()
+                                            ->drawText()
+                                            ->dragMode()
+                                            ->cutPolygon()
+                                            ->editPolygon()
+                                            ->deleteLayer()
+                                            ->setColor('#3388ff')
+                                            ->setFilledColor('#cad9ec')
+                                            ->snappable()
+
+                                            // Extra Customization
+                                            ->extraStyles([
+                                                'min-height: 100vh',
                                             ])
-                                            ->columnSpanFull(),
+                                            ->extraControl(['customControl' => true])
+                                            ->extraTileControl(['customTileOption' => 'value'])
+
+                                            // State Management
+                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
+                                                $set('latitude', $state['lat']);
+                                                $set('longitude', $state['lng']);
+                                            })
+                                            ->afterStateHydrated(function (Set $set, ?array $state): void {
+                                                if ($state) {
+                                                    $set('latitude', $state['lat']);
+                                                    $set('longitude', $state['lng']);
+                                                }
+                                            }),
                                     ])
                             ]),
 
