@@ -5,11 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Exception;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -25,6 +28,9 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
@@ -37,27 +43,214 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required(),
+                Tabs::make()
+                    ->columnSpanFull()
+                    ->tabs([
+                        Tabs\Tab::make('Profile')
+                            ->icon('heroicon-o-user')
+                            ->columns()
+                            ->schema([
+                                Select::make('roles')
+                                    ->label('Role')
+                                    ->prefixIcon('heroicon-o-shield-check')
+                                    ->relationship('roles', 'name')
+                                    ->preload()
+                                    ->required()
+                                    ->rules([
+                                        Rule::exists('roles', 'id')->where('guard_name', 'web'),
+                                    ])
+                                    ->searchable()
+                                    ->native(false),
 
-                TextInput::make('email')
-                    ->required(),
+                                TextInput::make('name')
+                                    ->prefixIcon('heroicon-o-user-circle')
+                                    ->required(),
 
-                DatePicker::make('email_verified_at')
-                    ->label('Email Verified Date'),
+                                TextInput::make('email')
+                                    ->prefixIcon('heroicon-o-envelope')
+                                    ->email()
+                                    ->unique(ignoreRecord: true)
+                                    ->required(),
 
-                TextInput::make('password')
-                    ->required(),
+                                Group::make()
+                                    ->relationship('userProfile')
+                                    ->schema([
+                                        TextInput::make('whatsapp_number')
+                                            ->label('WhatsApp Number')
+                                            ->prefixIcon('heroicon-o-phone')
+                                            ->required()
+                                            ->unique(ignoreRecord: true)
+                                            ->rules([
+                                                'regex:/^(08|628)[0-9]{8,11}$/',
+                                            ]),
+                                    ])
+                            ]),
 
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?User $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+                        Tabs\Tab::make('Alamat')
+                            ->icon('heroicon-o-map-pin')
+                            ->schema([
+                                Group::make()
+                                    ->relationship('userProfile')
+                                    ->columns()
+                                    ->schema([
+                                        Select::make('province')
+                                            ->label('Provinsi')
+                                            ->searchable()
+                                            ->getSearchResultsUsing(function (string $search) {
+                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/provinces', [
+                                                    'q' => $search,
+                                                ]);
+                                                return collect($response->json())->pluck('name', 'name')->toArray();
+                                            })
+                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $set('city', null);
+                                                $set('district', null);
+                                                $set('village', null);
+                                            }),
 
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?User $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                                        Select::make('city')
+                                            ->label('Kota/Kabupaten')
+                                            ->searchable()
+                                            ->getSearchResultsUsing(function (string $search, $get) {
+                                                $province = $get('province');
+                                                if (!$province) return [];
+                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/cities', [
+                                                    'province' => $province,
+                                                    'q' => $search,
+                                                ]);
+                                                return collect($response->json())->pluck('name', 'name')->toArray();
+                                            })
+                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $set('district', null);
+                                                $set('village', null);
+                                            }),
 
-                Checkbox::make('registerMediaConversionsUsingModelInstance'),
+                                        Select::make('district')
+                                            ->label('Kecamatan')
+                                            ->searchable()
+                                            ->getSearchResultsUsing(function (string $search, $get) {
+                                                $city = $get('city');
+                                                if (!$city) return [];
+                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/districts', [
+                                                    'city' => $city,
+                                                    'q' => $search,
+                                                ]);
+                                                return collect($response->json())->pluck('name', 'name')->toArray();
+                                            })
+                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $set('village', null);
+                                            }),
+
+                                        Select::make('village')
+                                            ->label('Desa/Kelurahan')
+                                            ->searchable()
+                                            ->getSearchResultsUsing(function (string $search, $get) {
+                                                $district = $get('district');
+                                                if (!$district) return [];
+                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/villages', [
+                                                    'district' => $district,
+                                                    'q' => $search,
+                                                ]);
+                                                return collect($response->json())->pluck('name', 'name')->toArray();
+                                            })
+                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
+                                            ->reactive(),
+
+                                        TextInput::make('street')
+                                            ->label('Jalan')
+                                            ->maxLength(255)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
+
+                                        TextInput::make('postal_code')
+                                            ->label('Kode Pos')
+                                            ->maxLength(10)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
+
+                                        // lat_long json
+                                        TextInput::make('latitude')
+                                            ->label('Latitude')
+                                            ->helperText('Format: -6.200000')
+                                            ->maxLength(20)
+                                            ->dehydrated(false)
+                                            ->placeholder('e.g. -6.200000'),
+
+                                        TextInput::make('longitude')
+                                            ->label('Longitude')
+                                            ->helperText('Format: 106.816666')
+                                            ->maxLength(20)
+                                            ->dehydrated(false)
+                                            ->placeholder('e.g. 106.816666'),
+
+                                        Placeholder::make('lat_long')
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(function ($state, $get) {
+                                                $lat = $get('latitude');
+                                                $long = $get('longitude');
+                                                return ($lat && $long) ? json_encode(['lat' => $lat, 'long' => $long]) : null;
+                                            }),
+                                    ])
+                            ]),
+
+                        Tabs\Tab::make('Keamanan')
+                            ->icon('heroicon-o-lock-closed')
+                            ->columns()
+                            ->schema([
+                                TextInput::make('password')
+                                    ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
+                                    ->password()
+                                    ->confirmed()
+                                    ->minLength(8)
+                                    ->regex('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
+                                    ->maxLength(255)
+                                    ->autocomplete('new-password')
+                                    ->dehydrated(fn (?string $state): bool => filled($state))
+                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                    ->placeholder(fn($livewire) => $livewire instanceof EditRecord ? 'Biarkan kosong jika tidak ingin mengubah password' : null)
+                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->revealable(),
+
+                                TextInput::make('password_confirmation')
+                                    ->label('Konfirmasi Kata Sandi')
+                                    ->password()
+                                    ->minLength(8)
+                                    ->maxLength(255)
+                                    ->autocomplete('new-password')
+                                    ->dehydrated(fn (?string $state): bool => filled($state))
+                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                    ->placeholder(fn($livewire) => $livewire instanceof EditRecord ? 'Biarkan kosong jika tidak ingin mengubah password' : null)
+                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->revealable(),
+                            ]),
+                    ]),
+
+                Grid::make()
+                    ->schema([
+                        Placeholder::make('created_at')
+                            ->label('Created Date')
+                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
+                            ->content(fn(?User $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+
+                        Placeholder::make('updated_at')
+                            ->label('Last Modified Date')
+                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
+                            ->content(fn(?User $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                    ]),
             ]);
     }
 
@@ -130,8 +323,8 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            /*'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),*/
         ];
     }
 
