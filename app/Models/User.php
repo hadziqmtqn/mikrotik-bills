@@ -30,6 +30,7 @@ class User extends Authenticatable implements HasMedia
         'name',
         'email',
         'password',
+        'is_active'
     ];
 
     /**
@@ -53,6 +54,7 @@ class User extends Authenticatable implements HasMedia
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'deleted_at' => 'datetime',
+            'is_active' => 'boolean',
         ];
     }
 

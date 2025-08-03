@@ -9,6 +9,7 @@ use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
@@ -24,7 +25,9 @@ use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -85,7 +88,17 @@ class UserResource extends Resource
                                             ->rules([
                                                 'regex:/^(08|628)[0-9]{8,11}$/',
                                             ]),
+                                    ]),
+
+                                Radio::make('is_active')
+                                    ->label('Status')
+                                    ->inline()
+                                    ->options([
+                                        true => 'Aktif',
+                                        false => 'Tidak Aktif',
                                     ])
+                                    ->default(true)
+                                    ->required(),
                             ]),
 
                         Tabs\Tab::make('Alamat')
@@ -287,6 +300,11 @@ class UserResource extends Resource
                     ->formatStateUsing(fn($state): string => ucwords(str_replace('_', ' ', $state)))
                     ->searchable()
                     ->sortable(),
+
+                IconColumn::make('is_active')
+                    ->label('Status')
+                    ->boolean()
+                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -303,7 +321,7 @@ class UserResource extends Resource
                         }
                     })
                     ->native(false),
-            ])
+            ], layout: FiltersLayout::Modal)
             ->actions([
                 EditAction::make(),
                 DeleteAction::make()

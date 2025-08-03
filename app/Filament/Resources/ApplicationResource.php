@@ -7,10 +7,12 @@ use App\Models\Application;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -43,6 +45,58 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                     ->required(),
 
                 TextInput::make('full_name'),
+
+                Select::make('panel_color')
+                    ->label('Warna Panel')
+                    ->options(
+                        collect(Color::all())
+                            // Ubah key jadi label yang lebih enak dibaca (opsional)
+                            ->mapWithKeys(function ($value, $key) {
+                                // Translate label sesuai kebutuhan
+                                $labels = [
+                                    'slate' => 'Abu Tua',
+                                    'gray' => 'Abu',
+                                    'zinc' => 'Zinc',
+                                    'neutral' => 'Netral',
+                                    'stone' => 'Stone',
+                                    'red' => 'Merah',
+                                    'orange' => 'Oranye',
+                                    'amber' => 'Amber',
+                                    'yellow' => 'Kuning',
+                                    'lime' => 'Lime',
+                                    'green' => 'Hijau',
+                                    'emerald' => 'Emerald',
+                                    'teal' => 'Teal',
+                                    'cyan' => 'Cyan',
+                                    'sky' => 'Biru Langit',
+                                    'blue' => 'Biru',
+                                    'indigo' => 'Indigo',
+                                    'violet' => 'Ungu',
+                                    'purple' => 'Ungu Tua',
+                                    'fuchsia' => 'Fuchsia',
+                                    'pink' => 'Merah Muda',
+                                    'rose' => 'Rose',
+                                ];
+                                return [$key => $labels[$key] ?? ucfirst($key)];
+                            })
+                            ->toArray()
+                    )
+                    ->native(false)
+                    ->searchable()
+                    ->helperText('Warna panel ini akan digunakan sebagai tema utama aplikasi Anda.')
+                    ->required(),
+
+                Select::make('navigation_position')
+                    ->label('Posisi Navigasi')
+                    ->options([
+                        'top' => 'Atas',
+                        'left' => 'Kiri',
+                    ])
+                    ->default('top')
+                    ->native(false)
+                    ->searchable()
+                    ->helperText('Posisi navigasi ini akan menentukan di mana menu aplikasi ditampilkan pada antarmuka pengguna.')
+                    ->required(),
 
                 SpatieMediaLibraryFileUpload::make('favicon')
                     ->label('Favicon')
@@ -88,6 +142,13 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                 TextColumn::make('full_name')
                     ->label('Nama Lengkap')
                     ->searchable(),
+
+                TextColumn::make('panel_color')
+                    ->label('Warna Panel')
+                    ->formatStateUsing(fn($state): string => ucfirst($state)),
+
+                TextColumn::make('navigation_position')->formatStateUsing(fn($state): string => ucfirst($state))
+                    ->label('Posisi Navigasi'),
             ])
             ->filters([
                 //

@@ -30,16 +30,41 @@ class AdminPanelProvider extends PanelProvider
     {
         $application = Application::first();
 
+        $colorMap = [
+            'slate'    => Color::Slate,
+            'gray'     => Color::Gray,
+            'zinc'     => Color::Zinc,
+            'neutral'  => Color::Neutral,
+            'stone'    => Color::Stone,
+            'red'      => Color::Red,
+            'orange'   => Color::Orange,
+            'amber'    => Color::Amber,
+            'yellow'   => Color::Yellow,
+            'lime'     => Color::Lime,
+            'green'    => Color::Green,
+            'emerald'  => Color::Emerald,
+            'teal'     => Color::Teal,
+            'cyan'     => Color::Cyan,
+            'sky'      => Color::Sky,
+            'blue'     => Color::Blue,
+            'indigo'   => Color::Indigo,
+            'violet'   => Color::Violet,
+            'purple'   => Color::Purple,
+            'fuchsia'  => Color::Fuchsia,
+            'pink'     => Color::Pink,
+            'rose'     => Color::Rose,
+        ];
+
         return $panel
             ->default()
             ->id('admin')
             ->path('control-panel')
             ->login()
-            ->topNavigation()
+            ->topNavigation($application?->navigation_position == 'top')
             ->brandName($application?->short_name ?? config('app.name'))
             ->favicon($application?->favicon)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => $colorMap[$application?->panel_color ?? 'amber'] ?? Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

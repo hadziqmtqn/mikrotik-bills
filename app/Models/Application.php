@@ -16,6 +16,8 @@ class Application extends Model implements HasMedia
         'slug',
         'short_name',
         'full_name',
+        'navigation_position',
+        'panel_color'
     ];
 
     protected function casts(): array
