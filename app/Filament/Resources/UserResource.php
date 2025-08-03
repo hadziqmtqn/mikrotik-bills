@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use Afsakar\LeafletMapPicker\LeafletMapPicker;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use Dotswan\MapPicker\Fields\Map;
 use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -184,40 +184,13 @@ class UserResource extends Resource
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
-                                        Map::make('lat_long')
-                                            ->label('Location')
+                                        LeafletMapPicker::make('lat_long')
+                                            ->label('Select Location')
+                                            ->tileProvider('google')
+                                            ->draggable(false)
+                                            ->clickable()
+                                            ->defaultZoom(15)
                                             ->columnSpanFull()
-                                            // Basic Configuration
-                                            ->defaultLocation(latitude: -2.83, longitude: 118.30)
-                                            ->draggable()
-                                            ->clickable(true) // click to move marker
-                                            ->zoom(15)
-                                            ->minZoom(0)
-                                            ->maxZoom(28)
-                                            ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
-                                            ->detectRetina()
-                                            // Marker Configuration
-                                            ->showMarker()
-                                            ->markerColor("#3b82f6")
-                                            ->markerHtml('<div class="custom-marker">...</div>')
-                                            ->markerIconUrl(asset('assets/map-pin.svg'))
-                                            ->markerIconSize([40, 40])
-                                            ->markerIconClassName('my-marker-class')
-                                            ->markerIconAnchor([18, 36])
-                                            // Controls
-                                            ->showFullscreenControl()
-                                            ->showZoomControl()
-                                            // Location Features
-                                            ->liveLocation(true, true)
-                                            ->showMyLocationButton()
-                                            ->rangeSelectField('distance')
-                                            // Extra Customization
-                                            ->extraStyles([
-                                                'min-height: 40vh',
-                                            ])
-                                            ->extraControl(['customControl' => true])
-                                            ->extraTileControl(['customTileOption' => 'value'])
-                                            // State Management
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 if (!$state) {
                                                     $set('latitude', null);
@@ -233,7 +206,7 @@ class UserResource extends Resource
                                                     $set('latitude', $state['lat']);
                                                     $set('longitude', $state['lng']);
                                                 }
-                                            }),
+                                            })
                                     ])
                             ]),
 
@@ -298,8 +271,7 @@ class UserResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('userProfile.whatsapp_number')
-                    ->searchable()
-                    ->copyable(),
+                    ->searchable(),
 
                 TextColumn::make('userProfile.street'),
 
