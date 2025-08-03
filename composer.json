@@ -9,6 +9,7 @@
         "php": "^8.2",
         "afsakar/filament-leaflet-map-picker": "^1.3",
         "bezhansalleh/filament-shield": "^3.3",
+        "cheesegrits/filament-google-maps": "^3.0",
         "dotswan/filament-map-picker": "^1.8",
         "filament/filament": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",

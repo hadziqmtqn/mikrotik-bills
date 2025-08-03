@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use Dotswan\MapPicker\Fields\Map;
+use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -13,7 +13,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -184,7 +183,68 @@ class UserResource extends Resource
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
+                                        TextInput::make('latitude')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                                $set('location', [
+                                                    'lat' => floatVal($state),
+                                                    'lng' => floatVal($get('longitude')),
+                                                ]);
+                                            })
+                                            ->lazy(), // important to use lazy, to avoid updates as you type
+                                        TextInput::make('longitude')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                                $set('location', [
+                                                    'lat' => floatval($get('latitude')),
+                                                    'lng' => floatVal($state),
+                                                ]);
+                                            })
+                                            ->lazy(),
                                         Map::make('lat_long')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                                $set('latitude', $state['lat']);
+                                                $set('longitude', $state['lng']);
+                                            })
+                                            ->defaultLocation([-6.2, 106.8]) // default for new forms
+                                            ->draggable() // allow dragging to move marker
+                                            ->clickable() // allow clicking to move marker
+                                            ->columnSpanFull(),
+                                        /*Map::make('lat_long')
+                                            ->mapControls([
+                                                'mapTypeControl'    => true,
+                                                'scaleControl'      => true,
+                                                'streetViewControl' => true,
+                                                'rotateControl'     => true,
+                                                'fullscreenControl' => true,
+                                                'searchBoxControl'  => false, // creates geocomplete field inside map
+                                                'zoomControl'       => false,
+                                            ])
+                                            ->height(fn () => '400px') // map height (width is controlled by Filament options)
+                                            ->defaultZoom(5) // default zoom level when opening form
+                                            ->autocomplete('full_address') // field on form to use as Places geocompletion field
+                                            ->autocompleteReverse() // reverse geocode marker location to autocomplete field
+                                            ->reverseGeocode([
+                                                'street' => '%n %S',
+                                                'city' => '%L',
+                                                'state' => '%A1',
+                                                'zip' => '%z',
+                                            ]) // reverse geocode marker location to form fields, see notes below
+                                            ->debug() // prints reverse geocode format strings to the debug console
+                                            ->defaultLocation([-6.2, 106.8]) // default for new forms
+                                            ->draggable() // allow dragging to move marker
+                                            ->clickable() // allow clicking to move marker
+                                            //->geolocate() // adds a button to request device location and set map marker accordingly
+                                            ->geolocateLabel('Get Location') // overrides the default label for geolocate button
+                                            //->geolocateOnLoad() // geolocate on load, second arg 'always' (default false, only for new form))
+                                            ->layers([
+                                                'https://googlearchive.github.io/js-v2-samples/ggeoxml/cta.kml',
+                                            ]) // array of KML layer URLs to add to the map
+                                            ->geoJson('https://fgm.test/storage/AGEBS01.geojson') // GeoJSON file, URL or JSON
+                                            ->geoJsonContainsField('geojson')
+                                            ->columnSpanFull(),*/
+                                        /*Map::make('lat_long')
                                             ->label('Location')
                                             ->columnSpanFull()
                                             // Basic Configuration
@@ -215,29 +275,9 @@ class UserResource extends Resource
                                             ->showMyLocationButton()
                                             ->rangeSelectField('distance')
 
-                                            // GeoMan Integration
-                                            ->geoMan()
-                                            ->geoManEditable()
-                                            ->geoManPosition()
-                                            ->drawCircleMarker()
-                                            ->rotateMode()
-                                            ->drawMarker()
-                                            ->drawPolygon()
-                                            ->drawPolyline()
-                                            ->drawCircle()
-                                            ->drawRectangle()
-                                            ->drawText()
-                                            ->dragMode()
-                                            ->cutPolygon()
-                                            ->editPolygon()
-                                            ->deleteLayer()
-                                            ->setColor('#3388ff')
-                                            ->setFilledColor('#cad9ec')
-                                            ->snappable()
-
                                             // Extra Customization
                                             ->extraStyles([
-                                                'min-height: 70vh',
+                                                'min-height: 40vh',
                                             ])
                                             ->extraControl(['customControl' => true])
                                             ->extraTileControl(['customTileOption' => 'value'])
@@ -258,7 +298,7 @@ class UserResource extends Resource
                                                     $set('latitude', $state['lat']);
                                                     $set('longitude', $state['lng']);
                                                 }
-                                            }),
+                                            }),*/
                                     ])
                             ]),
 

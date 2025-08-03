@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use Cheesegrits\FilamentGoogleMaps\Concerns\InteractsWithMaps;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
@@ -10,6 +11,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
 {
+    use InteractsWithMaps;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
