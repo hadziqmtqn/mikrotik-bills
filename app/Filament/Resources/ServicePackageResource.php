@@ -65,6 +65,11 @@ class ServicePackageResource extends Resource
                                             $set('data_limit', null);
                                             $set('data_limit_unit', null);
                                         }
+
+                                        if ($state !== 'pppoe') {
+                                            $set('validity_period', null);
+                                            $set('validity_unit', null);
+                                        }
                                     })
                                     ->columnSpanFull(),
 
@@ -101,32 +106,114 @@ class ServicePackageResource extends Resource
                         // TODO: Hotspot settings
                         Section::make('Hotspot Settings')
                             ->hidden(fn(Get $get) => $get('service_type') !== 'hotspot')
+                            ->columns()
                             ->schema([
-                                TextInput::make('package_limit_type'),
+                                Select::make('package_limit_type')
+                                    ->options([
+                                        'unlimited' => 'Tidak Terbatas',
+                                        'limited' => 'Terbatas',
+                                    ])
+                                        ->native(false)
+                                        ->required(fn(Get $get) => $get('service_type') === 'hotspot')
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if ($state !== 'limited') {
+                                                $set('limit_type', null);
+                                                $set('time_limit', null);
+                                                $set('time_limit_unit', null);
+                                                $set('data_limit', null);
+                                                $set('data_limit_unit', null);
+                                            }
+                                        })
+                                        ->columnSpanFull(),
 
-                                TextInput::make('limit_type'),
+                                Radio::make('limit_type')
+                                    ->options([
+                                        'time' => 'Waktu',
+                                        'data' => 'Data',
+                                        'both' => 'Waktu & Data',
+                                    ])
+                                    ->inline()
+                                    ->required(fn(Get $get) => $get('package_limit_type') === 'limited')
+                                    ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state !== 'time') {
+                                            $set('time_limit', null);
+                                            $set('time_limit_unit', null);
+                                        }
+
+                                        if ($state !== 'data') {
+                                            $set('data_limit', null);
+                                            $set('data_limit_unit', null);
+                                        }
+
+                                        if ($state !== 'both') {
+                                            $set('time_limit', null);
+                                            $set('time_limit_unit', null);
+                                            $set('data_limit', null);
+                                            $set('data_limit_unit', null);
+                                        }
+                                    })
+                                    ->columnSpanFull(),
 
                                 TextInput::make('time_limit')
+                                    ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'time' && $get('limit_type') !== 'both'))
+                                    ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'time' || $get('limit_type') === 'both'))
+                                    ->numeric()
                                     ->integer(),
 
-                                TextInput::make('time_limit_unit'),
+                                Select::make('time_limit_unit')
+                                    ->options([
+                                        'menit' => 'Menit',
+                                        'jam' => 'Jam',
+                                        'hari' => 'Hari',
+                                    ])
+                                    ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'time' && $get('limit_type') !== 'both'))
+                                    ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'time' || $get('limit_type') === 'both'))
+                                    ->default('menit')
+                                    ->native(false),
 
                                 TextInput::make('data_limit')
+                                    ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'data' && $get('limit_type') !== 'both'))
+                                    ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'data' || $get('limit_type') === 'both'))
+                                    ->numeric()
                                     ->integer(),
 
-                                TextInput::make('data_limit_unit'),
+                                Select::make('data_limit_unit')
+                                    ->options(['MBs', 'GBs'])
+                                    ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'data' && $get('limit_type') !== 'both'))
+                                    ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'data' || $get('limit_type') === 'both'))
+                                    ->native(false),
                             ]),
 
+                        // TODO: PPPoE settings
                         Section::make('PPPeE Settings')
                             ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
+                            ->columns()
                             ->schema([
                                 TextInput::make('validity_period')
+                                    ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
+                                    ->required(fn(Get $get) => $get('service_type') === 'pppoe')
+                                    ->numeric()
                                     ->integer(),
 
-                                TextInput::make('validity_unit'),
+                                Select::make('validity_unit')
+                                    ->options([
+                                        'menit' => 'Menit',
+                                        'jam' => 'Jam',
+                                        'hari' => 'Hari',
+                                        'bulan' => 'Bulan',
+                                    ])
+                                    ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
+                                    ->required(fn(Get $get) => $get('service_type') === 'pppoe')
+                                    ->default('hari')
+                                    ->native(false),
                             ]),
 
+                        // TODO: Package Price
                         Section::make('Package Price')
+                            ->columns()
                             ->schema([
                                 TextInput::make('package_price')
                                     ->numeric()
@@ -137,10 +224,12 @@ class ServicePackageResource extends Resource
 
                                 TextInput::make('price_before_discount')
                                     ->numeric()
+                                    ->prefix('Rp')
                                     ->default(0)
                                     ->helperText('Harga sebelum diskon, jika ada.'),
                             ]),
 
+                        // TODO: Description
                         Section::make()
                             ->schema([
                                 RichEditor::make('description')

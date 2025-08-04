@@ -17,13 +17,13 @@ return new class extends Migration {
             $table->enum('payment_type', ['prepaid', 'postpaid']);
             $table->enum('plan_type', ['pribadi', 'bisnis']);
             $table->enum('package_limit_type', ['unlimited', 'limited'])->nullable();
-            $table->enum('limit_type', ['batas_waktu', 'data', 'keduanya'])->nullable();
+            $table->enum('limit_type', ['time', 'data', 'both'])->nullable();
             $table->integer('time_limit')->nullable();
             $table->enum('time_limit_unit', ['menit', 'jam', 'hari'])->nullable();
             $table->integer('data_limit')->nullable();
             $table->enum('data_limit_unit', ['MBs', 'GBs'])->nullable();
             $table->integer('validity_period')->nullable();
-            $table->enum('validity_unit', ['meni', 'jam', 'hari', 'bulan'])->nullable();
+            $table->enum('validity_unit', ['menit', 'jam', 'hari', 'bulan'])->nullable();
             $table->decimal('package_price', 20, 0);
             $table->decimal('price_before_discount', 20, 0)->nullable();
             $table->unsignedBigInteger('router_id');
