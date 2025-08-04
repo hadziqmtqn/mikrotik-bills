@@ -4,55 +4,77 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RouterResource\Pages;
 use App\Models\Router;
-use Filament\Forms\Components\Checkbox;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
-class RouterResource extends Resource
+class RouterResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Router::class;
-
     protected static ?string $slug = 'routers';
+    protected static ?string $navigationGroup = 'Network';
+    protected static ?string $navigationIcon = 'heroicon-o-computer-desktop';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'delete',
+        ];
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('slug')
-                    ->disabled()
-                    ->required()
-                    ->unique(Router::class, 'slug', fn($record) => $record),
-
                 TextInput::make('name')
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
-
-                TextInput::make('ip_addreess')
                     ->required(),
 
-                Checkbox::make('is_active'),
+                TextInput::make('ip_address')
+                    ->label('IP Address')
+                    ->required(),
 
-                TextInput::make('description'),
+                Radio::make('is_active')
+                    ->label('Status')
+                    ->options([
+                        true => 'Active',
+                        false => 'Inactive',
+                    ])
+                    ->default(true)
+                    ->inline()
+                    ->required(),
 
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?Router $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+                Textarea::make('description')
+                    ->rows(3)
+                    ->columnSpanFull(),
 
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?Router $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                Grid::make()
+                    ->schema([
+                        Placeholder::make('created_at')
+                            ->label('Created Date')
+                            ->visible(fn($record): bool => $record?->exists() ?? false)
+                            ->content(fn(?Router $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+
+                        Placeholder::make('updated_at')
+                            ->label('Last Modified Date')
+                            ->visible(fn($record): bool => $record?->exists() ?? false)
+                            ->content(fn(?Router $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                    ])
             ]);
     }
 
@@ -60,31 +82,34 @@ class RouterResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
-                    ->searchable()
-                    ->sortable(),
-
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('ip_addreess'),
+                TextColumn::make('ip_address')
+                    ->label('IP Address')
+                    ->searchable(),
 
-                TextColumn::make('is_active'),
+                CheckboxColumn::make('is_active')
+                    ->sortable(),
 
-                TextColumn::make('description'),
+                TextColumn::make('description')
+                    ->wrap(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->label('Actions')
+                    ->link()
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -92,13 +117,8 @@ class RouterResource extends Resource
     {
         return [
             'index' => Pages\ListRouters::route('/'),
-            'create' => Pages\CreateRouter::route('/create'),
-            'edit' => Pages\EditRouter::route('/{record}/edit'),
+            /*'create' => Pages\CreateRouter::route('/create'),
+            'edit' => Pages\EditRouter::route('/{record}/edit'),*/
         ];
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug', 'name'];
     }
 }

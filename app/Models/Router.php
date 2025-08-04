@@ -31,4 +31,9 @@ class Router extends Model
             $router->slug = Str::uuid()->toString();
         });
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }
