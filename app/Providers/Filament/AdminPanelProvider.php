@@ -62,7 +62,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('control-panel')
+            ->path('admin')
             ->login()
             ->topNavigation($application?->navigation_position == 'top')
             ->brandName($application?->short_name ?? config('app.name'))
