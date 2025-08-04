@@ -3,5 +3,5 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->to('/control-panel/login');
+    return to_route('filament.admin.auth.login');
 });
