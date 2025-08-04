@@ -49,6 +49,7 @@ class ServicePackageResource extends Resource
                             ->columns()
                             ->schema([
                                 Radio::make('service_type')
+                                    ->label('Tipe Layanan')
                                     ->options([
                                         'hotspot' => 'Hotspot',
                                         'pppoe' => 'PPPoE',
@@ -74,6 +75,7 @@ class ServicePackageResource extends Resource
                                     ->columnSpanFull(),
 
                                 Radio::make('payment_type')
+                                    ->label('Tipe Pembayaran')
                                     ->options([
                                         'prepaid' => 'Prepaid',
                                         'postpaid' => 'Postpaid',
@@ -83,10 +85,13 @@ class ServicePackageResource extends Resource
                                     ->columnSpanFull(),
 
                                 TextInput::make('package_name')
+                                    ->label('Nama Paket Layanan')
                                     ->required()
                                     ->columnSpanFull(),
 
                                 Select::make('plan_type')
+                                    ->label('Tipe Paket')
+                                    ->hintIcon('heroicon-o-information-circle', 'Pilih tipe paket layanan untuk jenis pelanggan yang sesuai.')
                                     ->options([
                                         'pribadi' => 'Pribadi',
                                         'bisnis' => 'Bisnis',
@@ -105,10 +110,12 @@ class ServicePackageResource extends Resource
 
                         // TODO: Hotspot settings
                         Section::make('Hotspot Settings')
+                            ->description('Pengaturan khusus untuk paket layanan Hotspot.')
                             ->hidden(fn(Get $get) => $get('service_type') !== 'hotspot')
                             ->columns()
                             ->schema([
                                 Select::make('package_limit_type')
+                                    ->label('Tipe Batasan Paket')
                                     ->options([
                                         'unlimited' => 'Tidak Terbatas',
                                         'limited' => 'Terbatas',
@@ -128,6 +135,7 @@ class ServicePackageResource extends Resource
                                         ->columnSpanFull(),
 
                                 Radio::make('limit_type')
+                                    ->label('Tipe Batasan')
                                     ->options([
                                         'time' => 'Waktu',
                                         'data' => 'Data',
@@ -158,12 +166,14 @@ class ServicePackageResource extends Resource
                                     ->columnSpanFull(),
 
                                 TextInput::make('time_limit')
+                                    ->label('Batasan Waktu')
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'time' && $get('limit_type') !== 'both'))
                                     ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'time' || $get('limit_type') === 'both'))
                                     ->numeric()
                                     ->integer(),
 
                                 Select::make('time_limit_unit')
+                                    ->label('Satuan Batasan Waktu')
                                     ->options([
                                         'menit' => 'Menit',
                                         'jam' => 'Jam',
@@ -175,12 +185,14 @@ class ServicePackageResource extends Resource
                                     ->native(false),
 
                                 TextInput::make('data_limit')
+                                    ->label('Batasan Data')
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'data' && $get('limit_type') !== 'both'))
                                     ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'data' || $get('limit_type') === 'both'))
                                     ->numeric()
                                     ->integer(),
 
                                 Select::make('data_limit_unit')
+                                    ->label('Satuan Batasan Data')
                                     ->options(['MBs', 'GBs'])
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'data' && $get('limit_type') !== 'both'))
                                     ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'data' || $get('limit_type') === 'both'))
@@ -189,16 +201,19 @@ class ServicePackageResource extends Resource
 
                         // TODO: PPPoE settings
                         Section::make('PPPeE Settings')
+                            ->description('Pengaturan khusus untuk paket layanan PPPoE.')
                             ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
                             ->columns()
                             ->schema([
                                 TextInput::make('validity_period')
+                                    ->label('Masa Berlaku Paket')
                                     ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
                                     ->required(fn(Get $get) => $get('service_type') === 'pppoe')
                                     ->numeric()
                                     ->integer(),
 
                                 Select::make('validity_unit')
+                                    ->label('Satuan Masa Berlaku')
                                     ->options([
                                         'menit' => 'Menit',
                                         'jam' => 'Jam',
@@ -213,9 +228,11 @@ class ServicePackageResource extends Resource
 
                         // TODO: Package Price
                         Section::make('Package Price')
+                            ->description('Pengaturan harga paket layanan.')
                             ->columns()
                             ->schema([
                                 TextInput::make('package_price')
+                                    ->label('Harga Paket Layanan')
                                     ->numeric()
                                     ->required()
                                     ->prefix('Rp')
@@ -223,6 +240,7 @@ class ServicePackageResource extends Resource
                                     ->helperText('Harga paket layanan ini.'),
 
                                 TextInput::make('price_before_discount')
+                                    ->label('Harga Sebelum Diskon')
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->default(0)
@@ -233,6 +251,7 @@ class ServicePackageResource extends Resource
                         Section::make()
                             ->schema([
                                 RichEditor::make('description')
+                                    ->label('Deskripsi Paket Layanan')
                                     ->fileAttachmentsDisk('s3')
                                     ->fileAttachmentsDirectory('attachments')
                                     ->fileAttachmentsVisibility('private')
