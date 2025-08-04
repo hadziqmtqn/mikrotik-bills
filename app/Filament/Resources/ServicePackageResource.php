@@ -4,9 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServicePackageResource\Pages;
 use App\Models\ServicePackage;
+use Exception;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -26,33 +32,71 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ServicePackageResource extends Resource
 {
     protected static ?string $model = ServicePackage::class;
-
     protected static ?string $slug = 'service-packages';
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Paket Layanan';
+    protected static ?string $navigationIcon = 'heroicon-o-server-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('serial_number')
-                    ->required()
-                    ->integer(),
+                Group::make()
+                    ->schema([
+                        Section::make()
+                            ->columns()
+                            ->schema([
+                                Radio::make('service_type')
+                                    ->options([
+                                        'hotspot' => 'Hotspot',
+                                        'pppoe' => 'PPPoE',
+                                    ])
+                                    ->inline()
+                                    ->required()
+                                    ->columnSpanFull(),
 
-                TextInput::make('code')
-                    ->required(),
+                                Radio::make('payment_type')
+                                    ->options([
+                                        'prepaid' => 'Prepaid',
+                                        'postpaid' => 'Postpaid',
+                                    ])
+                                    ->inline()
+                                    ->required()
+                                    ->columnSpanFull(),
 
-                TextInput::make('service_type')
-                    ->required(),
+                                TextInput::make('package_name')
+                                    ->required(),
 
-                TextInput::make('package_name')
-                    ->required(),
+                                Select::make('plan_type')
+                                    ->options([
+                                        'pribadi' => 'Pribadi',
+                                        'bisnis' => 'Bisnis',
+                                    ])
+                                    ->native(false)
+                                    ->required(),
+                            ])
+                    ])->columnSpan(['lg' => 2]),
 
-                TextInput::make('payment_type')
-                    ->required(),
+                Group::make()
+                    ->schema([
+                        Section::make('Status')
+                            ->schema([
+                                Toggle::make('is_active')
+                                    ->label('Aktif')
+                                    ->default(true)
+                                    ->inline()
+                                    ->required()
+                                    ->helperText('Aktifkan paket layanan ini untuk membuatnya tersedia bagi pelanggan.')
+                                    ->columnSpanFull(),
 
-                TextInput::make('plan_type')
-                    ->required(),
+                                Placeholder::make('created_at')
+                                    ->label('Created Date')
+                                    ->content(fn(?ServicePackage $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+
+                                Placeholder::make('updated_at')
+                                    ->label('Last Modified Date')
+                                    ->content(fn(?ServicePackage $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                            ])
+                    ])->columnSpan(['lg' => 1]),
 
                 TextInput::make('package_limit_type'),
 
@@ -85,19 +129,13 @@ class ServicePackageResource extends Resource
                     ->integer(),
 
                 TextInput::make('description'),
-
-                Checkbox::make('is_active'),
-
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?ServicePackage $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?ServicePackage $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
-            ]);
+            ])
+                ->columns(3);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
