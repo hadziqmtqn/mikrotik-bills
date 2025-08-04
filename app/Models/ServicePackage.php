@@ -59,4 +59,10 @@ class ServicePackage extends Model implements HasMedia
     {
         return $this->belongsTo(Router::class);
     }
+
+    // TODO More
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

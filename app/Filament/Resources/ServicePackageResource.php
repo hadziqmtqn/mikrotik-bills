@@ -17,6 +17,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -25,7 +26,10 @@ use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -290,56 +294,77 @@ class ServicePackageResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
-                    ->searchable()
+                TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
+
+                TextColumn::make('service_type')
+                    ->label('Tipe Layanan')
+                    ->badge()
+                    ->color(fn($state): string => match ($state) {
+                        'hotspot' => 'primary',
+                        'pppoe' => 'danger',
+                        default => 'warning',
+                    })
                     ->sortable(),
 
-                TextColumn::make('serial_number'),
+                TextColumn::make('package_name')
+                    ->label('Nama Paket Layanan')
+                    ->searchable(),
 
-                TextColumn::make('code'),
+                TextColumn::make('plan_type')
+                    ->label('Tipe Paket')
+                    ->badge()
+                    ->icon(fn($record) => $record->plan_type === 'pribadi' ? 'heroicon-o-user' : 'heroicon-o-users')
+                    ->color(fn($state): string => match ($state) {
+                        'pribadi' => 'success',
+                        'bisnis' => 'warning',
+                        default => 'secondary',
+                    })
+                    ->sortable(),
 
-                TextColumn::make('service_type'),
+                TextColumn::make('package_price')
+                    ->label('Harga Paket')
+                    ->money('idr')
+                    ->sortable(),
 
-                TextColumn::make('package_name'),
+                TextColumn::make('router.name')
+                    ->label('Router')
+                    ->getStateUsing(fn(ServicePackage $record) => $record->router?->name ?? '-')
+                    ->sortable(),
 
-                TextColumn::make('payment_type'),
-
-                TextColumn::make('plan_type'),
-
-                TextColumn::make('package_limit_type'),
-
-                TextColumn::make('limit_type'),
-
-                TextColumn::make('time_limit'),
-
-                TextColumn::make('time_limit_unit'),
-
-                TextColumn::make('data_limit'),
-
-                TextColumn::make('data_limit_unit'),
-
-                TextColumn::make('validity_period'),
-
-                TextColumn::make('validity_unit'),
-
-                TextColumn::make('package_price'),
-
-                TextColumn::make('price_before_discount'),
-
-                TextColumn::make('router_id'),
-
-                TextColumn::make('description'),
-
-                TextColumn::make('is_active'),
+                ToggleColumn::make('is_active')
+                    ->label('Aktif')
+                    ->sortable()
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('service_type')
+                    ->label('Tipe Layanan')
+                    ->options([
+                        'hotspot' => 'Hotspot',
+                        'pppoe' => 'PPPoE',
+                    ])
+                    ->native(false)
+                    ->placeholder('Semua Tipe Layanan')
+                    ->searchable(),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->icon('heroicon-o-eye')
+                        ->label('Lihat')
+                        ->modalContent()
+                        ->modalHeading(fn(ServicePackage $record): string => 'Detail Paket Layanan: ' . $record->package_name)
+                        ->modalWidth('5xl'),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 BulkActionGroup::make([

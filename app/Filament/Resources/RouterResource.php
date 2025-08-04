@@ -103,7 +103,8 @@ class RouterResource extends Resource implements HasShieldPermissions
             ->actions([
                 ActionGroup::make([
                     EditAction::make(),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->disabled(fn($record): bool => $record?->servicePackages()->exists() ?? false),
                 ])
                     ->label('Actions')
                     ->link()
