@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -50,5 +51,10 @@ class ServicePackage extends Model
             $servicePackage->serial_number = self::max('serial_number') + 1;
             $servicePackage->code = ($servicePackage->service_type === 'pppoe' ? 'PP' : 'HS') . Str::padLeft($servicePackage->serial_number, 6, '0');
         });
+    }
+
+    public function router(): BelongsTo
+    {
+        return $this->belongsTo(Router::class);
     }
 }

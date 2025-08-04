@@ -15,8 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class RouterResource extends Resource implements HasShieldPermissions
@@ -90,7 +90,7 @@ class RouterResource extends Resource implements HasShieldPermissions
                     ->label('IP Address')
                     ->searchable(),
 
-                CheckboxColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->sortable(),
 
                 TextColumn::make('description')

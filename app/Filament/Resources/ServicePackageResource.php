@@ -3,17 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServicePackageResource\Pages;
+use App\Models\Router;
 use App\Models\ServicePackage;
 use Exception;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -42,6 +44,7 @@ class ServicePackageResource extends Resource
             ->schema([
                 Group::make()
                     ->schema([
+                        // TODO: General Information
                         Section::make()
                             ->columns()
                             ->schema([
@@ -52,6 +55,17 @@ class ServicePackageResource extends Resource
                                     ])
                                     ->inline()
                                     ->required()
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state !== 'hotspot') {
+                                            $set('package_limit_type', null);
+                                            $set('limit_type', null);
+                                            $set('time_limit', null);
+                                            $set('time_limit_unit', null);
+                                            $set('data_limit', null);
+                                            $set('data_limit_unit', null);
+                                        }
+                                    })
                                     ->columnSpanFull(),
 
                                 Radio::make('payment_type')
@@ -64,7 +78,8 @@ class ServicePackageResource extends Resource
                                     ->columnSpanFull(),
 
                                 TextInput::make('package_name')
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpanFull(),
 
                                 Select::make('plan_type')
                                     ->options([
@@ -73,6 +88,65 @@ class ServicePackageResource extends Resource
                                     ])
                                     ->native(false)
                                     ->required(),
+
+                                Select::make('router_id')
+                                    ->label('Router')
+                                    ->options(fn() => Router::where('is_active', true)->get()->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->native(false)
+                                    ->required(),
+                            ]),
+
+                        // TODO: Hotspot settings
+                        Section::make('Hotspot Settings')
+                            ->hidden(fn(Get $get) => $get('service_type') !== 'hotspot')
+                            ->schema([
+                                TextInput::make('package_limit_type'),
+
+                                TextInput::make('limit_type'),
+
+                                TextInput::make('time_limit')
+                                    ->integer(),
+
+                                TextInput::make('time_limit_unit'),
+
+                                TextInput::make('data_limit')
+                                    ->integer(),
+
+                                TextInput::make('data_limit_unit'),
+                            ]),
+
+                        Section::make('PPPeE Settings')
+                            ->hidden(fn(Get $get) => $get('service_type') !== 'pppoe')
+                            ->schema([
+                                TextInput::make('validity_period')
+                                    ->integer(),
+
+                                TextInput::make('validity_unit'),
+                            ]),
+
+                        Section::make('Package Price')
+                            ->schema([
+                                TextInput::make('package_price')
+                                    ->numeric()
+                                    ->required()
+                                    ->prefix('Rp')
+                                    ->default(0)
+                                    ->helperText('Harga paket layanan ini.'),
+
+                                TextInput::make('price_before_discount')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->helperText('Harga sebelum diskon, jika ada.'),
+                            ]),
+
+                        Section::make()
+                            ->schema([
+                                RichEditor::make('description')
+                                    ->fileAttachmentsDisk('s3')
+                                    ->fileAttachmentsDirectory('attachments')
+                                    ->fileAttachmentsVisibility('private')
                             ])
                     ])->columnSpan(['lg' => 2]),
 
@@ -97,38 +171,6 @@ class ServicePackageResource extends Resource
                                     ->content(fn(?ServicePackage $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
                             ])
                     ])->columnSpan(['lg' => 1]),
-
-                TextInput::make('package_limit_type'),
-
-                TextInput::make('limit_type'),
-
-                TextInput::make('time_limit')
-                    ->integer(),
-
-                TextInput::make('time_limit_unit'),
-
-                TextInput::make('data_limit')
-                    ->integer(),
-
-                TextInput::make('data_limit_unit'),
-
-                TextInput::make('validity_period')
-                    ->integer(),
-
-                TextInput::make('validity_unit'),
-
-                TextInput::make('package_price')
-                    ->required()
-                    ->numeric(),
-
-                TextInput::make('price_before_discount')
-                    ->numeric(),
-
-                TextInput::make('router_id')
-                    ->required()
-                    ->integer(),
-
-                TextInput::make('description'),
             ])
                 ->columns(3);
     }
