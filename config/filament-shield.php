@@ -3,7 +3,7 @@
 return [
     'shield_resource' => [
         'should_register_navigation' => true,
-        'slug' => 'roles',
+        'slug' => 'shield/roles',
         'navigation_sort' => -1,
         'navigation_badge' => true,
         'navigation_group' => true,
@@ -56,7 +56,7 @@ return [
         'pages' => true,
         'widgets' => true,
         'resources' => true,
-        'custom_permissions' => false,
+        'custom_permissions' => true,
     ],
 
     'generator' => [
@@ -89,4 +89,7 @@ return [
         'enabled' => true,
     ],
 
+    'register_permissions' => [
+        'access panel'
+    ],
 ];

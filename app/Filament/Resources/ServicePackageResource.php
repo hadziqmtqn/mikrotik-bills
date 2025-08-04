@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ServicePackageResource\Pages;
 use App\Models\Router;
 use App\Models\ServicePackage;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
@@ -35,12 +36,26 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ServicePackageResource extends Resource
+class ServicePackageResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = ServicePackage::class;
     protected static ?string $slug = 'service-packages';
     protected static ?string $navigationLabel = 'Paket Layanan';
     protected static ?string $navigationIcon = 'heroicon-o-server-stack';
+
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'delete',
+            'restore',
+            'force_delete',
+        ];
+    }
 
     public static function form(Form $form): Form
     {
