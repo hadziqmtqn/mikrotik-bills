@@ -21,3 +21,8 @@ restore_user;YES;NO;NO
 restore_any_user;YES;NO;NO
 force_delete_user;NO;NO;NO
 force_delete_any_user;NO;NO;NO
+view_any_router;YES;NO;NO
+view_router;YES;NO;NO
+create_router;YES;NO;NO
+update_router;YES;NO;NO
+delete_router;NO;NO;NO
