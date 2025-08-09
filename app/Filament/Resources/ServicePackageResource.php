@@ -40,7 +40,6 @@ class ServicePackageResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = ServicePackage::class;
     protected static ?string $slug = 'service-packages';
-    protected static ?string $navigationLabel = 'Paket Layanan';
     protected static ?string $navigationIcon = 'heroicon-o-server-stack';
 
     public static function getPermissionPrefixes(): array
