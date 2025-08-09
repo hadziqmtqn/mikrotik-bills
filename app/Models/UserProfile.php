@@ -9,6 +9,7 @@ class UserProfile extends Model
 {
     protected $fillable = [
         'user_id',
+        'place_name',
         'whatsapp_number',
         'province',
         'city',

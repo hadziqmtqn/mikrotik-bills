@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('whatsapp_number')->nullable();
+            $table->string('place_name')->nullable();
             $table->string('province')->nullable();
             $table->string('city')->nullable();
             $table->string('district')->nullable();

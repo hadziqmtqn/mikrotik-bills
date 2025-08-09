@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Afsakar\LeafletMapPicker\LeafletMapPicker;
+use Afsakar\LeafletMapPicker\LeafletMapPickerEntry;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Exception;
@@ -15,8 +16,12 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -25,6 +30,7 @@ use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -57,6 +63,7 @@ class UserResource extends Resource
                             ->schema([
                                 Select::make('roles')
                                     ->label('Role')
+                                    ->placeholder('Pilih role')
                                     ->prefixIcon('heroicon-o-shield-check')
                                     ->relationship('roles', 'name')
                                     ->preload()
@@ -69,9 +76,11 @@ class UserResource extends Resource
 
                                 TextInput::make('name')
                                     ->prefixIcon('heroicon-o-user-circle')
+                                    ->placeholder('Masukkan nama lengkap')
                                     ->required(),
 
                                 TextInput::make('email')
+                                    ->placeholder('Masukkan alamat email')
                                     ->prefixIcon('heroicon-o-envelope')
                                     ->email()
                                     ->unique(ignoreRecord: true)
@@ -81,7 +90,7 @@ class UserResource extends Resource
                                     ->relationship('userProfile')
                                     ->schema([
                                         TextInput::make('whatsapp_number')
-                                            ->label('WhatsApp Number')
+                                            ->placeholder('Masukkan nomor WhatsApp')
                                             ->prefixIcon('heroicon-o-phone')
                                             ->required()
                                             ->unique(ignoreRecord: true)
@@ -94,22 +103,30 @@ class UserResource extends Resource
                                     ->label('Status')
                                     ->inline()
                                     ->options([
-                                        true => 'Aktif',
-                                        false => 'Tidak Aktif',
+                                        true => 'Active',
+                                        false => 'Inactive',
                                     ])
                                     ->default(true)
                                     ->required(),
                             ]),
 
-                        Tabs\Tab::make('Alamat')
+                        Tabs\Tab::make('Address')
                             ->icon('heroicon-o-map-pin')
                             ->schema([
                                 Group::make()
                                     ->relationship('userProfile')
                                     ->columns()
                                     ->schema([
+                                        TextInput::make('place_name')
+                                            ->label('Nama Tempat')
+                                            ->placeholder('Masukkan nama tempat')
+                                            ->maxLength(100)
+                                            ->dehydrated()
+                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
+
                                         Select::make('province')
                                             ->label('Provinsi')
+                                            ->placeholder('Pilih provinsi')
                                             ->searchable()
                                             ->getSearchResultsUsing(function (string $search) {
                                                 $response = Http::get('https://idn-location.bkn.my.id/api/v1/provinces', [
@@ -129,6 +146,7 @@ class UserResource extends Resource
 
                                         Select::make('city')
                                             ->label('Kota/Kabupaten')
+                                            ->placeholder('Pilih kota/kabupaten')
                                             ->searchable()
                                             ->getSearchResultsUsing(function (string $search, $get) {
                                                 $province = $get('province');
@@ -150,6 +168,7 @@ class UserResource extends Resource
 
                                         Select::make('district')
                                             ->label('Kecamatan')
+                                            ->placeholder('Pilih kecamatan')
                                             ->searchable()
                                             ->getSearchResultsUsing(function (string $search, $get) {
                                                 $city = $get('city');
@@ -170,6 +189,7 @@ class UserResource extends Resource
 
                                         Select::make('village')
                                             ->label('Desa/Kelurahan')
+                                            ->placeholder('Pilih desa/kelurahan')
                                             ->searchable()
                                             ->getSearchResultsUsing(function (string $search, $get) {
                                                 $district = $get('district');
@@ -187,12 +207,14 @@ class UserResource extends Resource
 
                                         TextInput::make('street')
                                             ->label('Jalan')
+                                            ->placeholder('Masukkan nama jalan')
                                             ->maxLength(255)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
                                         TextInput::make('postal_code')
                                             ->label('Kode Pos')
+                                            ->placeholder('Masukkan kode pos')
                                             ->maxLength(10)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
@@ -223,12 +245,13 @@ class UserResource extends Resource
                                     ])
                             ]),
 
-                        Tabs\Tab::make('Keamanan')
+                        Tabs\Tab::make('Security')
                             ->icon('heroicon-o-lock-closed')
                             ->columns()
                             ->schema([
                                 TextInput::make('password')
                                     ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
+                                    ->placeholder('Masukkan kata sandi')
                                     ->password()
                                     ->confirmed()
                                     ->minLength(8)
@@ -237,19 +260,20 @@ class UserResource extends Resource
                                     ->autocomplete('new-password')
                                     ->dehydrated(fn (?string $state): bool => filled($state))
                                     ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->placeholder(fn($livewire) => $livewire instanceof EditRecord ? 'Biarkan kosong jika tidak ingin mengubah password' : null)
+                                    ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
                                     ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
                                     ->revealable(),
 
                                 TextInput::make('password_confirmation')
                                     ->label('Konfirmasi Kata Sandi')
+                                    ->placeholder('Masukkan konfirmasi kata sandi')
                                     ->password()
                                     ->minLength(8)
                                     ->maxLength(255)
                                     ->autocomplete('new-password')
                                     ->dehydrated(fn (?string $state): bool => filled($state))
                                     ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->placeholder(fn($livewire) => $livewire instanceof EditRecord ? 'Biarkan kosong jika tidak ingin mengubah password' : null)
+                                    ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
                                     ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
                                     ->revealable(),
                             ]),
@@ -279,14 +303,19 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
-                    ->description(fn($record): string => $record->email)
+                    ->description(fn($record): string => $record->userProfile?->place_name ?? '-')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('userProfile.whatsapp_number')
+                    ->label('WhatsApp Number')
                     ->searchable(),
 
-                TextColumn::make('userProfile.street'),
+                TextColumn::make('userProfile.street')
+                    ->label('Street')
+                    ->searchable()
+                    ->limit(50)
+                    ->tooltip(fn($record): string => $record->userProfile?->street ?? '-'),
 
                 TextColumn::make('roles.name')
                     ->label('Role')
@@ -323,12 +352,17 @@ class UserResource extends Resource
                     ->native(false),
             ], layout: FiltersLayout::Modal)
             ->actions([
-                EditAction::make(),
-                DeleteAction::make()
-                    ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
-                RestoreAction::make(),
-                ForceDeleteAction::make()
-                    ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
+                    RestoreAction::make(),
+                    ForceDeleteAction::make()
+                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
+                ])
+                ->link()
+                ->label('Actions')
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -359,5 +393,54 @@ class UserResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email', 'userProfile.street', 'userProfile.whatsapp_number'];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        parent::infolist($infolist); // TODO: Change the autogenerated stub
+
+        return $infolist
+            ->schema([
+                Section::make('Profile')
+                    ->columns()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Nama'),
+                        TextEntry::make('email')
+                            ->label('Email'),
+                        TextEntry::make('userProfile.whatsapp_number')
+                            ->label('WhatsApp Number'),
+                        TextEntry::make('roles.name')
+                            ->label('Role'),
+                    ]),
+
+                Section::make('Address')
+                    ->columns()
+                    ->schema([
+                        TextEntry::make('userProfile.place_name')
+                            ->label('Nama Tempat'),
+                        TextEntry::make('userProfile.street')
+                            ->label('Jalan'),
+                        TextEntry::make('userProfile.village')
+                            ->label('Desa/Kelurahan'),
+                        TextEntry::make('userProfile.district')
+                            ->label('Kecamatan'),
+                        TextEntry::make('userProfile.city')
+                            ->label('Kota/Kabupaten'),
+                        TextEntry::make('userProfile.province')
+                            ->label('Provinsi'),
+                        TextEntry::make('userProfile.postal_code')
+                            ->label('Kode Pos'),
+                    ]),
+
+                Section::make('Map')
+                    ->columnSpanFull()
+                    ->schema([
+                        LeafletMapPickerEntry::make('userProfile.lat_long')
+                            ->hiddenLabel()
+                            ->tileProvider('google')
+                            ->hideTileControl()
+                    ])
+            ]);
     }
 }
