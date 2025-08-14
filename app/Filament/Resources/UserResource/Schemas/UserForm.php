@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Tabs;
@@ -15,7 +16,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -199,29 +199,66 @@ class UserForm
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
-                                        LeafletMapPicker::make('lat_long')
-                                            ->label('Pilih Lokasi di Peta')
-                                            ->tileProvider('google')
-                                            ->draggable(false)
-                                            ->clickable()
-                                            ->defaultZoom(15)
+                                        Group::make()
+                                            //->description('Pilih lokasi tempat tinggal Anda di peta. Klik pada peta untuk menentukan lokasi.')
+                                            ->columns(3)
                                             ->columnSpanFull()
-                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                                if (!$state) {
-                                                    $set('latitude', null);
-                                                    $set('longitude', null);
-                                                    return;
-                                                }
+                                            ->schema([
+                                                Grid::make()
+                                                    ->schema([
+                                                        TextInput::make('latitude')
+                                                            ->label('Latitude')
+                                                            ->numeric()
+                                                            ->dehydrated(false)
+                                                            ->afterStateUpdated(fn($state, $set, $get) =>
+                                                                $set('lat_long', [
+                                                                    'lat' => $state,
+                                                                    'lng' => $get('longitude'),
+                                                                ])
+                                                            )
+                                                            ->columnSpanFull(),
 
-                                                $set('latitude', $state['lat']);
-                                                $set('longitude', $state['lng']);
-                                            })
-                                            ->afterStateHydrated(function (Set $set, ?array $state): void {
-                                                if ($state) {
-                                                    $set('latitude', $state['lat']);
-                                                    $set('longitude', $state['lng']);
-                                                }
-                                            })
+                                                        TextInput::make('longitude')
+                                                            ->label('Longitude')
+                                                            ->numeric()
+                                                            ->dehydrated(false)
+                                                            ->afterStateUpdated(fn($state, $set, $get) =>
+                                                                $set('lat_long', [
+                                                                    'lat' => $get('latitude'),
+                                                                    'lng' => $state,
+                                                                ])
+                                                            )
+                                                            ->columnSpanFull(),
+                                                    ])->columnSpan(['lg' => 1]),
+
+                                                Grid::make()
+                                                    ->schema([
+                                                        LeafletMapPicker::make('lat_long')
+                                                            ->label('Pilih Lokasi di Peta')
+                                                            ->tileProvider('google')
+                                                            ->draggable(false)
+                                                            ->clickable()
+                                                            ->hideTileControl()
+                                                            ->defaultZoom(15)
+                                                            ->columnSpanFull()
+                                                            ->afterStateUpdated(function ($set, ?array $state) {
+                                                                if (!$state) {
+                                                                    $set('latitude', null);
+                                                                    $set('longitude', null);
+                                                                    return;
+                                                                }
+                                                                $set('latitude', $state['lat']);
+                                                                $set('longitude', $state['lng']);
+                                                            })
+                                                            ->afterStateHydrated(function ($set, ?array $state) {
+                                                                if ($state) {
+                                                                    $set('latitude', $state['lat']);
+                                                                    $set('longitude', $state['lng']);
+                                                                }
+                                                            }),
+                                                    ])
+                                                    ->columnSpan(['lg' => 2])
+                                            ])
                                     ])
                             ]),
 

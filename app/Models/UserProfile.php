@@ -49,6 +49,6 @@ class UserProfile extends Model implements HasMedia
 
     protected function longitude(): Attribute
     {
-        return Attribute::make(fn() => $this->lat_long ? $this->lat_long['long'] : null);
+        return Attribute::make(fn() => $this->lat_long ? $this->lat_long['lng'] : null);
     }
 }
