@@ -11,8 +11,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AdminForm
@@ -43,7 +45,7 @@ class AdminForm
                         TextInput::make('email')
                             ->required()
                             ->email()
-                            ->unique(User::class, 'email', fn(?User $record) => $record?->id)
+                            ->unique(ignoreRecord: true)
                             ->placeholder('Masukkan email'),
 
                         Group::make()
@@ -76,28 +78,37 @@ class AdminForm
                     ->columns()
                     ->schema([
                         TextInput::make('password')
-                            ->label('Kata Sandi')
+                            ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
+                            ->placeholder('Masukkan kata sandi')
                             ->password()
+                            ->confirmed()
                             ->minLength(8)
-                            ->required(fn(?User $record): bool => $record?->id === null)
                             ->regex('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
-                            ->placeholder('Masukkan kata sandi baru')
-                            ->helperText(fn(?User $record): string => $record?->id === null ? 'Kata sandi harus terdiri dari minimal 8 karakter.' : 'Biarkan kosong jika tidak ingin mengubah kata sandi.')
+                            ->maxLength(20)
+                            ->autocomplete('new-password')
+                            ->dehydrated(fn(?string $state): bool => filled($state))
+                            ->required(fn(string $operation): bool => $operation === 'create')
+                            ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
+                            ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
                             ->revealable(),
 
                         TextInput::make('password_confirmation')
                             ->label('Konfirmasi Kata Sandi')
+                            ->placeholder('Masukkan konfirmasi kata sandi')
                             ->password()
-                            ->same('password')
-                            ->required(fn(?User $record): bool => $record?->id === null)
-                            ->placeholder('Konfirmasi kata sandi baru')
-                            ->helperText(fn(?User $record): string => $record?->id === null ? 'Kata sandi harus terdiri dari minimal 8 karakter.' : 'Biarkan kosong jika tidak ingin mengubah kata sandi.')
+                            ->minLength(8)
+                            ->maxLength(20)
+                            ->autocomplete('new-password')
+                            ->dehydrated(fn(?string $state): bool => filled($state))
+                            ->required(fn(string $operation): bool => $operation === 'create')
+                            ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
+                            ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
                             ->revealable(),
                     ]),
 
                 Grid::make()
                     ->columns()
-                    ->visible(fn(?User $record): bool => $record?->exists ?? false)
+                    ->visible(fn(?User $record): bool => $record?->exists() ?? false)
                     ->schema([
                         Placeholder::make('created_at')
                             ->label('Created Date')

@@ -97,6 +97,7 @@ class UserForm
                                     ->required(fn(string $operation): bool => $operation === 'create')
                                     ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
                                     ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->prefixIcon('heroicon-o-lock-closed')
                                     ->revealable(),
 
                                 TextInput::make('password_confirmation')
@@ -110,6 +111,7 @@ class UserForm
                                     ->required(fn(string $operation): bool => $operation === 'create')
                                     ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
                                     ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->prefixIcon('heroicon-o-lock-closed')
                                     ->revealable(),
 
                                 Toggle::make('is_active')
@@ -313,15 +315,14 @@ class UserForm
                     ]),
 
                 Grid::make()
+                    ->visible(fn(?User $record): bool => $record?->exists() ?? false)
                     ->schema([
                         Placeholder::make('created_at')
                             ->label('Created Date')
-                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
                             ->content(fn(?User $record): string => $record?->created_at?->diffForHumans() ?? '-'),
 
                         Placeholder::make('updated_at')
                             ->label('Last Modified Date')
-                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
                             ->content(fn(?User $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
                     ]),
             ]);
