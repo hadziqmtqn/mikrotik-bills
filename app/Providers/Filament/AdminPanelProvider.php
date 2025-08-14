@@ -64,21 +64,31 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->spa()
             ->login()
+            ->profile()
+            ->passwordReset()
             ->topNavigation($application?->navigation_position == 'top')
             ->brandName($application?->short_name ?? config('app.name'))
             ->favicon($application?->favicon)
             ->colors([
                 'primary' => $colorMap[$application?->panel_color ?? 'amber'] ?? Color::Amber,
             ])
+            ->collapsibleNavigationGroups(false)
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            //->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 /*Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,*/
+            ])
+            ->navigationGroups([
+                'Main',
+                'Network',
+                'System'
             ])
             ->middleware([
                 EncryptCookies::class,

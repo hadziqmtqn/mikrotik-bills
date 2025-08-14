@@ -2,296 +2,29 @@
 
 namespace App\Filament\Resources;
 
-use Afsakar\LeafletMapPicker\LeafletMapPicker;
-use Afsakar\LeafletMapPicker\LeafletMapPickerEntry;
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\Schemas\UserForm;
+use App\Filament\Resources\UserResource\Schemas\UserInfoList;
+use App\Filament\Resources\UserResource\Schemas\UserTable;
 use App\Models\User;
 use Exception;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
-use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $slug = 'users';
+    protected static ?string $navigationGroup = 'Main';
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Tabs::make()
-                    ->columnSpanFull()
-                    ->tabs([
-                        Tabs\Tab::make('Profile')
-                            ->icon('heroicon-o-user')
-                            ->columns()
-                            ->schema([
-                                Select::make('roles')
-                                    ->label('Role')
-                                    ->placeholder('Pilih role')
-                                    ->prefixIcon('heroicon-o-shield-check')
-                                    ->relationship('roles', 'name')
-                                    ->preload()
-                                    ->required()
-                                    ->rules([
-                                        Rule::exists('roles', 'id')->where('guard_name', 'web'),
-                                    ])
-                                    ->searchable()
-                                    ->native(false),
-
-                                TextInput::make('name')
-                                    ->prefixIcon('heroicon-o-user-circle')
-                                    ->placeholder('Masukkan nama lengkap')
-                                    ->required(),
-
-                                TextInput::make('email')
-                                    ->placeholder('Masukkan alamat email')
-                                    ->prefixIcon('heroicon-o-envelope')
-                                    ->email()
-                                    ->unique(ignoreRecord: true)
-                                    ->required(),
-
-                                Group::make()
-                                    ->relationship('userProfile')
-                                    ->schema([
-                                        TextInput::make('whatsapp_number')
-                                            ->placeholder('Masukkan nomor WhatsApp')
-                                            ->prefixIcon('heroicon-o-phone')
-                                            ->required()
-                                            ->unique(ignoreRecord: true)
-                                            ->rules([
-                                                'regex:/^(08|628)[0-9]{8,11}$/',
-                                            ]),
-                                    ]),
-
-                                Radio::make('is_active')
-                                    ->label('Status')
-                                    ->inline()
-                                    ->options([
-                                        true => 'Active',
-                                        false => 'Inactive',
-                                    ])
-                                    ->default(true)
-                                    ->required(),
-                            ]),
-
-                        Tabs\Tab::make('Address')
-                            ->icon('heroicon-o-map-pin')
-                            ->schema([
-                                Group::make()
-                                    ->relationship('userProfile')
-                                    ->columns()
-                                    ->schema([
-                                        TextInput::make('place_name')
-                                            ->label('Nama Tempat')
-                                            ->placeholder('Masukkan nama tempat')
-                                            ->maxLength(100)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
-
-                                        Select::make('province')
-                                            ->label('Provinsi')
-                                            ->placeholder('Pilih provinsi')
-                                            ->searchable()
-                                            ->getSearchResultsUsing(function (string $search) {
-                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/provinces', [
-                                                    'q' => $search,
-                                                ]);
-                                                return collect($response->json())->pluck('name', 'name')->toArray();
-                                            })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set) {
-                                                $set('city', null);
-                                                $set('district', null);
-                                                $set('village', null);
-                                            }),
-
-                                        Select::make('city')
-                                            ->label('Kota/Kabupaten')
-                                            ->placeholder('Pilih kota/kabupaten')
-                                            ->searchable()
-                                            ->getSearchResultsUsing(function (string $search, $get) {
-                                                $province = $get('province');
-                                                if (!$province) return [];
-                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/cities', [
-                                                    'province' => $province,
-                                                    'q' => $search,
-                                                ]);
-                                                return collect($response->json())->pluck('name', 'name')->toArray();
-                                            })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set) {
-                                                $set('district', null);
-                                                $set('village', null);
-                                            }),
-
-                                        Select::make('district')
-                                            ->label('Kecamatan')
-                                            ->placeholder('Pilih kecamatan')
-                                            ->searchable()
-                                            ->getSearchResultsUsing(function (string $search, $get) {
-                                                $city = $get('city');
-                                                if (!$city) return [];
-                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/districts', [
-                                                    'city' => $city,
-                                                    'q' => $search,
-                                                ]);
-                                                return collect($response->json())->pluck('name', 'name')->toArray();
-                                            })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set) {
-                                                $set('village', null);
-                                            }),
-
-                                        Select::make('village')
-                                            ->label('Desa/Kelurahan')
-                                            ->placeholder('Pilih desa/kelurahan')
-                                            ->searchable()
-                                            ->getSearchResultsUsing(function (string $search, $get) {
-                                                $district = $get('district');
-                                                if (!$district) return [];
-                                                $response = Http::get('https://idn-location.bkn.my.id/api/v1/villages', [
-                                                    'district' => $district,
-                                                    'q' => $search,
-                                                ]);
-                                                return collect($response->json())->pluck('name', 'name')->toArray();
-                                            })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                            ->reactive(),
-
-                                        TextInput::make('street')
-                                            ->label('Jalan')
-                                            ->placeholder('Masukkan nama jalan')
-                                            ->maxLength(255)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
-
-                                        TextInput::make('postal_code')
-                                            ->label('Kode Pos')
-                                            ->placeholder('Masukkan kode pos')
-                                            ->maxLength(10)
-                                            ->dehydrated()
-                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
-
-                                        LeafletMapPicker::make('lat_long')
-                                            ->label('Select Location')
-                                            ->tileProvider('google')
-                                            ->draggable(false)
-                                            ->clickable()
-                                            ->defaultZoom(15)
-                                            ->columnSpanFull()
-                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                                if (!$state) {
-                                                    $set('latitude', null);
-                                                    $set('longitude', null);
-                                                    return;
-                                                }
-
-                                                $set('latitude', $state['lat']);
-                                                $set('longitude', $state['lng']);
-                                            })
-                                            ->afterStateHydrated(function (Set $set, ?array $state): void {
-                                                if ($state) {
-                                                    $set('latitude', $state['lat']);
-                                                    $set('longitude', $state['lng']);
-                                                }
-                                            })
-                                    ])
-                            ]),
-
-                        Tabs\Tab::make('Security')
-                            ->icon('heroicon-o-lock-closed')
-                            ->columns()
-                            ->schema([
-                                TextInput::make('password')
-                                    ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
-                                    ->placeholder('Masukkan kata sandi')
-                                    ->password()
-                                    ->confirmed()
-                                    ->minLength(8)
-                                    ->regex('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
-                                    ->maxLength(255)
-                                    ->autocomplete('new-password')
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
-                                    ->revealable(),
-
-                                TextInput::make('password_confirmation')
-                                    ->label('Konfirmasi Kata Sandi')
-                                    ->placeholder('Masukkan konfirmasi kata sandi')
-                                    ->password()
-                                    ->minLength(8)
-                                    ->maxLength(255)
-                                    ->autocomplete('new-password')
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
-                                    ->revealable(),
-                            ]),
-                    ]),
-
-                Grid::make()
-                    ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Created Date')
-                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
-                            ->content(fn(?User $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                        Placeholder::make('updated_at')
-                            ->label('Last Modified Date')
-                            ->visible(fn(?User $record): bool => $record?->exists() ?? false)
-                            ->content(fn(?User $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
-                    ]),
-            ]);
+        return UserForm::configure($form);
     }
 
     /**
@@ -299,78 +32,7 @@ class UserResource extends Resource
      */
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Nama')
-                    ->description(fn($record): string => $record->userProfile?->place_name ?? '-')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('userProfile.whatsapp_number')
-                    ->label('WhatsApp Number')
-                    ->searchable(),
-
-                TextColumn::make('userProfile.street')
-                    ->label('Street')
-                    ->searchable()
-                    ->limit(50)
-                    ->tooltip(fn($record): string => $record->userProfile?->street ?? '-'),
-
-                TextColumn::make('roles.name')
-                    ->label('Role')
-                    ->badge()
-                    ->color(fn($state): string => match ($state) {
-                        'super_admin' => 'primary',
-                        'admin' => 'info',
-                        'user' => 'gray',
-                        default => 'secondary',
-                    })
-                    ->formatStateUsing(fn($state): string => ucwords(str_replace('_', ' ', $state)))
-                    ->searchable()
-                    ->sortable(),
-
-                IconColumn::make('is_active')
-                    ->label('Status')
-                    ->boolean()
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at', 'desc')
-            ->filters([
-                TrashedFilter::make(),
-                SelectFilter::make('role')
-                    ->label('Role')
-                    ->options(fn () => Role::all()->pluck('name', 'id'))
-                    ->default(Role::where('name', 'user')->first()?->id)
-                    ->query(function (Builder $query, array $data) {
-                        if ($data['value']) {
-                            $query->whereHas('roles', function ($q) use ($data) {
-                                $q->where('id', $data['value']);
-                            });
-                        }
-                    })
-                    ->native(false),
-            ], layout: FiltersLayout::Modal)
-            ->actions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make()
-                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
-                    RestoreAction::make(),
-                    ForceDeleteAction::make()
-                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
-                ])
-                ->link()
-                ->label('Actions')
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                ]),
-            ]);
+        return UserTable::configure($table);
     }
 
     public static function getPages(): array
@@ -399,48 +61,6 @@ class UserResource extends Resource
     {
         parent::infolist($infolist); // TODO: Change the autogenerated stub
 
-        return $infolist
-            ->schema([
-                Section::make('Profile')
-                    ->columns()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Nama'),
-                        TextEntry::make('email')
-                            ->label('Email'),
-                        TextEntry::make('userProfile.whatsapp_number')
-                            ->label('WhatsApp Number'),
-                        TextEntry::make('roles.name')
-                            ->label('Role'),
-                    ]),
-
-                Section::make('Address')
-                    ->columns()
-                    ->schema([
-                        TextEntry::make('userProfile.place_name')
-                            ->label('Nama Tempat'),
-                        TextEntry::make('userProfile.street')
-                            ->label('Jalan'),
-                        TextEntry::make('userProfile.village')
-                            ->label('Desa/Kelurahan'),
-                        TextEntry::make('userProfile.district')
-                            ->label('Kecamatan'),
-                        TextEntry::make('userProfile.city')
-                            ->label('Kota/Kabupaten'),
-                        TextEntry::make('userProfile.province')
-                            ->label('Provinsi'),
-                        TextEntry::make('userProfile.postal_code')
-                            ->label('Kode Pos'),
-                    ]),
-
-                Section::make('Map')
-                    ->columnSpanFull()
-                    ->schema([
-                        LeafletMapPickerEntry::make('userProfile.lat_long')
-                            ->hiddenLabel()
-                            ->tileProvider('google')
-                            ->hideTileControl()
-                    ])
-            ]);
+        return UserInfoList::configure($infolist);
     }
 }

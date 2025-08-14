@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('user_profiles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->string('ppoe_name')->nullable();
             $table->string('whatsapp_number')->nullable();
             $table->string('place_name')->nullable();
             $table->string('province')->nullable();
