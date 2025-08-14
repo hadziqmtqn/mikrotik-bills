@@ -16,6 +16,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,7 @@ class UserForm
                 Tabs::make()
                     ->columnSpanFull()
                     ->tabs([
+                        // TODO Data Pribadi
                         Tabs\Tab::make('Data Pribadi')
                             ->icon('heroicon-o-user')
                             ->columns()
@@ -49,13 +51,11 @@ class UserForm
                                     ->label('Role')
                                     ->placeholder('Pilih role')
                                     ->prefixIcon('heroicon-o-shield-check')
-                                    ->relationship('roles', 'name')
-                                    ->preload()
+                                    ->relationship('roles', 'name', fn(Builder $query) => $query->where(['guard_name' => 'web', 'name' => 'user']))
                                     ->required()
                                     ->rules([
                                         Rule::exists('roles', 'id')->where('guard_name', 'web'),
                                     ])
-                                    ->searchable()
                                     ->native(false),
 
                                 TextInput::make('name')
@@ -84,11 +84,41 @@ class UserForm
                                             ]),
                                     ]),
 
+                                TextInput::make('password')
+                                    ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
+                                    ->placeholder('Masukkan kata sandi')
+                                    ->password()
+                                    ->confirmed()
+                                    ->minLength(8)
+                                    ->regex('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
+                                    ->maxLength(20)
+                                    ->autocomplete('new-password')
+                                    ->dehydrated(fn(?string $state): bool => filled($state))
+                                    ->required(fn(string $operation): bool => $operation === 'create')
+                                    ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
+                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->revealable(),
+
+                                TextInput::make('password_confirmation')
+                                    ->label('Konfirmasi Kata Sandi')
+                                    ->placeholder('Masukkan konfirmasi kata sandi')
+                                    ->password()
+                                    ->minLength(8)
+                                    ->maxLength(20)
+                                    ->autocomplete('new-password')
+                                    ->dehydrated(fn(?string $state): bool => filled($state))
+                                    ->required(fn(string $operation): bool => $operation === 'create')
+                                    ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
+                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                                    ->revealable(),
+
                                 Toggle::make('is_active')
                                     ->label('Status')
-                                    ->required(),
+                                    ->required()
+                                    ->visible(fn(?User $record): bool => $record?->exists() ?? false),
                             ]),
 
+                        // TODO Alamat dan Foto Tempat Tinggal
                         Tabs\Tab::make('Alamat')
                             ->icon('heroicon-o-map-pin')
                             ->schema([
@@ -113,7 +143,7 @@ class UserForm
                                                 ]);
                                                 return collect($response->json())->pluck('name', 'name')->toArray();
                                             })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->getOptionLabelUsing(fn($value) => $value)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                             ->reactive()
@@ -136,7 +166,7 @@ class UserForm
                                                 ]);
                                                 return collect($response->json())->pluck('name', 'name')->toArray();
                                             })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->getOptionLabelUsing(fn($value) => $value)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                             ->reactive()
@@ -158,7 +188,7 @@ class UserForm
                                                 ]);
                                                 return collect($response->json())->pluck('name', 'name')->toArray();
                                             })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->getOptionLabelUsing(fn($value) => $value)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                             ->reactive()
@@ -179,7 +209,7 @@ class UserForm
                                                 ]);
                                                 return collect($response->json())->pluck('name', 'name')->toArray();
                                             })
-                                            ->getOptionLabelUsing(fn ($value) => $value)
+                                            ->getOptionLabelUsing(fn($value) => $value)
                                             ->dehydrated()
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                             ->reactive(),
@@ -199,7 +229,6 @@ class UserForm
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
                                         Group::make()
-                                            //->description('Pilih lokasi tempat tinggal Anda di peta. Klik pada peta untuk menentukan lokasi.')
                                             ->columns(3)
                                             ->columnSpanFull()
                                             ->schema([
@@ -208,26 +237,24 @@ class UserForm
                                                         TextInput::make('latitude')
                                                             ->label('Latitude')
                                                             ->numeric()
-                                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                                            ->dehydrated(fn(?string $state): bool => filled($state))
                                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                                            ->afterStateUpdated(fn($state, $set, $get) =>
-                                                                $set('lat_long', [
-                                                                    'lat' => $state,
-                                                                    'lng' => $get('longitude'),
-                                                                ])
+                                                            ->afterStateUpdated(fn($state, $set, $get) => $set('lat_long', [
+                                                                'lat' => $state,
+                                                                'lng' => $get('longitude'),
+                                                            ])
                                                             )
                                                             ->columnSpanFull(),
 
                                                         TextInput::make('longitude')
                                                             ->label('Longitude')
                                                             ->numeric()
-                                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                                            ->dehydrated(fn(?string $state): bool => filled($state))
                                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
-                                                            ->afterStateUpdated(fn($state, $set, $get) =>
-                                                                $set('lat_long', [
-                                                                    'lat' => $get('latitude'),
-                                                                    'lng' => $state,
-                                                                ])
+                                                            ->afterStateUpdated(fn($state, $set, $get) => $set('lat_long', [
+                                                                'lat' => $get('latitude'),
+                                                                'lng' => $state,
+                                                            ])
                                                             )
                                                             ->columnSpanFull(),
                                                     ])->columnSpan(['lg' => 1]),
@@ -263,6 +290,7 @@ class UserForm
                                     ])
                             ]),
 
+                        // TODO Foto Tempat Tinggal
                         Tabs\Tab::make('Foto Tempat Tinggal')
                             ->icon('heroicon-o-photo')
                             ->schema([
@@ -281,39 +309,6 @@ class UserForm
                                             ->maxSize(2 * 1024) // 2 MB
                                             ->helperText('Unggah foto tempat tinggal Anda. Minimal 1 foto, maksimal 5 foto dengan ukuran maksimal 2 MB per foto.'),
                                     ]),
-                            ]),
-
-                        Tabs\Tab::make('Keamanan')
-                            ->icon('heroicon-o-lock-closed')
-                            ->columns()
-                            ->schema([
-                                TextInput::make('password')
-                                    ->label(fn($livewire) => $livewire instanceof EditRecord ? 'Kata Sandi Baru' : 'Kata Sandi')
-                                    ->placeholder('Masukkan kata sandi')
-                                    ->password()
-                                    ->confirmed()
-                                    ->minLength(8)
-                                    ->regex('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
-                                    ->maxLength(255)
-                                    ->autocomplete('new-password')
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->helperText('Kata sandi harus terdiri dari minimal 8 karakter, termasuk huruf besar, huruf kecil, angka, dan simbol.')
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
-                                    ->revealable(),
-
-                                TextInput::make('password_confirmation')
-                                    ->label('Konfirmasi Kata Sandi')
-                                    ->placeholder('Masukkan konfirmasi kata sandi')
-                                    ->password()
-                                    ->minLength(8)
-                                    ->maxLength(255)
-                                    ->autocomplete('new-password')
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->required(fn (string $operation): bool => $operation === 'create')
-                                    ->helperText('Ketik ulang kata sandi untuk konfirmasi.')
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
-                                    ->revealable(),
                             ]),
                     ]),
 
