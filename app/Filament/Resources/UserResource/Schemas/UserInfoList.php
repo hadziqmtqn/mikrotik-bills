@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\Schemas;
 
 use Afsakar\LeafletMapPicker\LeafletMapPickerEntry;
 use App\Enums\AccountType;
+use App\Helpers\DateHelper;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
@@ -41,6 +42,11 @@ class UserInfoList
 
                                 TextEntry::make('roles.name')
                                     ->label('Role'),
+
+                                TextEntry::make('userProfile.activation_date')
+                                    ->label('Tanggal Aktivasi')
+                                    ->date()
+                                    ->formatStateUsing(fn($state): ?string => DateHelper::indonesiaDate($state)),
 
                                 TextEntry::make('is_active')
                                     ->label('Aktif')

@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\AdminResource\Pages;
+use App\Filament\Resources\AdminResource\Schemas\AdminForm;
+use App\Filament\Resources\AdminResource\Schemas\AdminTable;
+use App\Models\User;
+use Exception;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class AdminResource extends Resource
+{
+    protected static ?string $model = User::class;
+    protected static ?string $navigationLabel = 'Admins';
+    protected static ?string $slug = 'admins';
+    protected static ?string $navigationGroup = 'System';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    public static function form(Form $form): Form
+    {
+        return AdminForm::form($form);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function table(Table $table): Table
+    {
+        return AdminTable::table($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListAdmins::route('/'),
+            /*'create' => Pages\CreateAdmin::route('/create'),
+            'edit' => Pages\EditAdmin::route('/{record}/edit'),*/
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->with('roles')
+            ->whereHas('roles', function (Builder $query) {
+                $query->where('name', '!=', 'user');
+            });
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
+    }
+}

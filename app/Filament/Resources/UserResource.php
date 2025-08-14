@@ -52,7 +52,8 @@ class UserResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ])
+            ->whereHas('roles', fn($query) => $query->where('name', 'user'));
     }
 
     public static function getGloballySearchableAttributes(): array

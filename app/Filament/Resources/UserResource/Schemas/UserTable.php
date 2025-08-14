@@ -21,7 +21,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\Permission\Models\Role;
 
 class UserTable
 {
@@ -85,19 +84,6 @@ class UserTable
                         if ($data['value']) {
                             $query->whereHas('userProfile', function ($q) use ($data) {
                                 $q->where('account_type', $data['value']);
-                            });
-                        }
-                    })
-                    ->native(false),
-
-                SelectFilter::make('role')
-                    ->label('Role')
-                    ->options(fn () => Role::all()->pluck('name', 'id'))
-                    ->default(Role::where('name', 'user')->first()?->id)
-                    ->query(function (Builder $query, array $data) {
-                        if ($data['value']) {
-                            $query->whereHas('roles', function ($q) use ($data) {
-                                $q->where('id', $data['value']);
                             });
                         }
                     })
