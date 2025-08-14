@@ -45,4 +45,12 @@ enum AccountType: string implements HasLabel, HasIcon, HasColor
             self::BISNIS->value => self::BISNIS->getLabel(),
         ];
     }
+
+    public static function colors(): array
+    {
+        return [
+            self::PRIBADI->value => self::PRIBADI->getColor(),
+            self::BISNIS->value => self::BISNIS->getColor(),
+        ];
+    }
 }

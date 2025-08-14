@@ -3,14 +3,16 @@
 namespace App\Filament\Resources\UserResource\Schemas;
 
 use Afsakar\LeafletMapPicker\LeafletMapPicker;
+use App\Enums\AccountType;
 use App\Models\User;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
@@ -28,7 +30,7 @@ class UserForm
                 Tabs::make()
                     ->columnSpanFull()
                     ->tabs([
-                        Tabs\Tab::make('Profile')
+                        Tabs\Tab::make('Data Pribadi')
                             ->icon('heroicon-o-user')
                             ->columns()
                             ->schema([
@@ -37,8 +39,12 @@ class UserForm
                                     ->schema([
                                         ToggleButtons::make('account_type')
                                             ->label('Tipe Akun')
-                                            ->columnSpanFull()
-                                    ]),
+                                            ->options(AccountType::options())
+                                            ->colors(AccountType::colors())
+                                            ->inline()
+                                            ->required()
+                                    ])
+                                    ->columnSpanFull(),
 
                                 Select::make('roles')
                                     ->label('Role')
@@ -54,6 +60,7 @@ class UserForm
                                     ->native(false),
 
                                 TextInput::make('name')
+                                    ->label('Nama Lengkap')
                                     ->prefixIcon('heroicon-o-user-circle')
                                     ->placeholder('Masukkan nama lengkap')
                                     ->required(),
@@ -78,18 +85,12 @@ class UserForm
                                             ]),
                                     ]),
 
-                                Radio::make('is_active')
+                                Toggle::make('is_active')
                                     ->label('Status')
-                                    ->inline()
-                                    ->options([
-                                        true => 'Active',
-                                        false => 'Inactive',
-                                    ])
-                                    ->default(true)
                                     ->required(),
                             ]),
 
-                        Tabs\Tab::make('Address')
+                        Tabs\Tab::make('Alamat')
                             ->icon('heroicon-o-map-pin')
                             ->schema([
                                 Group::make()
@@ -199,7 +200,7 @@ class UserForm
                                             ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state),
 
                                         LeafletMapPicker::make('lat_long')
-                                            ->label('Select Location')
+                                            ->label('Pilih Lokasi di Peta')
                                             ->tileProvider('google')
                                             ->draggable(false)
                                             ->clickable()
@@ -224,7 +225,28 @@ class UserForm
                                     ])
                             ]),
 
-                        Tabs\Tab::make('Security')
+                        Tabs\Tab::make('Foto Tempat Tinggal')
+                            ->icon('heroicon-o-photo')
+                            ->schema([
+                                Group::make()
+                                    ->relationship('userProfile')
+                                    ->schema([
+                                        SpatieMediaLibraryFileUpload::make('home_photo')
+                                            ->label('Foto Tempat Tinggal')
+                                            ->collection('home_photos')
+                                            ->disk('s3')
+                                            ->visibility('private')
+                                            ->image()
+                                            ->openable()
+                                            ->multiple()
+                                            ->maxFiles(5)
+                                            ->maxSize(2 * 1024) // 2 MB
+                                            ->required(fn (string $operation): bool => $operation === 'create')
+                                            ->helperText('Unggah foto tempat tinggal Anda. Minimal 1 foto, maksimal 5 foto dengan ukuran maksimal 2 MB per foto.'),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Keamanan')
                             ->icon('heroicon-o-lock-closed')
                             ->columns()
                             ->schema([

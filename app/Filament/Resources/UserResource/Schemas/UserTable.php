@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\Schemas;
 
+use App\Enums\AccountType;
 use App\Models\User;
 use Exception;
 use Filament\Tables\Actions\ActionGroup;
@@ -16,7 +17,6 @@ use Filament\Tables\Actions\RestoreBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -38,12 +38,20 @@ class UserTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('userProfile.account_type')
+                    ->label('Tipe Akun')
+                    ->badge()
+                    ->color(fn($state): ?string => AccountType::tryFrom($state)?->getColor() ?? 'secondary')
+                    ->icon(fn($state): ?string => AccountType::tryFrom($state)?->getIcon() ?? null)
+                    ->formatStateUsing(fn($state): ?string => AccountType::tryFrom($state)?->getLabel() ?? 'Unknown')
+                    ->sortable(),
+
                 TextColumn::make('userProfile.whatsapp_number')
-                    ->label('WhatsApp Number')
+                    ->label('No. WhatsApp')
                     ->searchable(),
 
                 TextColumn::make('userProfile.street')
-                    ->label('Street')
+                    ->label('Alamat')
                     ->searchable()
                     ->limit(50)
                     ->tooltip(fn($record): string => $record->userProfile?->street ?? '-'),
@@ -59,7 +67,9 @@ class UserTable
                     })
                     ->formatStateUsing(fn($state): string => ucwords(str_replace('_', ' ', $state)))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
 
                 IconColumn::make('is_active')
                     ->label('Status')
@@ -68,7 +78,18 @@ class UserTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                SelectFilter::make('account_type')
+                    ->label('Tipe Akun')
+                    ->options(AccountType::options())
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value']) {
+                            $query->whereHas('userProfile', function ($q) use ($data) {
+                                $q->where('account_type', $data['value']);
+                            });
+                        }
+                    })
+                    ->native(false),
+
                 SelectFilter::make('role')
                     ->label('Role')
                     ->options(fn () => Role::all()->pluck('name', 'id'))
@@ -81,7 +102,24 @@ class UserTable
                         }
                     })
                     ->native(false),
-            ], layout: FiltersLayout::Modal)
+
+                SelectFilter::make('is_active')
+                    ->label('Status')
+                    ->options([
+                        'active' => 'Aktif',
+                        'inactive' => 'Tidak Aktif',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value']) {
+                            $query->where('is_active', ($data['value'] === 'active'));
+                        }
+                    })
+                    ->native(false),
+
+                TrashedFilter::make()
+                    ->label('Data Terhapus')
+                    ->native(false),
+            ])
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
