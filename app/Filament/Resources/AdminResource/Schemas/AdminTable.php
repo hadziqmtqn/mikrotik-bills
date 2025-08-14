@@ -3,10 +3,14 @@
 namespace App\Filament\Resources\AdminResource\Schemas;
 
 use Exception;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ForceDeleteAction;
+use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class AdminTable
@@ -43,14 +47,20 @@ class AdminTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                TrashedFilter::make()
+                    ->native(false)
             ])
             ->actions([
-                EditAction::make()
-                    ->button(),
-                DeleteAction::make()
-                    ->button()
-                    ->visible(fn ($record) => $record->roles->isEmpty() || $record->roles->first()->name !== 'super_admin'),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->disabled(fn ($record) =>
+                            collect($record->roles)->isEmpty() ||
+                            collect($record->roles)->first()?->name === 'super_admin'
+                        ),
+                    RestoreAction::make(),
+                    ForceDeleteAction::make()
+                ])
             ])
             ->bulkActions([
                 //

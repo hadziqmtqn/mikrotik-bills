@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AdminResource\Schemas;
 
 use App\Models\User;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -44,6 +45,16 @@ class AdminForm
                             ->email()
                             ->unique(User::class, 'email', fn(?User $record) => $record?->id)
                             ->placeholder('Masukkan email'),
+
+                        Group::make()
+                            ->relationship('userProfile')
+                            ->schema([
+                                TextInput::make('whatsapp_number')
+                                    ->label('No. WhatsApp')
+                                    ->minLength(10)
+                                    ->maxLength(13)
+                                    ->placeholder('Masukkan nomor WhatsApp'),
+                            ]),
 
                         ToggleButtons::make('is_active')
                             ->label('Status Aktif')
