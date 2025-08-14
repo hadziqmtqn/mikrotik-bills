@@ -8,7 +8,6 @@ use App\Models\User;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Tabs;
@@ -209,7 +208,8 @@ class UserForm
                                                         TextInput::make('latitude')
                                                             ->label('Latitude')
                                                             ->numeric()
-                                                            ->dehydrated(false)
+                                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                                             ->afterStateUpdated(fn($state, $set, $get) =>
                                                                 $set('lat_long', [
                                                                     'lat' => $state,
@@ -221,7 +221,8 @@ class UserForm
                                                         TextInput::make('longitude')
                                                             ->label('Longitude')
                                                             ->numeric()
-                                                            ->dehydrated(false)
+                                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                                            ->dehydrateStateUsing(fn($state) => $state === '' ? null : $state)
                                                             ->afterStateUpdated(fn($state, $set, $get) =>
                                                                 $set('lat_long', [
                                                                     'lat' => $get('latitude'),
@@ -265,22 +266,18 @@ class UserForm
                         Tabs\Tab::make('Foto Tempat Tinggal')
                             ->icon('heroicon-o-photo')
                             ->schema([
-                                Group::make()
-                                    ->relationship('userProfile')
-                                    ->schema([
-                                        SpatieMediaLibraryFileUpload::make('home_photo')
-                                            ->label('Foto Tempat Tinggal')
-                                            ->collection('home_photos')
-                                            ->disk('s3')
-                                            ->visibility('private')
-                                            ->image()
-                                            ->openable()
-                                            ->multiple()
-                                            ->maxFiles(5)
-                                            ->maxSize(2 * 1024) // 2 MB
-                                            ->required(fn (string $operation): bool => $operation === 'create')
-                                            ->helperText('Unggah foto tempat tinggal Anda. Minimal 1 foto, maksimal 5 foto dengan ukuran maksimal 2 MB per foto.'),
-                                    ]),
+                                SpatieMediaLibraryFileUpload::make('home_photo')
+                                    ->label('Foto Tempat Tinggal')
+                                    ->collection('home_photos')
+                                    ->disk('s3')
+                                    ->visibility('private')
+                                    ->image()
+                                    ->openable()
+                                    ->multiple()
+                                    ->maxFiles(5)
+                                    ->maxSize(2 * 1024) // 2 MB
+                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                    ->helperText('Unggah foto tempat tinggal Anda. Minimal 1 foto, maksimal 5 foto dengan ukuran maksimal 2 MB per foto.'),
                             ]),
 
                         Tabs\Tab::make('Keamanan')
