@@ -41,6 +41,7 @@ class AdminTable
                     ->trueColor('success')
                     ->falseColor('danger'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])

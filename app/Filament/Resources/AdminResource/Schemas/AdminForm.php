@@ -11,6 +11,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 
 class AdminForm
 {
@@ -21,12 +23,14 @@ class AdminForm
                 Section::make('Data Utama')
                     ->columns()
                     ->schema([
-                        Select::make('role')
+                        Select::make('roles')
                             ->label('Role')
-                            ->relationship('roles', 'name', fn(Builder $query) => $query->whereIn('name', ['super_admin', 'admin']))
+                            ->placeholder('Pilih role')
+                            ->relationship('roles', 'name', fn(Builder $query) => $query->where('guard_name', 'web')->whereIn('name', ['super_admin', 'admin']))
                             ->required()
-                            ->searchable()
-                            ->preload()
+                            ->rules([
+                                Rule::exists('roles', 'id')->where('guard_name', 'web'),
+                            ])
                             ->native(false),
 
                         TextInput::make('name')
@@ -50,7 +54,11 @@ class AdminForm
                             ->colors(fn(?User $record): array => $record?->is_active ? ['danger'] : ['primary'])
                             ->default(true)
                             ->inline()
-                            ->visible(fn(?User $record): bool => $record?->id !== null && $record?->roles?->contains('name', '!=', 'super_admin')),
+                            ->visible(fn(?User $record) =>
+                                $record?->id !== null
+                                && $record?->roles instanceof Collection
+                                && $record->roles->contains(fn($role) => $role->name !== 'super_admin')
+                            ),
                     ]),
 
                 Section::make('Keamanan')
