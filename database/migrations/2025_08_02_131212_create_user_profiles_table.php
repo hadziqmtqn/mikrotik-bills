@@ -10,6 +10,8 @@ return new class extends Migration {
         Schema::create('user_profiles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->enum('account_type', ['pribadi', 'bisnis'])->nullable();
+            $table->date('activation_date')->nullable();
             $table->string('ppoe_name')->nullable();
             $table->string('whatsapp_number')->nullable();
             $table->string('place_name')->nullable();

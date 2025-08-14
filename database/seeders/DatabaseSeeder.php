@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Database\Seeders\Auth\RoleSeeder;
 use Database\Seeders\Auth\SuperAdminSeeder;
+use Database\Seeders\Auth\UserSeeder;
 use Database\Seeders\Network\RouterSeeder;
 use Database\Seeders\Setting\ApplicationSeeder;
 use Illuminate\Database\Seeder;
@@ -20,7 +21,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SuperAdminSeeder::class,
             ApplicationSeeder::class,
-            RouterSeeder::class
+            RouterSeeder::class,
+            UserSeeder::class
         ]);
     }
 }

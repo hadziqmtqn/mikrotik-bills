@@ -3,12 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserProfile extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
+        'account_type',
+        'activation_date',
         'place_name',
         'whatsapp_number',
         'province',
@@ -24,7 +30,13 @@ class UserProfile extends Model
     {
         return [
             'lat_long' => 'array',
+            'activation_date' => 'date'
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     // TODO Attachments

@@ -11,6 +11,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
@@ -31,6 +32,14 @@ class UserForm
                             ->icon('heroicon-o-user')
                             ->columns()
                             ->schema([
+                                Group::make()
+                                    ->relationship('userProfile')
+                                    ->schema([
+                                        ToggleButtons::make('account_type')
+                                            ->label('Tipe Akun')
+                                            ->columnSpanFull()
+                                    ]),
+
                                 Select::make('roles')
                                     ->label('Role')
                                     ->placeholder('Pilih role')
