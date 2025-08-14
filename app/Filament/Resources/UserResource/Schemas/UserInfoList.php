@@ -93,12 +93,16 @@ class UserInfoList
                                 Tab::make('Foto Tempat Tinggal')
                                     ->icon('heroicon-o-photo')
                                     ->schema([
-                                        SpatieMediaLibraryImageEntry::make('home_photos')
-                                            ->hiddenLabel()
-                                            ->collection('home_photos')
-                                            ->disk('s3')
-                                            ->visibility('private')
-                                            ->openUrlInNewTab()
+                                        Group::make()
+                                            ->relationship('userProfile')
+                                            ->schema([
+                                                SpatieMediaLibraryImageEntry::make('home_photos')
+                                                    ->hiddenLabel()
+                                                    ->collection('home_photos')
+                                                    ->disk('s3')
+                                                    ->visibility('private')
+                                                    ->openUrlInNewTab()
+                                            ]),
                                     ]),
                             ]),
                     ]),
