@@ -94,6 +94,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Main',
+                'Service',
                 'Network',
                 'System'
             ])
