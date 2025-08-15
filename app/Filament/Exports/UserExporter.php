@@ -8,6 +8,8 @@ use App\Models\User;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use OpenSpout\Common\Entity\Style\Border;
+use OpenSpout\Common\Entity\Style\Style;
 
 class UserExporter extends Exporter
 {
@@ -58,8 +60,25 @@ class UserExporter extends Exporter
                 ->label('Kode Pos'),
 
             ExportColumn::make('is_active')
-                ->label('Status Akun'),
+                ->label('Status Akun')
+                ->formatStateUsing(fn($state): string => $state ? 'Aktif' : 'Tidak Aktif'),
         ];
+    }
+
+    public function getXlsxHeaderCellStyle(): ?Style
+    {
+        return (new Style())
+            ->setFontSize(14)
+            ->setFontName('Arial')
+            ->setBorder(new Border());
+    }
+
+    public function getXlsxCellStyle(): ?Style
+    {
+        return (new Style())
+            ->setFontSize(12)
+            ->setFontName('Arial')
+            ->setBorder(new Border());
     }
 
     public static function getCompletedNotificationBody(Export $export): string

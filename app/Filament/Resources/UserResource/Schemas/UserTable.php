@@ -36,6 +36,7 @@ class UserTable
             ->headerActions([
                 ExportAction::make()
                     ->exporter(UserExporter::class)
+                    ->chunkSize(100)
                     ->fileDisk('s3')
             ])
             ->columns([
