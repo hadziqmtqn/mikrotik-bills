@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\UserResource\Schemas;
 
 use App\Enums\AccountType;
+use App\Filament\Exports\UserExporter;
+use App\Helpers\DateHelper;
 use App\Models\User;
 use Exception;
 use Filament\Tables\Actions\ActionGroup;
@@ -10,6 +12,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
@@ -30,10 +33,13 @@ class UserTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(UserExporter::class)
+            ])
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
-                    ->description(fn($record): string => $record->userProfile?->place_name ?? '-')
                     ->searchable()
                     ->sortable(),
 
@@ -49,31 +55,38 @@ class UserTable
                     ->label('No. WhatsApp')
                     ->searchable(),
 
-                TextColumn::make('userProfile.street')
-                    ->label('Alamat')
-                    ->searchable()
-                    ->limit(50)
-                    ->tooltip(fn($record): string => $record->userProfile?->street ?? '-'),
-
-                TextColumn::make('roles.name')
-                    ->label('Role')
-                    ->badge()
-                    ->color(fn($state): string => match ($state) {
-                        'super_admin' => 'primary',
-                        'admin' => 'info',
-                        'user' => 'gray',
-                        default => 'secondary',
-                    })
-                    ->formatStateUsing(fn($state): string => ucwords(str_replace('_', ' ', $state)))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->toggledHiddenByDefault(),
+                TextColumn::make('userProfile.activation_date')
+                    ->label('Tgl. Aktivasi')
+                    ->date()
+                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y'))
+                    ->sortable(),
 
                 IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
                     ->sortable(),
+
+                TextColumn::make('userProfile.street')
+                    ->label('Alamat')
+                    ->searchable()
+                    ->limit(50)
+                    ->tooltip(fn($record): string => $record->userProfile?->street ?? '-')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+
+                TextColumn::make('userProfile.place_name')
+                    ->label('Nama Lokasi')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+
+                TextColumn::make('userProfile.ppoe_name')
+                    ->label('Nama PPPoE')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

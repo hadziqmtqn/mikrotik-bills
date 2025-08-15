@@ -35,6 +35,17 @@ class AdminTable
                     ->label('No. WhatsApp')
                     ->searchable(),
 
+                TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => ucfirst(str_replace('_', ' ', $state)))
+                    ->color(fn($state) => match ($state) {
+                        'super_admin' => 'danger',
+                        'admin' => 'primary',
+                        default => 'secondary',
+                    })
+                    ->searchable(),
+
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
