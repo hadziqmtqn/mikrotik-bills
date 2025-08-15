@@ -9,6 +9,8 @@ use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use OpenSpout\Common\Entity\Style\Border;
+use OpenSpout\Common\Entity\Style\BorderPart;
+use OpenSpout\Common\Entity\Style\Color;
 use OpenSpout\Common\Entity\Style\Style;
 
 class UserExporter extends Exporter
@@ -70,7 +72,10 @@ class UserExporter extends Exporter
         return (new Style())
             ->setFontSize(14)
             ->setFontName('Arial')
-            ->setBorder(new Border());
+            ->setFontBold()
+            ->setBackgroundColor(Color::GREEN)
+            ->setFontColor(Color::WHITE)
+            ->setBorder($this->borderStyle());
     }
 
     public function getXlsxCellStyle(): ?Style
@@ -78,7 +83,17 @@ class UserExporter extends Exporter
         return (new Style())
             ->setFontSize(12)
             ->setFontName('Arial')
-            ->setBorder(new Border());
+            ->setBorder($this->borderStyle());
+    }
+
+    private function borderStyle(): Border
+    {
+        return (new Border(
+            new BorderPart(Border::TOP, Color::BLACK, Border::WIDTH_THIN),
+            new BorderPart(Border::BOTTOM, Color::BLACK, Border::WIDTH_THIN),
+            new BorderPart(Border::LEFT, Color::BLACK, Border::WIDTH_THIN),
+            new BorderPart(Border::RIGHT, Color::BLACK, Border::WIDTH_THIN),
+        ));
     }
 
     public static function getCompletedNotificationBody(Export $export): string
