@@ -36,6 +36,7 @@ class UserTable
             ->headerActions([
                 ExportAction::make()
                     ->exporter(UserExporter::class)
+                    ->fileDisk('s3')
             ])
             ->columns([
                 TextColumn::make('name')
