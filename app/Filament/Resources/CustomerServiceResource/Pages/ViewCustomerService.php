@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\AccountType;
+use App\Enums\PackageTypeService;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Models\CustomerService;
@@ -43,6 +44,20 @@ class ViewCustomerService extends ViewRecord
 
                                 TextEntry::make('user.userProfile.whatsapp_number')
                                     ->label('No. WhatsApp'),
+                            ]),
+
+                        Section::make('Data Paket')
+                            ->inlineLabel()
+                            ->schema([
+                                TextEntry::make('reference_number')
+                                    ->label('Nomor Referensi'),
+
+                                TextEntry::make('servicePackage.package_name')
+                                    ->label('Paket'),
+
+                                TextEntry::make('package_type')
+                                    ->label('Jenis Paket')
+                                    ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? '-'),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),

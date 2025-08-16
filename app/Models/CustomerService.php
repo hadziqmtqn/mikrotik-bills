@@ -19,7 +19,7 @@ class CustomerService extends Model
         'user_id',
         'service_package_id',
         'price',
-        'payment_type',
+        'package_type',
         'username',
         'password',
         'start_date',

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
-use App\Enums\PaymentTypeService;
+use App\Enums\PackageTypeService;
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
 use Exception;
@@ -41,10 +41,10 @@ class CustomerServiceTable
                     ->label('Harga')
                     ->money('idr'),
 
-                TextColumn::make('payment_type')
-                    ->label('Jenis Pembayaran')
+                TextColumn::make('package_type')
+                    ->label('Jenis Paket')
                     ->searchable()
-                    ->formatStateUsing(fn($state): string => PaymentTypeService::tryFrom($state)?->getLabel() ?? 'N/A'),
+                    ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? 'N/A'),
 
                 TextColumn::make('start_date')
                     ->label('Tanggal Mulai')
@@ -63,9 +63,9 @@ class CustomerServiceTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('payment_type')
-                    ->label('Jenis Pembayaran')
-                    ->options(PaymentTypeService::options())
+                SelectFilter::make('package_type')
+                    ->label('Jenis Paket')
+                    ->options(PackageTypeService::options())
                     ->native(false),
 
                 SelectFilter::make('status')

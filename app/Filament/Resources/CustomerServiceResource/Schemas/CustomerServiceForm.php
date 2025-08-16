@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
-use App\Enums\PaymentTypeService;
+use App\Enums\PackageTypeService;
 use App\Models\CustomerService;
 use App\Models\ServicePackage;
 use App\Models\UserProfile;
@@ -92,10 +92,10 @@ class CustomerServiceForm
                     ->schema([
                         Section::make()
                             ->schema([
-                                ToggleButtons::make('payment_type')
-                                    ->label('Jenis pembayaran')
-                                    ->options(PaymentTypeService::options())
-                                    ->colors(PaymentTypeService::colors())
+                                ToggleButtons::make('package_type')
+                                    ->label('Jenis Paket')
+                                    ->options(PackageTypeService::options())
+                                    ->colors(PackageTypeService::colors())
                                     ->required()
                                     ->inline()
                             ])
