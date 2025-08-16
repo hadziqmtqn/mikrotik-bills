@@ -65,7 +65,8 @@ class ViewCustomerService extends ViewRecord
                                     ->url(fn(CustomerService $record): string => ViewServicePackage::getUrl(['record' => $record->servicePackage?->slug])),
 
                                 TextEntry::make('reference_number')
-                                    ->label('Nomor Referensi'),
+                                    ->label('Nomor Referensi')
+                                    ->weight(FontWeight::Bold),
 
                                 TextEntry::make('servicePackage.service_type')
                                     ->label('Jenis Layanan')

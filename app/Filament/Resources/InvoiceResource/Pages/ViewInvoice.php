@@ -4,9 +4,11 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
+use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\UserResource;
+use App\Helpers\DateHelper;
 use App\Models\CustomerService;
 use App\Models\Invoice;
 use Filament\Infolists\Components\Group;
@@ -15,6 +17,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
 
 class ViewInvoice extends ViewRecord
@@ -78,12 +81,44 @@ class ViewInvoice extends ViewRecord
                                             ->label('Tipe Paket')
                                             ->inlineLabel()
                                             ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? '-'),
+
+                                        TextEntry::make('customerService.price')
+                                            ->label('Harga')
+                                            ->inlineLabel()
+                                            ->money('idr')
+                                            ->weight(FontWeight::Bold)
                                     ])
                             ])
                     ]),
 
                 Group::make()
-                    ->columnSpan(['lg' => 1]),
+                    ->columnSpan(['lg' => 1])
+                    ->schema([
+                        Section::make()
+                            ->inlineLabel()
+                            ->schema([
+                                TextEntry::make('date')
+                                    ->label('Tanggal')
+                                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state)),
+
+                                TextEntry::make('due_date')
+                                    ->label('Jatuh Tempo')
+                                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state))
+                                    ->color('danger'),
+
+                                TextEntry::make('cancel_date')
+                                    ->label('Tanggal Batal')
+                                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state))
+                                    ->color('danger')
+                                    ->hidden(fn(Invoice $record): bool => !$record->cancel_date),
+
+                                TextEntry::make('status')
+                                    ->weight(FontWeight::Bold)
+                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
+                                    ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? '-'),
+                            ])
+                    ]),
             ]);
     }
 }
