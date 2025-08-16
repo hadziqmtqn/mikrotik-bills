@@ -8,6 +8,7 @@ use Exception;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -65,6 +66,7 @@ class InvoiceTable
             ])
             ->actions([
                 ActionGroup::make([
+                    ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ])

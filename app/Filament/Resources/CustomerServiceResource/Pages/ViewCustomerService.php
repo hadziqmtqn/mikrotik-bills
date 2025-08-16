@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
+use App\Enums\ServiceType;
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\ServicePackageResource\Pages\ViewServicePackage;
@@ -50,7 +51,7 @@ class ViewCustomerService extends ViewRecord
                                     ->label('No. WhatsApp'),
                             ]),
 
-                        Section::make('Data Paket')
+                        Section::make('Detail Paket')
                             ->inlineLabel()
                             ->schema([
                                 TextEntry::make('servicePackage.code')
@@ -61,6 +62,10 @@ class ViewCustomerService extends ViewRecord
                                 TextEntry::make('reference_number')
                                     ->label('Nomor Referensi'),
 
+                                TextEntry::make('servicePackage.service_type')
+                                    ->label('Jenis Layanan')
+                                    ->formatStateUsing(fn($state): string => ServiceType::tryFrom($state)?->getLabel() ?? '-'),
+
                                 TextEntry::make('servicePackage.package_name')
                                     ->label('Paket'),
 
@@ -68,9 +73,23 @@ class ViewCustomerService extends ViewRecord
                                     ->label('Jenis Paket')
                                     ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? '-'),
 
+                                TextEntry::make('servicePackage.package_limit_type')
+                                    ->label('Tipe Batas Paket')
+                                    ->visible(fn(CustomerService $record): bool => $record->servicePackage?->service_type === 'hotspot'),
+
+                                TextEntry::make('servicePackage.limit_value')
+                                    ->label('Nilai Batasan')
+                                    ->visible(fn(CustomerService $record): bool => $record->servicePackage?->service_type === 'hotspot' && $record->servicePackage?->package_limit_type !== 'unlimited'),
+
+                                TextEntry::make('servicePackage.validity_period')
+                                    ->label('Periode')
+                                    ->formatStateUsing(fn(CustomerService $record): string => $record->servicePackage?->validity_period . ' ' . $record->servicePackage?->validity_unit)
+                                    ->visible(fn(CustomerService $record): bool => $record->servicePackage?->service_type === 'pppoe'),
+
                                 TextEntry::make('price')
                                     ->label('Harga')
                                     ->money('idr')
+                                    ->weight(FontWeight::Bold)
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
