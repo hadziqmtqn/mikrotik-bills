@@ -70,3 +70,8 @@ update_customer::service;YES;NO;NO
 delete_customer::service;YES;NO;NO
 restore_customer::service;YES;NO;NO
 force_delete_customer::service;YES;NO;NO
+view_any_invoice;YES;NO;NO
+view_invoice;YES;NO;NO
+create_invoice;YES;NO;NO
+update_invoice;YES;NO;NO
+delete_invoice;YES;NO;NO

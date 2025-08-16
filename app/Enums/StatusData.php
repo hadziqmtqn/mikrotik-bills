@@ -8,6 +8,7 @@ use Filament\Support\Contracts\HasLabel;
 enum StatusData: string implements HasColor, HasLabel
 {
     case PENDING = 'pending';
+    case UNPAID = 'unpaid';
     case PAID = 'paid';
     case ACTIVE = 'active';
     case SUSPENDED = 'suspended';
@@ -17,6 +18,7 @@ enum StatusData: string implements HasColor, HasLabel
     {
         return match ($this) {
             self::PENDING => 'Pending',
+            self::UNPAID => 'Unpaid',
             self::PAID => 'Paid',
             self::ACTIVE => 'Active',
             self::SUSPENDED => 'Suspended',
@@ -27,7 +29,7 @@ enum StatusData: string implements HasColor, HasLabel
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::PENDING => 'warning',
+            self::PENDING, self::UNPAID => 'warning',
             self::PAID, self::ACTIVE => 'primary',
             self::SUSPENDED, self::CANCELLED => 'danger',
         };
