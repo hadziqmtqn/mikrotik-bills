@@ -9,6 +9,8 @@ use App\Models\CustomerService;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,6 +24,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationGroup = 'Service';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-server';
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getPermissionPrefixes(): array
     {
@@ -55,6 +58,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
         return [
             'index' => Pages\ListCustomerServices::route('/'),
             'create' => Pages\CreateCustomerService::route('/create'),
+            'view' => Pages\ViewCustomerService::route('/{record}'),
             'edit' => Pages\EditCustomerService::route('/{record}/edit'),
         ];
     }
@@ -67,8 +71,11 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
             ]);
     }
 
-    public static function getGloballySearchableAttributes(): array
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return ['slug'];
+        return $page->generateNavigationItems([
+            Pages\ViewCustomerService::class,
+            Pages\EditCustomerService::class,
+        ]);
     }
 }

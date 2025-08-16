@@ -82,7 +82,11 @@ class CustomerServiceForm
                                             ->prefix('Rp'),
                                     ])
                             ])
-                    ])->columnSpan(['lg' => 2]),
+                    ])
+                    ->columnSpan([
+                        'lg' => 2,
+                        'md' => 2,
+                    ]),
 
                 Group::make()
                     ->schema([
@@ -96,7 +100,10 @@ class CustomerServiceForm
                                     ->inline()
                             ])
                     ])
-                    ->columnSpan(['lg' => 1]),
+                    ->columnSpan([
+                        'lg' => 1,
+                        'md' => 1,
+                    ]),
 
                 Grid::make()
                     ->visible(fn(?CustomerService $record): bool => $record?->exists ?? false)
