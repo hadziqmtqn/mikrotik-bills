@@ -7,6 +7,7 @@ use App\Filament\Resources\InvoiceResource\Schemas\InvoiceForm;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceTable;
 use App\Models\Invoice;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -38,6 +39,9 @@ class InvoiceResource extends Resource implements HasShieldPermissions
         return InvoiceForm::form($form);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return InvoiceTable::table($table);

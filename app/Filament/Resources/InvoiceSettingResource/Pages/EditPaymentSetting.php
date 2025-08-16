@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\PaymentSettingResource\Pages;
+namespace App\Filament\Resources\InvoiceSettingResource\Pages;
 
 use App\Filament\Resources\InvoiceSettingResource;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class CreatePaymentSetting extends CreateRecord
+class EditPaymentSetting extends EditRecord
 {
     protected static string $resource = InvoiceSettingResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-
+            DeleteAction::make(),
         ];
     }
 }

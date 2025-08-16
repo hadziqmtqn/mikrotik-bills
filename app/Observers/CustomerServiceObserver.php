@@ -24,7 +24,8 @@ class CustomerServiceObserver
         $invoice = new Invoice();
         $invoice->user_id = $customerService->user_id;
         $invoice->date = now();
-        $invoice->due_date = now()->addDays($this->setting()?->due_date_after);
+        $invoice->due_date = now()->addDays($this->setting()?->due_date_after_new_service);
+        $invoice->note = 'Dibuat secara otomatis oleh sistem';
         $invoice->save();
 
         // TODO Create Invoice Items

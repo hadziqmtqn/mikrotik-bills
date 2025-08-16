@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\PaymentSettingResource\Pages;
+namespace App\Filament\Resources\InvoiceSettingResource\Pages;
 
 use App\Filament\Resources\InvoiceSettingResource;
 use Filament\Actions\CreateAction;

@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->uuid('slug');
             $table->integer('repeat_every_date');
             $table->integer('due_date_after');
+            $table->integer('due_date_after_new_service');
             $table->integer('cancel_after');
             $table->timestamps();
         });

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PaymentSettingResource\Pages;
+use App\Filament\Resources\InvoiceSettingResource\Pages;
 use App\Models\InvoiceSetting;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\TextInput;
@@ -41,7 +41,14 @@ class InvoiceSettingResource extends Resource implements HasShieldPermissions
                     ->hintIcon('heroicon-o-information-circle', 'Pembuatan tagihan akan dibuat otomatis setiap tanggal yang ditentukan. Misalnya, jika diisi 5, maka tagihan akan dibuat setiap tanggal 5 bulan berikutnya.'),
 
                 TextInput::make('due_date_after')
-                    ->label('Jatuh Tempo Setelah')
+                    ->label('Jatuh Tempo Setelah (Layanan Berulang)')
+                    ->required()
+                    ->integer()
+                    ->hintIcon('heroicon-o-information-circle', 'Jatuh tempo tagihan akan dibuat setelah tanggal pembuatan tagihan. Misalnya, jika diisi 7, maka tagihan akan jatuh tempo 7 hari setelah tanggal pembuatan.')
+                    ->suffix('hari'),
+
+                TextInput::make('due_date_after_new_service')
+                    ->label('Jatuh Tempo Setelah (Layanan Baru)')
                     ->required()
                     ->integer()
                     ->hintIcon('heroicon-o-information-circle', 'Jatuh tempo tagihan akan dibuat setelah tanggal pembuatan tagihan. Misalnya, jika diisi 7, maka tagihan akan jatuh tempo 7 hari setelah tanggal pembuatan.')
@@ -64,7 +71,11 @@ class InvoiceSettingResource extends Resource implements HasShieldPermissions
                     ->label('Ulangi Setiap Tanggal'),
 
                 TextColumn::make('due_date_after')
-                    ->label('Jatuh Tempo Setelah')
+                    ->label('Jatuh Tempo Setelah (Layanan Berulang)')
+                    ->suffix(' hari'),
+
+                TextColumn::make('due_date_after_new_service')
+                    ->label('Jatuh Tempo Setelah (Layanan Baru)')
                     ->suffix(' hari'),
 
                 TextColumn::make('cancel_after')

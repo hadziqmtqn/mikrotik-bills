@@ -13,6 +13,7 @@ enum StatusData: string implements HasColor, HasLabel
     case ACTIVE = 'active';
     case SUSPENDED = 'suspended';
     case CANCELLED = 'cancelled';
+    case OVERDUE = 'overdue';
 
     public function getLabel(): ?string
     {
@@ -23,13 +24,14 @@ enum StatusData: string implements HasColor, HasLabel
             self::ACTIVE => 'Active',
             self::SUSPENDED => 'Suspended',
             self::CANCELLED => 'Cancelled',
+            self::OVERDUE => 'Overdue',
         };
     }
 
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::PENDING, self::UNPAID => 'warning',
+            self::PENDING, self::UNPAID, self::OVERDUE => 'warning',
             self::PAID, self::ACTIVE => 'primary',
             self::SUSPENDED, self::CANCELLED => 'danger',
         };
