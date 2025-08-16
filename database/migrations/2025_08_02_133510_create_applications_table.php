@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('short_name');
             $table->string('full_name')->nullable();
             $table->enum('navigation_position', ['top', 'left'])->default('left');
-            $table->string('panel_color')->default('amber');
+            $table->string('panel_color')->default('teal');
             $table->timestamps();
         });
     }

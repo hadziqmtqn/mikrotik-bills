@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\Schemas\UserForm;
 use App\Filament\Resources\UserResource\Schemas\UserTable;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Pages\SubNavigationPosition;
@@ -15,13 +16,30 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+class UserResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = User::class;
     protected static ?string $slug = 'users';
     protected static ?string $navigationLabel = 'Pelanggan';
     protected static ?string $navigationGroup = 'Main';
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'restore',
+            'restore_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
