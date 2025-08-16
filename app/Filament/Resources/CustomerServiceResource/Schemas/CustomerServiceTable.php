@@ -12,6 +12,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -61,6 +62,16 @@ class CustomerServiceTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                SelectFilter::make('payment_type')
+                    ->label('Jenis Pembayaran')
+                    ->options(PaymentTypeService::options())
+                    ->native(false),
+
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(StatusData::options(['pending', 'active', 'suspended', 'cancelled']))
+                    ->native(false),
+
                 TrashedFilter::make()
                     ->label('Termasuk yang Dihapus')
                     ->native(false),
