@@ -51,6 +51,7 @@ class ServicePackageTable
                     ->badge()
                     ->icon(fn($state): string => AccountType::tryFrom($state)?->getIcon() ?? 'heroicon-o-question-mark-circle')
                     ->color(fn($state): string => AccountType::tryFrom($state)?->getColor() ?? 'secondary')
+                    ->formatStateUsing(fn($state): string => AccountType::tryFrom($state)?->getLabel() ?? 'N/A')
                     ->sortable(),
 
                 TextColumn::make('package_price')

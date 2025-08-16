@@ -75,6 +75,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => $colorMap[$application?->panel_color ?? 'amber'] ?? Color::Amber,
             ])
+            ->font('Poppins')
             ->collapsibleNavigationGroups(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop(false)
@@ -95,6 +96,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Main',
                 'Service',
+                'Payment',
+                'Invoice',
                 'Network',
                 'System'
             ])

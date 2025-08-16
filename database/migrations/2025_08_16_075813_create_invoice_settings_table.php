@@ -7,19 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('applications', function (Blueprint $table) {
+        Schema::create('invoice_settings', function (Blueprint $table) {
             $table->id();
             $table->uuid('slug');
-            $table->string('short_name');
-            $table->string('full_name')->nullable();
-            $table->enum('navigation_position', ['top', 'left'])->default('left');
-            $table->string('panel_color')->default('teal');
+            $table->integer('repeat_every_date');
+            $table->integer('due_date_after');
+            $table->integer('cancel_after');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('applications');
+        Schema::dropIfExists('invoice_settings');
     }
 };

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AdminResource\Pages;
-use App\Filament\Resources\AdminResource\Schemas\AdminForm;
-use App\Filament\Resources\AdminResource\Schemas\AdminTable;
-use App\Models\User;
+use App\Filament\Resources\CustomerServiceResource\Pages;
+use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceForm;
+use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceTable;
+use App\Models\CustomerService;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Form;
@@ -14,14 +14,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class AdminResource extends Resource implements HasShieldPermissions
+class CustomerServiceResource extends Resource implements HasShieldPermissions
 {
-    protected static ?string $model = User::class;
-    protected static ?string $slug = 'admins';
-    protected static ?string $navigationLabel = 'Admin';
-    protected static ?string $navigationGroup = 'System';
-    protected static ?int $navigationSort = 1;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $model = CustomerService::class;
+    protected static ?string $slug = 'customer-services';
+    protected static ?string $navigationLabel = 'Layanan Pelanggan';
+    protected static ?string $navigationGroup = 'Service';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationIcon = 'heroicon-o-server';
 
     public static function getPermissionPrefixes(): array
     {
@@ -39,7 +39,7 @@ class AdminResource extends Resource implements HasShieldPermissions
 
     public static function form(Form $form): Form
     {
-        return AdminForm::form($form);
+        return CustomerServiceForm::form($form);
     }
 
     /**
@@ -47,15 +47,15 @@ class AdminResource extends Resource implements HasShieldPermissions
      */
     public static function table(Table $table): Table
     {
-        return AdminTable::table($table);
+        return CustomerServiceTable::table($table);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAdmins::route('/'),
-            /*'create' => Pages\CreateAdmin::route('/create'),
-            'edit' => Pages\EditAdmin::route('/{record}/edit'),*/
+            'index' => Pages\ListCustomerServices::route('/'),
+            'create' => Pages\CreateCustomerService::route('/create'),
+            'edit' => Pages\EditCustomerService::route('/{record}/edit'),
         ];
     }
 
@@ -64,15 +64,11 @@ class AdminResource extends Resource implements HasShieldPermissions
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])
-            ->with('roles')
-            ->whereHas('roles', function (Builder $query) {
-                $query->where('name', '!=', 'user');
-            });
+            ]);
     }
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'email'];
+        return ['slug'];
     }
 }

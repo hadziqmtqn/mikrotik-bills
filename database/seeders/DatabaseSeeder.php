@@ -7,7 +7,10 @@ use Database\Seeders\Auth\RoleSeeder;
 use Database\Seeders\Auth\SuperAdminSeeder;
 use Database\Seeders\Auth\UserSeeder;
 use Database\Seeders\Network\RouterSeeder;
+use Database\Seeders\Reference\BankAccountSeeder;
+use Database\Seeders\Service\ServicePackageSeeder;
 use Database\Seeders\Setting\ApplicationSeeder;
+use Database\Seeders\Setting\InvoiceSettingSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,7 +25,11 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             ApplicationSeeder::class,
             RouterSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
+            BankAccountSeeder::class,
+            ServicePackageSeeder::class,
+            // PAYMENT
+            InvoiceSettingSeeder::class
         ]);
     }
 }

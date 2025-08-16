@@ -173,7 +173,10 @@ class ServicePackageForm
 
                                 Select::make('data_limit_unit')
                                     ->label('Satuan Batasan Data')
-                                    ->options(['MBs', 'GBs'])
+                                    ->options([
+                                        'MBs' => 'MBs',
+                                        'GBs' => 'GBs',
+                                    ])
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== 'limited' || ($get('limit_type') !== 'data' && $get('limit_type') !== 'both'))
                                     ->required(fn(Get $get) => $get('package_limit_type') === 'limited' && ($get('limit_type') === 'data' || $get('limit_type') === 'both'))
                                     ->native(false),
