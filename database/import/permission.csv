@@ -36,8 +36,8 @@ restore_service::package;YES;NO;NO
 force_delete_service::package;YES;NO;NO
 replicate_user;YES;NO;NO
 reorder_user;YES;NO;NO
-view_any_payment::setting;YES;NO;NO
-update_payment::setting;YES;NO;NO
+view_any_invoice::setting;YES;NO;NO
+update_invoice::setting;YES;NO;NO
 view_any_bank::account;YES;NO;NO
 view_bank::account;YES;NO;NO
 create_bank::account;YES;NO;NO

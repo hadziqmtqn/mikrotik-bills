@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('payment_settings', function (Blueprint $table) {
+        Schema::create('invoice_settings', function (Blueprint $table) {
             $table->id();
             $table->uuid('slug');
             $table->integer('repeat_every_date');
@@ -19,6 +19,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('payment_settings');
+        Schema::dropIfExists('invoice_settings');
     }
 };

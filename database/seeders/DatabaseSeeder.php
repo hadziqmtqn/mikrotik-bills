@@ -9,7 +9,7 @@ use Database\Seeders\Auth\UserSeeder;
 use Database\Seeders\Network\RouterSeeder;
 use Database\Seeders\Reference\BankAccountSeeder;
 use Database\Seeders\Setting\ApplicationSeeder;
-use Database\Seeders\Setting\PaymentSettingSeeder;
+use Database\Seeders\Setting\InvoiceSettingSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             BankAccountSeeder::class,
             // PAYMENT
-            PaymentSettingSeeder::class
+            InvoiceSettingSeeder::class
         ]);
     }
 }
