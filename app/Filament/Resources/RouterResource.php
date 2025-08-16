@@ -23,6 +23,7 @@ class RouterResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Router::class;
     protected static ?string $slug = 'routers';
+    protected static ?string $navigationLabel = 'Ruter';
     protected static ?string $navigationGroup = 'Network';
     protected static ?string $navigationIcon = 'heroicon-o-computer-desktop';
 
