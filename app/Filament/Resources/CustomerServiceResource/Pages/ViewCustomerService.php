@@ -17,6 +17,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\IconPosition;
 
 class ViewCustomerService extends ViewRecord
 {
@@ -38,6 +39,8 @@ class ViewCustomerService extends ViewRecord
                                 TextEntry::make('user.name')
                                     ->label('Nama Pelanggan')
                                     ->color('primary')
+                                    ->icon('heroicon-o-arrow-top-right-on-square')
+                                    ->iconPosition(IconPosition::After)
                                     ->url(fn(CustomerService $record): string => ViewUser::getUrl(['record' => $record->user?->username])),
 
                                 TextEntry::make('user.userProfile.account_type')
@@ -57,6 +60,8 @@ class ViewCustomerService extends ViewRecord
                                 TextEntry::make('servicePackage.code')
                                     ->label('Kode Referensi')
                                     ->color('primary')
+                                    ->icon('heroicon-o-arrow-top-right-on-square')
+                                    ->iconPosition(IconPosition::After)
                                     ->url(fn(CustomerService $record): string => ViewServicePackage::getUrl(['record' => $record->servicePackage?->slug])),
 
                                 TextEntry::make('reference_number')

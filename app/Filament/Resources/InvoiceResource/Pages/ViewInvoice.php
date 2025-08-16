@@ -4,8 +4,10 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
+use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\UserResource;
+use App\Models\CustomerService;
 use App\Models\Invoice;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -13,6 +15,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\IconPosition;
 
 class ViewInvoice extends ViewRecord
 {
@@ -34,6 +37,8 @@ class ViewInvoice extends ViewRecord
                                 TextEntry::make('user.name')
                                     ->label('Nama')
                                     ->color('primary')
+                                    ->icon('heroicon-o-arrow-top-right-on-square')
+                                    ->iconPosition(IconPosition::After)
                                     ->url(fn(Invoice $record): string => UserResource::getUrl('view', ['record' => $record->user?->username])),
 
                                 TextEntry::make('user.userProfile.account_type')
@@ -54,7 +59,16 @@ class ViewInvoice extends ViewRecord
                                     ->schema([
                                         TextEntry::make('customerService.reference_number')
                                             ->label('No. Referensi')
-                                            ->inlineLabel(),
+                                            ->inlineLabel()
+                                            ->icon('heroicon-o-arrow-top-right-on-square')
+                                            ->iconPosition(IconPosition::After)
+                                            ->color('primary')
+                                            ->url(function ($state): string {
+                                                $customerService = CustomerService::filterByReferenceNumber($state)
+                                                    ->first();
+
+                                                return $customerService ? CustomerServiceResource::getUrl('view', ['record' => $customerService->slug]) : '';
+                                            }),
 
                                         TextEntry::make('customerService.servicePackage.package_name')
                                             ->label('Paket Layanan')
