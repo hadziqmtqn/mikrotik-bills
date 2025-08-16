@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,5 +52,12 @@ class UserProfile extends Model implements HasMedia
     protected function longitude(): Attribute
     {
         return Attribute::make(fn() => $this->lat_long ? $this->lat_long['lng'] : null);
+    }
+
+    // TODO Scopes
+    #[Scope]
+    protected function userId(Builder $query, $userId): Builder
+    {
+        return $query->where('user_id', $userId);
     }
 }

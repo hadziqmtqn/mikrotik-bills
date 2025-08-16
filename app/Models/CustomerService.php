@@ -48,6 +48,6 @@ class CustomerService extends Model
 
     public function servicePackage(): BelongsTo
     {
-        return $this->belongsTo(ServicePackage::class);
+        return $this->belongsTo(ServicePackage::class, 'service_package_id');
     }
 }

@@ -7,6 +7,7 @@ use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceForm;
 use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceTable;
 use App\Models\CustomerService;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -41,6 +42,9 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
         return CustomerServiceForm::form($form);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return CustomerServiceTable::table($table);
