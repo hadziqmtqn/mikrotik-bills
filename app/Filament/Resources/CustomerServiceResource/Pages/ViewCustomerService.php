@@ -5,6 +5,7 @@ namespace App\Filament\Resources\CustomerServiceResource\Pages;
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
 use App\Filament\Resources\CustomerServiceResource;
+use App\Filament\Resources\ServicePackageResource\Pages\ViewServicePackage;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Models\CustomerService;
 use Filament\Infolists\Components\Group;
@@ -49,6 +50,11 @@ class ViewCustomerService extends ViewRecord
                         Section::make('Data Paket')
                             ->inlineLabel()
                             ->schema([
+                                TextEntry::make('servicePackage.code')
+                                    ->label('Kode Referensi')
+                                    ->color('primary')
+                                    ->url(fn(CustomerService $record): string => ViewServicePackage::getUrl(['record' => $record->servicePackage?->slug])),
+
                                 TextEntry::make('reference_number')
                                     ->label('Nomor Referensi'),
 
@@ -58,6 +64,10 @@ class ViewCustomerService extends ViewRecord
                                 TextEntry::make('package_type')
                                     ->label('Jenis Paket')
                                     ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? '-'),
+
+                                TextEntry::make('price')
+                                    ->label('Harga')
+                                    ->money('idr')
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),

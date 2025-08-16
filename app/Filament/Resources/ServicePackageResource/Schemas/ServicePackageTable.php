@@ -86,12 +86,7 @@ class ServicePackageTable
             ])
             ->actions([
                 ActionGroup::make([
-                    ViewAction::make()
-                        ->icon('heroicon-o-eye')
-                        ->label('Lihat')
-                        ->modalContent()
-                        ->modalHeading(fn(ServicePackage $record): string => 'Detail Paket Layanan: ' . $record->package_name)
-                        ->modalWidth('5xl'),
+                    ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                     RestoreAction::make(),
