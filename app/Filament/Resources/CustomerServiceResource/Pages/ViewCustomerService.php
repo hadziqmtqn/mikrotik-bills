@@ -4,15 +4,18 @@ namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
+use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\ServicePackageResource\Pages\ViewServicePackage;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Helpers\DateHelper;
 use App\Models\CustomerService;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\FontWeight;
 
 class ViewCustomerService extends ViewRecord
 {
@@ -76,7 +79,15 @@ class ViewCustomerService extends ViewRecord
                     ->schema([
                         Section::make()
                             ->schema([
+                                TextEntry::make('status')
+                                    ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? '-')
+                                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
+                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->weight(FontWeight::Bold),
 
+                                TextEntry::make('start_date')
+                                    ->label('Tanggal Mulai Aktif')
+                                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : '-'),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
