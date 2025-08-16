@@ -2,15 +2,18 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
+use App\Enums\PaymentTypeService;
 use App\Models\CustomerService;
+use App\Models\ServicePackage;
 use App\Models\UserProfile;
 use App\Services\UserService;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,53 +40,75 @@ class CustomerServiceForm
                                     ->native(false)
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         $set('service_package_id', null);
+                                        $set('price', null);
                                     }),
 
-                                Select::make('service_package_id')
-                                    ->label('Paket Layanan')
-                                    ->required()
-                                    ->relationship('servicePackage', 'package_name', function (Builder $query, Get $get) {
-                                        $accountType = UserProfile::userId($get('user_id'))
-                                            ->first();
+                                Grid::make()
+                                    ->schema([
+                                        Select::make('service_package_id')
+                                            ->label('Paket layanan')
+                                            ->required()
+                                            ->relationship('servicePackage', 'package_name', function (Builder $query, Get $get) {
+                                                $accountType = UserProfile::userId($get('user_id'))
+                                                    ->first();
 
-                                        $query->where('is_active', true);
+                                                // If account type is not found, return an empty query
+                                                if (!$accountType) {
+                                                    $query->whereRaw('1 = 0'); // No results
+                                                }
 
-                                        if ($accountType) {
-                                            $query->where('plan_type', $accountType->account_type);
-                                        }
-                                    })
-                                    ->preload()
-                                    ->searchable()
-                                    ->reactive()
-                                    ->native(false),
+                                                $query->where('is_active', true);
+                                                $query->where('plan_type', $accountType?->account_type);
+                                            })
+                                            ->preload()
+                                            ->searchable()
+                                            ->reactive()
+                                            ->native(false)
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if ($state) {
+                                                    $servicePackage = ServicePackage::find($state);
+                                                    if ($servicePackage) {
+                                                        $set('price', $servicePackage->package_price);
+                                                    }
+                                                } else {
+                                                    $set('price', null);
+                                                }
+                                            }),
+
+                                        TextInput::make('price')
+                                            ->label('Harga')
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('Rp'),
+                                    ])
                             ])
                     ])->columnSpan(['lg' => 2]),
 
-                TextInput::make('price')
-                    ->required()
-                    ->numeric(),
+                Group::make()
+                    ->schema([
+                        Section::make()
+                            ->schema([
+                                ToggleButtons::make('payment_type')
+                                    ->label('Jenis pembayaran')
+                                    ->options(PaymentTypeService::options())
+                                    ->colors(PaymentTypeService::colors())
+                                    ->required()
+                                    ->inline()
+                            ])
+                    ])
+                    ->columnSpan(['lg' => 1]),
 
-                TextInput::make('payment_type')
-                    ->required(),
+                Grid::make()
+                    ->visible(fn(?CustomerService $record): bool => $record?->exists ?? false)
+                    ->schema([
+                        Placeholder::make('created_at')
+                            ->label('Created Date')
+                            ->content(fn(?CustomerService $record): string => $record?->created_at?->diffForHumans() ?? '-'),
 
-                TextInput::make('username'),
-
-                TextInput::make('password'),
-
-                DatePicker::make('start_date'),
-
-                DatePicker::make('end_date_time'),
-
-                TextInput::make('status')
-                    ->required(),
-
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?CustomerService $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?CustomerService $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                        Placeholder::make('updated_at')
+                            ->label('Last Modified Date')
+                            ->content(fn(?CustomerService $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                    ])
             ]);
     }
 }

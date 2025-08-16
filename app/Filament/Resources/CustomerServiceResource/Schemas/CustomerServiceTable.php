@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
+use App\Enums\PaymentTypeService;
+use App\Enums\StatusData;
+use App\Helpers\DateHelper;
 use Exception;
-use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -24,45 +24,59 @@ class CustomerServiceTable
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
+                TextColumn::make('reference_number')
+                    ->label('No. Referensi')
+                    ->searchable(),
+
+                TextColumn::make('user.name')
+                    ->label('Pelanggan'),
+
+                TextColumn::make('servicePackage.package_name')
+                    ->label('Paket Layanan')
+                    ->searchable(),
+
+                TextColumn::make('price')
+                    ->label('Harga')
+                    ->money('idr'),
+
+                TextColumn::make('payment_type')
+                    ->label('Jenis Pembayaran')
                     ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('reference_number'),
-
-                TextColumn::make('user_id'),
-
-                TextColumn::make('service_package_id'),
-
-                TextColumn::make('price'),
-
-                TextColumn::make('payment_type'),
-
-                TextColumn::make('username'),
+                    ->formatStateUsing(fn($state): string => PaymentTypeService::tryFrom($state)?->getLabel() ?? 'N/A'),
 
                 TextColumn::make('start_date')
-                    ->date(),
+                    ->label('Tanggal Mulai')
+                    ->date()
+                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : null)
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
 
-                TextColumn::make('end_date_time')
-                    ->date(),
-
-                TextColumn::make('status'),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'N/A')
+                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()
+                    ->label('Termasuk yang Dihapus')
+                    ->native(false),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
+                ])
+                ->link()
+                ->label('Actions')
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 }
