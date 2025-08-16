@@ -4,93 +4,118 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BankAccountResource\Pages;
 use App\Models\BankAccount;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Placeholder;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Exception;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class BankAccountResource extends Resource
+class BankAccountResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = BankAccount::class;
-
     protected static ?string $slug = 'bank-accounts';
+    protected static ?string $navigationLabel = 'Rek. Bank';
+    protected static ?string $navigationGroup = 'Payment';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'delete',
+            'restore',
+            'force_delete',
+        ];
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('bank_name')
-                    ->required(),
+                    ->label('Nama Bank')
+                    ->required()
+                    ->placeholder('Contoh: Bank Central Asia'),
 
-                TextInput::make('short_name'),
+                TextInput::make('short_name')
+                    ->label('Singkatan')
+                    ->maxLength(10)
+                    ->placeholder('Contoh: BCA'),
 
                 TextInput::make('account_number')
-                    ->required(),
+                    ->label('No. Rekening')
+                    ->required()
+                    ->placeholder('Contoh: 1234567890'),
 
                 TextInput::make('account_name')
-                    ->required(),
+                    ->label('Atas Nama')
+                    ->required()
+                    ->placeholder('Contoh: John Doe'),
 
-                Checkbox::make('is_active'),
-
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn(?BankAccount $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn(?BankAccount $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                Toggle::make('is_active')
+                    ->label('Aktif')
+                    ->default(true)
+                    ->inline(false),
             ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
+                TextColumn::make('bank_name')
+                    ->label('Nama Bank')
                     ->searchable()
-                    ->sortable(),
+                    ->formatStateUsing(fn($state, ?BankAccount $bankAccount): string => $state . ($bankAccount->short_name ? ' (' . $bankAccount->short_name . ')' : '')),
 
-                TextColumn::make('bank_name'),
+                TextColumn::make('account_number')
+                    ->label('No. Rekening')
+                    ->searchable(),
 
-                TextColumn::make('short_name'),
+                TextColumn::make('account_name')
+                    ->label('Atas Nama')
+                    ->searchable(),
 
-                TextColumn::make('account_number'),
-
-                TextColumn::make('account_name'),
-
-                TextColumn::make('is_active'),
+                ToggleColumn::make('is_active')
+                    ->label('Status')
+                    ->sortable()
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
+                ])
+                ->link()
+                ->label('Actions'),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -98,8 +123,6 @@ class BankAccountResource extends Resource
     {
         return [
             'index' => Pages\ListBankAccounts::route('/'),
-            'create' => Pages\CreateBankAccount::route('/create'),
-            'edit' => Pages\EditBankAccount::route('/{record}/edit'),
         ];
     }
 
@@ -109,10 +132,5 @@ class BankAccountResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug'];
     }
 }

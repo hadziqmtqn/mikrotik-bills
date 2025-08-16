@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentSettingResource\Pages;
 use App\Models\InvoiceSetting;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -11,14 +12,23 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class InvoiceSettingResource extends Resource
+class InvoiceSettingResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = InvoiceSetting::class;
     protected static ?string $slug = 'invoice-settings';
-    protected static ?string $navigationGroup = 'Payment';
+    protected static ?string $navigationGroup = 'Invoice';
     protected static ?string $navigationLabel = 'Peng. Tagihan';
     protected static ?int $navigationSort = 1;
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+
+    public static function getPermissionPrefixes(): array
+    {
+        // TODO: Implement getPermissionPrefixes() method.
+        return [
+            'view_any',
+            'update'
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -78,10 +88,5 @@ class InvoiceSettingResource extends Resource
         return [
             'index' => Pages\ListPaymentSettings::route('/'),
         ];
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [];
     }
 }

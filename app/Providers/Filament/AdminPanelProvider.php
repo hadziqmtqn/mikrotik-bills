@@ -96,6 +96,7 @@ class AdminPanelProvider extends PanelProvider
                 'Main',
                 'Service',
                 'Payment',
+                'Invoice',
                 'Network',
                 'System'
             ])
