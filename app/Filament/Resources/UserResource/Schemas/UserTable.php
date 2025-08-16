@@ -127,10 +127,10 @@ class UserTable
                     EditAction::make()
                         ->closeModalByClickingAway(false),
                     DeleteAction::make()
-                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
+                        ->visible(fn(User $record): bool => $record->invoices->count() === 0 || $record->customerServices->count() === 0),
                     RestoreAction::make(),
                     ForceDeleteAction::make()
-                        ->hidden(fn(User $record): bool => $record->hasRole('super_admin')),
+                        ->visible(fn(User $record): bool => $record->invoices->count() === 0 || $record->customerServices->count() === 0),
                 ])
                     ->link()
                     ->label('Actions')
