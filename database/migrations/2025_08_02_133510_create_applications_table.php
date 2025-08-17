@@ -12,12 +12,12 @@ return new class extends Migration {
             $table->uuid('slug');
             $table->string('short_name');
             $table->string('full_name')->nullable();
-            $table->enum('navigation_position', ['top', 'left'])->default('left');
+            $table->enum('navigation_position', ['top', 'left']);
             $table->string('panel_color')->default('teal');
-            $table->string('company_name')->nullable();
-            $table->string('company_email')->nullable();
-            $table->string('company_phone')->nullable();
-            $table->string('company_address')->nullable();
+            $table->string('business_name')->nullable();
+            $table->string('business_email')->nullable();
+            $table->string('business_phone')->nullable();
+            $table->string('business_address')->nullable();
             $table->timestamps();
         });
     }

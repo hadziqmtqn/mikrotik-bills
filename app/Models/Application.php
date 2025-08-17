@@ -17,7 +17,11 @@ class Application extends Model implements HasMedia
         'short_name',
         'full_name',
         'navigation_position',
-        'panel_color'
+        'panel_color',
+        'business_name',
+        'business_phone',
+        'business_email',
+        'business_address'
     ];
 
     protected function casts(): array
