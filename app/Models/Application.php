@@ -39,6 +39,11 @@ class Application extends Model implements HasMedia
     // TODO Attributes
     protected function favicon(): Attribute
     {
-        return Attribute::make(fn() => $this->hasMedia('favicon') ? $this->getFirstTemporaryUrl(now()->addHour(), 'favicon') : url('https://ui-avatars.com/api/?name=' . urlencode($this->short_name) . '&size=64&background=00bb00&color=ffffff&rounded=true'));
+        return Attribute::make(fn() => $this->hasMedia('favicon') ? $this->getFirstTemporaryUrl(now()->addHour(), 'favicon') : 'https://ui-avatars.com/api/?name=' . urlencode($this->short_name) . '&size=64&background=00bb00&color=ffffff&rounded=true');
+    }
+
+    protected function invoiceLogo(): Attribute
+    {
+        return Attribute::make(fn() => $this->hasMedia('invoice_logo') ? $this->getFirstMediaUrl('invoice_logo') : 'https://raw.githubusercontent.com/templid/email-templates/main/templid-dynamic-templates/invoice-02/brand-sample.png');
     }
 }

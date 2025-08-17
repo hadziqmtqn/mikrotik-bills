@@ -110,6 +110,15 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                     ->dehydrated(fn($state) => filled($state))
                     ->columnSpanFull(),
 
+                SpatieMediaLibraryFileUpload::make('invoice_logo')
+                    ->label('Logo Invoice')
+                    ->collection('invoice_logo')
+                    ->image()
+                    ->maxSize(150)
+                    ->openable()
+                    ->dehydrated(fn($state) => filled($state))
+                    ->columnSpanFull(),
+
                 Grid::make()
                     ->columns()
                     ->schema([
