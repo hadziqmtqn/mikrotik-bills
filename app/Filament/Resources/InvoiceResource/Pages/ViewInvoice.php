@@ -13,6 +13,7 @@ use App\Models\Application;
 use App\Models\BankAccount;
 use App\Models\CustomerService;
 use App\Models\Invoice;
+use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
@@ -31,6 +32,10 @@ class ViewInvoice extends ViewRecord
     protected function getActions(): array
     {
         return [
+            EditAction::make()
+                ->label('Ubah')
+                ->icon('heroicon-o-pencil')
+                ->color('warning'),
             Html2MediaAction::make('export')
                 ->label('Cetak')
                 ->icon('heroicon-o-printer')
@@ -132,7 +137,8 @@ class ViewInvoice extends ViewRecord
                                 TextEntry::make('due_date')
                                     ->label('Jatuh Tempo')
                                     ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state))
-                                    ->color('danger'),
+                                    ->color('danger')
+                                    ->tooltip(fn($state): string => 'Jatuh tempo pada ' . DateHelper::indonesiaDate($state, 'D MMMM Y HH:mm')),
 
                                 TextEntry::make('cancel_date')
                                     ->label('Tanggal Batal')
