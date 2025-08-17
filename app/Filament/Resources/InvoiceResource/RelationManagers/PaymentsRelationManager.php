@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceResource\RelationManagers;
 
+use App\Enums\StatusData;
 use App\Filament\Resources\PaymentResource\Schemas\PaymentForm;
 use App\Models\Invoice;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
@@ -47,18 +48,22 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->createAnother(false)
-                    ->visible(fn() => $this->getOwnerRecord()?->payments()->count() === 0)
+                    ->visible(fn() => $this->getOwnerRecord()->status === StatusData::UNPAID->value && $this->getOwnerRecord()?->payments()->count() === 0)
                     ->closeModalByClickingAway(false)
-                    ->mutateFormDataUsing(function (): array {
-                        return [
-                            'user_id' => $this->getOwnerRecord()->user_id,
-                            'invoice_id' => $this->getOwnerRecord()->id,
-                        ];
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['user_id'] = $this->getOwnerRecord()->user_id;
+                        $data['invoice_id'] = $this->getOwnerRecord()->id;
+                        return $data;
                     })
+            ])
+            ->filters([
+                Tables\Filters\TrashedFilter::make()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

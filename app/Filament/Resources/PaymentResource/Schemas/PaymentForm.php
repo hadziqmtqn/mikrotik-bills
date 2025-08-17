@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PaymentResource\Schemas;
 
 use App\Enums\PaymentMethod;
+use App\Enums\StatusData;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -73,6 +74,17 @@ class PaymentForm
                             ->placeholder('Masukkan catatan')
                             ->autosize()
                             ->columnSpanFull()
+                    ]),
+
+                Section::make('Status Pembayaran')
+                    ->schema([
+                        ToggleButtons::make('status')
+                            ->hiddenLabel()
+                            ->inline()
+                            ->options(StatusData::options(['paid', 'cancelled']))
+                            ->colors(StatusData::colors(['paid', 'cancelled']))
+                            ->default('paid')
+                            ->required()
                     ]),
             ]);
     }

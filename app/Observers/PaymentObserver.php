@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\StatusData;
 use App\Models\Payment;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,11 @@ class PaymentObserver
 
     public function created(Payment $payment): void
     {
+        if ($payment->status === StatusData::PAID->value) {
+            $invoice = $payment->invoice;
+            $invoice->status = StatusData::PAID->value;
+            $invoice->save();
+        }
     }
 
     public function updated(Payment $payment): void

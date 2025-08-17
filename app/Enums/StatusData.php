@@ -64,4 +64,23 @@ enum StatusData: string implements HasColor, HasLabel
             ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
             ->toArray();
     }
+
+    public static function colors(array $cases = []): array
+    {
+        $allCases = self::cases();
+
+        // Jika $cases kosong, tampilkan semua
+        if (empty($cases)) {
+            $casesToShow = $allCases;
+        } else {
+            $casesToShow = array_filter($allCases, function($case) use ($cases) {
+                // Cek apakah enum atau value ada di $cases
+                return in_array($case, $cases, true) || in_array($case->value, $cases, true);
+            });
+        }
+
+        return collect($casesToShow)
+            ->mapWithKeys(fn($case) => [$case->value => $case->getColor()])
+            ->toArray();
+    }
 }

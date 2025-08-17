@@ -40,6 +40,15 @@ class InvoiceObserver
                 ]);
         }
 
+        if ($invoice->status === StatusData::PAID->value) {
+            $invoiceItems = $invoice->invoiceItems;
+            foreach ($invoiceItems as $item) {
+                $customerService = $item->customerService;
+                $customerService->status = StatusData::ACTIVE->value;
+                $customerService->save();
+            }
+        }
+
         $invoice->save();
     }
 
