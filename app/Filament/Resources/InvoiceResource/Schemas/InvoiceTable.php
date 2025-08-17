@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
+use App\Models\Invoice;
 use Exception;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -56,7 +57,8 @@ class InvoiceTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'Unknown')
-                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray'),
+                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
+                    ->sortable(),
             ])
             ->defaultSort('date', 'desc')
             ->filters([
@@ -67,8 +69,10 @@ class InvoiceTable
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make(),
+                    EditAction::make()
+                        ->visible(fn(Invoice $record): bool => $record->status === StatusData::UNPAID->value || $record->status === StatusData::OVERDUE->value),
+                    DeleteAction::make()
+                        ->visible(fn(Invoice $record): bool => $record->status === StatusData::CANCELLED->value),
                 ])
             ])
             ->bulkActions([

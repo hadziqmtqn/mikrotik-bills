@@ -25,7 +25,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $uniqueName = fake()->unique()->name();
-        
+
         return [
             'name' => $uniqueName,
             'email' => Str::slug($uniqueName) . '@gmail.com',
