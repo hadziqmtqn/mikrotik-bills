@@ -19,10 +19,32 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\Contracts\View\View;
+use Torgodly\Html2Media\Actions\Html2MediaAction;
 
 class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;
+
+    protected function getActions(): array
+    {
+        return [
+            Html2MediaAction::make('export')
+                ->label('Cetak')
+                ->icon('heroicon-o-printer')
+                ->color('primary')
+                ->modalHeading('Cetak Invoice')
+                ->modalDescription('Apakah Anda yakin ingin mencetak invoice ini?')
+                ->successNotificationTitle('Invoice berhasil dicetak.')
+                ->savePdf()
+                ->content(
+                    fn(Invoice $record): View => view('filament.resources.invoice-resource.pages.print', [
+                        'invoice' => $record,
+                    ])
+                )
+                ->filename(fn(Invoice $record): string => 'invoice-' . $record->code . '-' . DateHelper::indonesiaDate($record->date) . '.pdf')
+        ];
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
