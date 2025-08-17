@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\InvoiceResource\RelationManagers;
 
+use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
 use App\Filament\Resources\PaymentResource\Schemas\PaymentForm;
-use App\Models\Invoice;
+use App\Helpers\DateHelper;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -40,7 +41,26 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
         return $table
             ->recordTitleAttribute('invoice_id')
             ->columns([
-                Tables\Columns\TextColumn::make('invoice_id'),
+                Tables\Columns\TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Tgl. Bayar')
+                    ->date()
+                    ->formatStateUsing(fn ($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
+
+                Tables\Columns\TextColumn::make('payment_method')
+                    ->label('Metode Pembayaran')
+                    ->formatStateUsing(fn ($state): string => PaymentMethod::tryFrom($state)?->getLabel() ?? 'N/A'),
+
+                Tables\Columns\TextColumn::make('bankAccount.short_name')
+                    ->label('Bank Tujuan'),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn ($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
+                    ->formatStateUsing(fn ($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'N/A')
             ])
             ->filters([
                 //
@@ -57,18 +77,18 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
                     })
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make()
+                //Tables\Filters\TrashedFilter::make()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                /*Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
-                Tables\Actions\ForceDeleteAction::make()
+                Tables\Actions\ForceDeleteAction::make()*/
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                /*Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ]),*/
             ]);
     }
 }
