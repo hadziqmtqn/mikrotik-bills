@@ -35,7 +35,9 @@ class ViewInvoice extends ViewRecord
             EditAction::make()
                 ->label('Ubah')
                 ->icon('heroicon-o-pencil')
-                ->color('warning'),
+                ->color('warning')
+                ->visible(fn(Invoice $record): bool => $record->status === StatusData::UNPAID->value || $record->status === StatusData::OVERDUE->value),
+
             Html2MediaAction::make('export')
                 ->label('Cetak')
                 ->icon('heroicon-o-printer')
@@ -144,7 +146,8 @@ class ViewInvoice extends ViewRecord
                                     ->label('Tanggal Batal')
                                     ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state))
                                     ->color('danger')
-                                    ->hidden(fn(Invoice $record): bool => !$record->cancel_date),
+                                    ->visible(fn(Invoice $record): bool => $record->status === StatusData::CANCELLED->value)
+                                    ->tooltip(fn($state): string => 'Dibatalkan pada ' . DateHelper::indonesiaDate($state, 'D MMMM Y HH:mm')),
 
                                 TextEntry::make('status')
                                     ->weight(FontWeight::Bold)
