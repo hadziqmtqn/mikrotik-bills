@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Observers\CustomerServiceObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,7 +21,7 @@ class CustomerService extends Model
         'user_id',
         'service_package_id',
         'price',
-        'payment_type',
+        'package_type',
         'username',
         'password',
         'start_date',
@@ -49,5 +51,12 @@ class CustomerService extends Model
     public function servicePackage(): BelongsTo
     {
         return $this->belongsTo(ServicePackage::class, 'service_package_id');
+    }
+
+    // TODO Scopes
+    #[Scope]
+    protected function filterByReferenceNumber(Builder $query, $referenceNumber): Builder
+    {
+        return $query->where('reference_number', $referenceNumber);
     }
 }

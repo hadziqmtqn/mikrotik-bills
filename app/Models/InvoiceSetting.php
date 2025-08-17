@@ -29,4 +29,9 @@ class InvoiceSetting extends Model
             $invoiceSetting->slug = Str::uuid()->toString();
         });
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

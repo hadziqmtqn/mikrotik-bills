@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('service_package_id');
             $table->decimal('price', 20, 0);
-            $table->enum('payment_type', ['subscription', 'one-time']);
+            $table->enum('package_type', ['subscription', 'one-time']);
             $table->string('username')->nullable();
             $table->string('password')->nullable();
             $table->dateTime('start_date')->nullable();

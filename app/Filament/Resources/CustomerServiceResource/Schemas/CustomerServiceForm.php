@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
-use App\Enums\PaymentTypeService;
+use App\Enums\PackageTypeService;
 use App\Models\CustomerService;
 use App\Models\ServicePackage;
 use App\Models\UserProfile;
@@ -82,21 +82,28 @@ class CustomerServiceForm
                                             ->prefix('Rp'),
                                     ])
                             ])
-                    ])->columnSpan(['lg' => 2]),
+                    ])
+                    ->columnSpan([
+                        'lg' => 2,
+                        'md' => 2,
+                    ]),
 
                 Group::make()
                     ->schema([
                         Section::make()
                             ->schema([
-                                ToggleButtons::make('payment_type')
-                                    ->label('Jenis pembayaran')
-                                    ->options(PaymentTypeService::options())
-                                    ->colors(PaymentTypeService::colors())
+                                ToggleButtons::make('package_type')
+                                    ->label('Jenis Paket')
+                                    ->options(PackageTypeService::options())
+                                    ->colors(PackageTypeService::colors())
                                     ->required()
                                     ->inline()
                             ])
                     ])
-                    ->columnSpan(['lg' => 1]),
+                    ->columnSpan([
+                        'lg' => 1,
+                        'md' => 1,
+                    ]),
 
                 Grid::make()
                     ->visible(fn(?CustomerService $record): bool => $record?->exists ?? false)

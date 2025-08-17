@@ -11,7 +11,8 @@ class InvoiceSettingSeeder extends Seeder
     {
         $paymentSetting = new InvoiceSetting();
         $paymentSetting->repeat_every_date = 5; // Buat invoice baru setiap tanggal 5
-        $paymentSetting->due_date_after = 20; // Jatuh tempo setiap tanggal 20
+        $paymentSetting->due_date_after = 20; // Jatuh tempo setiap tanggal 20, untuk layanan lama
+        $paymentSetting->due_date_after_new_service = 7; // Jatuh tempo setiap tanggal 7 untuk layanan baru
         $paymentSetting->cancel_after = 7; // Batalkan invoice setelah 7 hari dari tanggal jatuh tempo
         $paymentSetting->save();
     }

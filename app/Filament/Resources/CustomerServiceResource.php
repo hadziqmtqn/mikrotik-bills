@@ -9,9 +9,12 @@ use App\Models\CustomerService;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CustomerServiceResource extends Resource implements HasShieldPermissions
@@ -22,6 +25,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationGroup = 'Service';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-server';
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getPermissionPrefixes(): array
     {
@@ -55,6 +59,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
         return [
             'index' => Pages\ListCustomerServices::route('/'),
             'create' => Pages\CreateCustomerService::route('/create'),
+            'view' => Pages\ViewCustomerService::route('/{record}'),
             'edit' => Pages\EditCustomerService::route('/{record}/edit'),
         ];
     }
@@ -62,13 +67,49 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with('user.userProfile', 'servicePackage')
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
     }
 
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->reference_number ?? 'Layanan Pelanggan';
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
-        return ['slug'];
+        return [
+            'reference_number',
+            'user.name',
+            'servicePackage.package_name',
+        ];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Nama Pelanggan' => $record->user?->name,
+            'Paket' => $record->servicePackage?->package_name,
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['user', 'servicePackage']);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return CustomerServiceResource::getUrl('view', ['record' => $record]);
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewCustomerService::class,
+            Pages\EditCustomerService::class,
+        ]);
     }
 }

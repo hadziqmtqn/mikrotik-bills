@@ -5,18 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
 class ApplicationResource extends Resource implements HasShieldPermissions
 {
@@ -26,6 +22,11 @@ class ApplicationResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationGroup = 'System';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-cog';
+
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('edit', ['record' => Application::first()?->getRouteKey()]);
+    }
 
     public static function getPermissionPrefixes(): array
     {
@@ -42,123 +43,111 @@ class ApplicationResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                TextInput::make('short_name')
-                    ->required(),
-
-                TextInput::make('full_name'),
-
-                Select::make('panel_color')
-                    ->label('Warna Panel')
-                    ->options(
-                        collect(Color::all())
-                            // Ubah key jadi label yang lebih enak dibaca (opsional)
-                            ->mapWithKeys(function ($value, $key) {
-                                // Translate label sesuai kebutuhan
-                                $labels = [
-                                    'slate' => 'Abu Tua',
-                                    'gray' => 'Abu',
-                                    'zinc' => 'Zinc',
-                                    'neutral' => 'Netral',
-                                    'stone' => 'Stone',
-                                    'red' => 'Merah',
-                                    'orange' => 'Oranye',
-                                    'amber' => 'Amber',
-                                    'yellow' => 'Kuning',
-                                    'lime' => 'Lime',
-                                    'green' => 'Hijau',
-                                    'emerald' => 'Emerald',
-                                    'teal' => 'Teal',
-                                    'cyan' => 'Cyan',
-                                    'sky' => 'Biru Langit',
-                                    'blue' => 'Biru',
-                                    'indigo' => 'Indigo',
-                                    'violet' => 'Ungu',
-                                    'purple' => 'Ungu Tua',
-                                    'fuchsia' => 'Fuchsia',
-                                    'pink' => 'Merah Muda',
-                                    'rose' => 'Rose',
-                                ];
-                                return [$key => $labels[$key] ?? ucfirst($key)];
-                            })
-                            ->toArray()
-                    )
-                    ->native(false)
-                    ->searchable()
-                    ->helperText('Warna panel ini akan digunakan sebagai tema utama aplikasi Anda.')
-                    ->required(),
-
-                Select::make('navigation_position')
-                    ->label('Posisi Navigasi')
-                    ->options([
-                        'top' => 'Atas',
-                        'left' => 'Kiri',
-                    ])
-                    ->default('top')
-                    ->native(false)
-                    ->searchable()
-                    ->helperText('Posisi navigasi ini akan menentukan di mana menu aplikasi ditampilkan pada antarmuka pengguna.')
-                    ->required(),
-
-                SpatieMediaLibraryFileUpload::make('favicon')
-                    ->label('Favicon')
-                    ->collection('favicon')
-                    ->image()
-                    ->disk('s3')
-                    ->maxSize(50)
-                    ->visibility('private')
-                    ->openable()
-                    ->dehydrated(fn($state) => filled($state))
-                    ->columnSpanFull(),
-
-                Grid::make()
-                    ->columns()
+                Section::make('Aplikasi')
+                    ->description('Pengaturan aplikasi ini akan digunakan untuk mengonfigurasi nama, warna, dan logo aplikasi Anda.')
+                    ->inlineLabel()
+                    ->aside()
                     ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Created Date')
-                            ->content(fn(?Application $record): string => $record?->created_at?->diffForHumans() ?? '-'),
+                        TextInput::make('short_name')
+                            ->required(),
 
-                        Placeholder::make('updated_at')
-                            ->label('Last Modified Date')
-                            ->content(fn(?Application $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                        TextInput::make('full_name'),
+
+                        Select::make('panel_color')
+                            ->label('Warna Panel')
+                            ->options(
+                                collect(Color::all())
+                                    // Ubah key jadi label yang lebih enak dibaca (opsional)
+                                    ->mapWithKeys(function ($value, $key) {
+                                        // Translate label sesuai kebutuhan
+                                        $labels = [
+                                            'slate' => 'Abu Tua',
+                                            'gray' => 'Abu',
+                                            'zinc' => 'Zinc',
+                                            'neutral' => 'Netral',
+                                            'stone' => 'Stone',
+                                            'red' => 'Merah',
+                                            'orange' => 'Oranye',
+                                            'amber' => 'Amber',
+                                            'yellow' => 'Kuning',
+                                            'lime' => 'Lime',
+                                            'green' => 'Hijau',
+                                            'emerald' => 'Emerald',
+                                            'teal' => 'Teal',
+                                            'cyan' => 'Cyan',
+                                            'sky' => 'Biru Langit',
+                                            'blue' => 'Biru',
+                                            'indigo' => 'Indigo',
+                                            'violet' => 'Ungu',
+                                            'purple' => 'Ungu Tua',
+                                            'fuchsia' => 'Fuchsia',
+                                            'pink' => 'Merah Muda',
+                                            'rose' => 'Rose',
+                                        ];
+                                        return [$key => $labels[$key] ?? ucfirst($key)];
+                                    })
+                                    ->toArray()
+                            )
+                            ->native(false)
+                            ->searchable()
+                            ->helperText('Warna panel ini akan digunakan sebagai tema utama aplikasi Anda.')
+                            ->required(),
+
+                        Select::make('navigation_position')
+                            ->label('Posisi Navigasi')
+                            ->options([
+                                'top' => 'Atas',
+                                'left' => 'Kiri',
+                            ])
+                            ->default('top')
+                            ->native(false)
+                            ->searchable()
+                            ->helperText('Posisi navigasi ini akan menentukan di mana menu aplikasi ditampilkan pada antarmuka pengguna.')
+                            ->required(),
+
+                        SpatieMediaLibraryFileUpload::make('favicon')
+                            ->label('Favicon')
+                            ->collection('favicon')
+                            ->image()
+                            ->disk('s3')
+                            ->maxSize(50)
+                            ->visibility('private')
+                            ->openable()
+                            ->dehydrated(fn($state) => filled($state))
+                            ->columnSpanFull(),
+
+                        SpatieMediaLibraryFileUpload::make('invoice_logo')
+                            ->label('Logo Invoice')
+                            ->collection('invoice_logo')
+                            ->image()
+                            ->maxSize(150)
+                            ->openable()
+                            ->dehydrated(fn($state) => filled($state))
+                            ->columnSpanFull(),
                     ]),
-            ]);
-    }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                SpatieMediaLibraryImageColumn::make('favicon')
-                    ->label('Favicon')
-                    ->collection('favicon')
-                    ->disk('s3')
-                    ->visibility('private')
-                    ->circular()
-                    ->size(32),
+                Section::make('Informasi Bisnis')
+                    ->description('Pengaturan ini akan digunakan untuk mengonfigurasi data usaha Anda seperti nama, alamat, dan nomor telepon.')
+                    ->inlineLabel()
+                    ->aside()
+                    ->schema([
+                        TextInput::make('business_name')
+                            ->label('Nama Usaha')
+                            ->required(),
 
-                TextColumn::make('short_name')
-                    ->label('Nama Singkat')
-                    ->searchable(),
+                        TextInput::make('business_phone')
+                            ->label('Nomor Telepon Usaha')
+                            ->required(),
 
-                TextColumn::make('full_name')
-                    ->label('Nama Lengkap')
-                    ->searchable(),
+                        TextInput::make('business_email')
+                            ->label('Email Usaha')
+                            ->email()
+                            ->required(),
 
-                TextColumn::make('panel_color')
-                    ->label('Warna Panel')
-                    ->formatStateUsing(fn($state): string => ucfirst($state)),
-
-                TextColumn::make('navigation_position')->formatStateUsing(fn($state): string => ucfirst($state))
-                    ->label('Posisi Navigasi'),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                EditAction::make(),
-            ])
-            ->bulkActions([
-                //
+                        Textarea::make('business_address')
+                            ->label('Alamat Usaha')
+                            ->rows(2),
+                    ]),
             ]);
     }
 
@@ -166,6 +155,7 @@ class ApplicationResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => Pages\ListApplications::route('/'),
+            'edit' => Pages\EditApplication::route('{record}'),
         ];
     }
 

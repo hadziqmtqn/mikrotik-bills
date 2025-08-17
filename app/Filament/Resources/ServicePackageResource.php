@@ -9,6 +9,8 @@ use App\Models\ServicePackage;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +23,7 @@ class ServicePackageResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationLabel = 'Paket Layanan';
     protected static ?string $navigationGroup = 'Service';
     protected static ?string $navigationIcon = 'heroicon-o-server-stack';
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getPermissionPrefixes(): array
     {
@@ -54,6 +57,7 @@ class ServicePackageResource extends Resource implements HasShieldPermissions
         return [
             'index' => Pages\ListServicePackages::route('/'),
             'create' => Pages\CreateServicePackage::route('/create'),
+            'view' => Pages\ViewServicePackage::route('/{record}'),
             'edit' => Pages\EditServicePackage::route('/{record}/edit'),
         ];
     }
@@ -66,8 +70,11 @@ class ServicePackageResource extends Resource implements HasShieldPermissions
             ]);
     }
 
-    public static function getGloballySearchableAttributes(): array
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return ['slug'];
+        return $page->generateNavigationItems([
+            Pages\ViewServicePackage::class,
+            Pages\EditServicePackage::class,
+        ]);
     }
 }

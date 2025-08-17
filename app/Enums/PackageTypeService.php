@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum PaymentTypeService: string implements HasLabel, HasColor
+enum PackageTypeService: string implements HasLabel, HasColor
 {
     case SUBSCRIPTION = 'subscription';
     case ONE_TIME = 'one-time';

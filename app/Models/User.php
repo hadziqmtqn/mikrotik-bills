@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -89,6 +90,16 @@ class User extends Authenticatable implements HasMedia, FilamentUser
     public function getRouteKeyName(): string
     {
         return 'username';
+    }
+
+    public function customerServices(): HasMany
+    {
+        return $this->hasMany(CustomerService::class, 'user_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'user_id');
     }
 
     // TODO Scopes

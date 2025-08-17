@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -66,6 +67,17 @@ class ServicePackage extends Model implements HasMedia
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    // TODO Attributes
+    protected function limitValue(): Attribute
+    {
+        $timeLimit = $this->time_limit ? ($this->time_limit . ' ' . $this->time_limit_unit) : '';
+        $dataLimit = $this->data_limit ? ($this->data_limit . ' ' . $this->data_limit_unit) : '';
+
+        return Attribute::make(
+            get: fn() => trim($timeLimit . ($timeLimit && $dataLimit ? ' & ' : '') . $dataLimit)
+        );
     }
 
     // TODO Scopes

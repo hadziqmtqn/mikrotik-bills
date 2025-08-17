@@ -18,7 +18,7 @@ class UserProfileFactory extends Factory
             'user_id' => User::factory(),
             'account_type' => $this->faker->randomElement(['pribadi', 'bisnis']),
             'activation_date' => Carbon::now()->subMonth(),
-            'ppoe_name' => $this->faker->name(),
+            'ppoe_name' => $this->faker->safeEmail(),
             'whatsapp_number' => $this->faker->numerify('08##########'),
             'place_name' => $this->faker->company(),
             'created_at' => Carbon::now(),

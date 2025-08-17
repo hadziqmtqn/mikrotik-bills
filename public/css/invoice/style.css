@@ -1,0 +1,81 @@
+/* Font styling tetap dipertahankan dan tidak dihapus */
+html {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+}
+b, strong {
+    font-weight: bolder;
+}
+code, kbd, samp, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 1em;
+}
+small { font-size: 80%; }
+sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+sub { bottom: -0.25em; }
+sup { top: -0.5em; }
+button, input, optgroup, select, textarea {
+    font-family: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Invoice Prefix: ci- */
+.ci-h-12{height:3rem;}
+.ci-w-1\/2{width:50%;}
+.ci-w-full{width:100%;}
+.ci-border-collapse{border-collapse:collapse;}
+.ci-border-spacing-0{border-spacing:0;}
+.ci-whitespace-nowrap{white-space:nowrap;}
+.ci-border-b{border-bottom-width:1px;}
+.ci-border-b-2{border-bottom-width:2px;}
+.ci-border-r{border-right-width:1px;}
+.ci-border-main{border-color:#5c6ac4;}
+.ci-bg-main{background-color:#5c6ac4;}
+.ci-bg-slate-100{background-color:#f1f5f9;}
+.ci-p-3{padding:0.75rem;}
+.ci-px-14{padding-left:3.5rem; padding-right:3.5rem;}
+.ci-py-10{padding-top:2.5rem;padding-bottom:2.5rem;}
+.ci-py-3{padding-top:0.75rem;padding-bottom:0.75rem;}
+.ci-py-4{padding-top:1rem;padding-bottom:1rem;}
+.ci-py-6{padding-top:1.5rem;padding-bottom:1.5rem;}
+.ci-pb-3{padding-bottom:0.75rem;}
+.ci-pl-2{padding-left:0.5rem;}
+.ci-pl-3{padding-left:0.75rem;}
+.ci-pl-4{padding-left:1rem;}
+.ci-pr-3{padding-right:0.75rem;}
+.ci-pr-4{padding-right:1rem;}
+.ci-text-center{text-align:center;}
+.ci-text-right{text-align:right;}
+.ci-align-top{vertical-align:top;}
+.ci-text-sm{font-size:0.875rem;line-height:1.25rem;}
+.ci-font-bold{font-weight:700;}
+.ci-italic{font-style:italic;}
+.ci-text-main{color:#5c6ac4;}
+.ci-text-neutral-600{color:#525252;}
+.ci-text-neutral-700{color:#404040;}
+.ci-text-slate-400{color:#94a3b8;}
+.ci-text-white{color:#fff;}
+@page{margin:0;}
+@media print{
+    body{-webkit-print-color-adjust:exact;}
+}
