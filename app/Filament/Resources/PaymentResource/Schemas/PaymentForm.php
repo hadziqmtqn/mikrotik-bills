@@ -2,11 +2,16 @@
 
 namespace App\Filament\Resources\PaymentResource\Schemas;
 
-use App\Models\Payment;
+use App\Enums\PaymentMethod;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Illuminate\Database\Eloquent\Builder;
 
 class PaymentForm
 {
@@ -14,41 +19,61 @@ class PaymentForm
     {
         return $form
             ->schema([
-                TextInput::make('serial_number')
-                    ->required()
-                    ->integer(),
+                Section::make()
+                    ->columns()
+                    ->schema([
+                        ToggleButtons::make('payment_method')
+                            ->label('Metode Pembayaran')
+                            ->required()
+                            ->inline()
+                            ->options(PaymentMethod::options())
+                            ->colors(PaymentMethod::colors())
+                            ->icons(PaymentMethod::icons())
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $set('bank_account_id', null);
+                            })
+                            ->columnSpanFull(),
 
-                TextInput::make('code')
-                    ->required(),
+                        Select::make('bank_account_id')
+                            ->label('Rekening Bank')
+                            ->relationship('bankAccount', 'short_name', function (Builder $query) {
+                                return $query->where('is_active', true);
+                            })
+                            ->native(false)
+                            ->placeholder('Pilih Tujuan Bank')
+                            ->required(fn(Get $get): bool => $get('payment_method') === 'bank_transfer')
+                            ->disabled(fn(Get $get): bool => $get('payment_method') !== 'bank_transfer'),
 
-                TextInput::make('user_id')
-                    ->required()
-                    ->integer(),
+                        DatePicker::make('date')
+                            ->label('Tanggal Pembayaran')
+                            ->required()
+                            ->native(false)
+                            ->maxDate(now())
+                            ->placeholder('Tanggal Pembayaran')
+                            ->closeOnDateSelection(),
+                    ]),
 
-                TextInput::make('invoice_id')
-                    ->required()
-                    ->integer(),
+                Section::make('Bukti Pembayaran')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('proof_of_payment')
+                            ->hiddenLabel()
+                            ->required(fn(Get $get): bool => $get('payment_method') === PaymentMethod::BANK_TRANSFER->value)
+                            ->disk('s3')
+                            ->collection('proof_of_payment')
+                            ->visibility('private')
+                            ->openable()
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                    ]),
 
-                TextInput::make('payment_method')
-                    ->required(),
-
-                TextInput::make('bank_account_id')
-                    ->integer(),
-
-                DatePicker::make('date'),
-
-                TextInput::make('status')
-                    ->required(),
-
-                TextInput::make('notes'),
-
-                Placeholder::make('created_at')
-                    ->label('Created Date')
-                    ->content(fn (?Payment $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                Placeholder::make('updated_at')
-                    ->label('Last Modified Date')
-                    ->content(fn (?Payment $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                Section::make('Catatan')
+                    ->schema([
+                        Textarea::make('notes')
+                            ->hiddenLabel()
+                            ->placeholder('Masukkan catatan')
+                            ->autosize()
+                            ->columnSpanFull()
+                    ]),
             ]);
     }
 }

@@ -44,6 +44,11 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class, 'invoice_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'invoice_id');
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
