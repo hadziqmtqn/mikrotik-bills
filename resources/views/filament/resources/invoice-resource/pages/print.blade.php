@@ -47,18 +47,17 @@
                     <td class="ci-w-1/2 ci-align-top">
                         <div class="ci-text-sm ci-text-neutral-600">
                             <p class="ci-font-bold">Dari</p>
-                            <p>Number: 23456789</p>
-                            <p>VAT: 23456789</p>
-                            <p>6622 Abshire Mills</p>
-                            <p>Port Orlofurt, 05820</p>
-                            <p>United States</p>
+                            <p>{{ $application?->business_name }}</p>
+                            <p>{{ $application?->business_email }}</p>
+                            <p>{{ $application?->business_phone }}</p>
+                            <p>{{ $application?->business_address }}</p>
                         </div>
                     </td>
                     <td class="ci-w-1/2 ci-align-top ci-text-right">
                         <div class="ci-text-sm ci-text-neutral-600">
                             <p class="ci-font-bold">Untuk</p>
-                            <p>Nama: {{ $invoice->user?->name }}</p>
-                            <p>No. WA/HP: {{ $invoice->user?->userProfile?->whatsapp_number }}</p>
+                            <p>{{ $invoice->user?->name }}</p>
+                            <p>{{ $invoice->user?->userProfile?->whatsapp_number }}</p>
                             <p>{{ $invoice->user?->userProfile?->street }}</p>
                             <p>{{ $invoice->user?->userProfile?->village }}, {{ $invoice->user?->userProfile?->district }}</p>
                             <p>{{ $invoice->user?->userProfile?->city }}, {{ $invoice->user?->userProfile?->postal_code }}</p>

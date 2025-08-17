@@ -43,7 +43,9 @@ class ViewInvoice extends ViewRecord
                     fn(Invoice $record): View => view('filament.resources.invoice-resource.pages.print', [
                         'invoice' => $record->loadMissing('user:id,name,email', 'user.userProfile', 'invoiceItems.customerService.servicePackage'),
                         'application' => Application::first(),
-                        'bankAccounts' => BankAccount::active()->get()
+                        'bankAccounts' => BankAccount::where('is_active', true)
+                            ->orderBy('bank_name')
+                            ->get(),
                     ])
                 )
                 ->filename(fn(Invoice $record): string => 'invoice-' . $record->code . '-' . DateHelper::indonesiaDate($record->date) . '.pdf')
@@ -143,6 +145,12 @@ class ViewInvoice extends ViewRecord
                                     ->size(TextEntry\TextEntrySize::Large)
                                     ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
                                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? '-'),
+                            ]),
+
+                        Section::make('Note')
+                            ->schema([
+                                TextEntry::make('note')
+                                    ->hiddenLabel()
                             ])
                     ]),
             ]);

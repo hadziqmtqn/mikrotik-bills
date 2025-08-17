@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\InvoiceSettingResource\Pages;
 
 use App\Filament\Resources\InvoiceSettingResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditPaymentSetting extends EditRecord
@@ -13,7 +12,7 @@ class EditPaymentSetting extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            //
         ];
     }
 }
