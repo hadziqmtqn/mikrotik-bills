@@ -4,8 +4,11 @@ namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource;
 use App\Helpers\DateHelper;
+use App\Models\InvoiceItem;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -51,11 +54,17 @@ class InvoiceHistory extends ManageRelatedRecords
                 TextColumn::make('invoice.cancel_date')
                     ->label('Tanggal Dibatalkan')
                     ->date()
-                    ->formatStateUsing(fn ($state): string => DateHelper::indonesiaDate($state, 'D MMM Y HH:mm')),
+                    ->formatStateUsing(fn ($state): string => DateHelper::indonesiaDate($state, 'D MMM Y HH:mm'))
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 //
+            ])
+            ->actions([
+                ViewAction::make()
+                    ->url(fn(InvoiceItem $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug])),
             ]);
     }
 }
