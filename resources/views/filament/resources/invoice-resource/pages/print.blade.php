@@ -1,4 +1,7 @@
-@php use App\Helpers\DateHelper; @endphp
+@php
+    use App\Helpers\DateHelper;
+    use App\Enums\StatusData;
+@endphp
 
 <link rel="stylesheet" href="{{ asset('css/invoice/style.css') }}">
 
@@ -24,10 +27,16 @@
                                             <p class="ci-whitespace-nowrap ci-font-bold ci-text-main ci-text-right">{{ DateHelper::indonesiaDate($invoice->date, 'D MMM Y') }}</p>
                                         </div>
                                     </td>
-                                    <td class="ci-pl-4">
+                                    <td class="ci-border-r ci-pr-4">
                                         <div>
                                             <p class="ci-whitespace-nowrap ci-text-slate-400 ci-text-right">Invoice #</p>
                                             <p class="ci-whitespace-nowrap ci-font-bold ci-text-main ci-text-right">{{ $invoice->code }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="ci-pl-4">
+                                        <div>
+                                            <p class="ci-whitespace-nowrap ci-text-slate-400 ci-text-right">Status</p>
+                                            <p class="ci-whitespace-nowrap ci-font-bold ci-text-main ci-text-right" style="color: {{ StatusData::tryFrom($invoice->status)->htmlColor() }}">{{ StatusData::tryFrom($invoice->status)->getLabel() }}</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -136,9 +145,9 @@
             </ul>
         </div>
 
-        <div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">
+        {{--<div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">
             <p class="ci-text-main ci-font-bold">Notes</p>
             <p class="ci-italic">Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.</p>
-        </div>
+        </div>--}}
     </div>
 </div>

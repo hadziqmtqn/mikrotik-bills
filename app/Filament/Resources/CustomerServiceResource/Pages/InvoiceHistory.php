@@ -6,11 +6,16 @@ use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Helpers\DateHelper;
+use App\Models\Application;
+use App\Models\BankAccount;
 use App\Models\InvoiceItem;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\View\View;
+use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 
 class InvoiceHistory extends ManageRelatedRecords
 {
@@ -63,8 +68,33 @@ class InvoiceHistory extends ManageRelatedRecords
                 //
             ])
             ->actions([
-                ViewAction::make()
-                    ->url(fn(InvoiceItem $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug])),
+                ActionGroup::make([
+                    Html2MediaAction::make('export')
+                        ->label('Cetak')
+                        ->icon('heroicon-o-printer')
+                        ->color('primary')
+                        ->modalHeading('Cetak Invoice')
+                        ->modalDescription('Apakah Anda yakin ingin mencetak invoice ini?')
+                        ->successNotificationTitle('Invoice berhasil dicetak.')
+                        ->savePdf()
+                        ->content(function (InvoiceItem $record): View {
+                            $record->loadMissing('invoice.user:id,name,email', 'invoice.user.userProfile', 'invoice.invoiceItems.customerService.servicePackage');
+
+                            return view('filament.resources.invoice-resource.pages.print', [
+                                'invoice' => $record->invoice,
+                                'application' => Application::first(),
+                                'bankAccounts' => BankAccount::where('is_active', true)
+                                    ->orderBy('bank_name')
+                                    ->get(),
+                            ]);
+                        })
+                        ->filename(fn(InvoiceItem $record): string => 'invoice-' . $record->invoice?->code . '-' . DateHelper::indonesiaDate($record->invoice?->date) . '.pdf'),
+
+                    ViewAction::make()
+                        ->url(fn(InvoiceItem $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug])),
+                ])
+                ->link()
+                ->label('Action'),
             ]);
     }
 }

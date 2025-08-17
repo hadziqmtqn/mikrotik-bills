@@ -37,6 +37,15 @@ enum StatusData: string implements HasColor, HasLabel
         };
     }
 
+    public function htmlColor(): string
+    {
+        return match ($this) {
+            self::PENDING, self::UNPAID, self::OVERDUE => '#ffc107',
+            self::PAID, self::ACTIVE => '#007bff',
+            self::SUSPENDED, self::CANCELLED => '#dc3545',
+        };
+    }
+
     public static function options(array $cases = []): array
     {
         $allCases = self::cases();
