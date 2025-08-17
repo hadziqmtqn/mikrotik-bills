@@ -2,15 +2,11 @@
 
 namespace App\Filament\Resources\PaymentResource\Schemas;
 
+use App\Enums\PaymentMethod;
+use App\Enums\StatusData;
+use App\Helpers\DateHelper;
 use Exception;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
-use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -24,38 +20,43 @@ class PaymentTable
     {
         return $table
             ->columns([
-                TextColumn::make('code'),
+                TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
 
-                TextColumn::make('user.name'),
+                TextColumn::make('user.name')
+                    ->label('Nama')
+                    ->searchable(),
 
-                TextColumn::make('invoice.code'),
+                TextColumn::make('invoice.code')
+                    ->label('Kode Faktur')
+                    ->searchable(),
 
-                TextColumn::make('payment_method'),
+                TextColumn::make('payment_method')
+                    ->label('Metode Bayar')
+                    ->formatStateUsing(fn($state): string => PaymentMethod::tryFrom($state)?->getLabel() ?? 'N/A'),
 
-                TextColumn::make('bankAccount.short_name'),
+                TextColumn::make('bankAccount.short_name')
+                    ->label('Bank Tujuan'),
 
                 TextColumn::make('date')
-                    ->date(),
+                    ->label('Tgl. Bayar')
+                    ->date()
+                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
 
-                TextColumn::make('status'),
-
-                TextColumn::make('notes'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
+                    ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'N/A'),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                ViewAction::make()
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 }
