@@ -12,6 +12,9 @@ class ApplicationSeeder extends Seeder
         $application = new Application();
         $application->short_name = 'Mikrotik Bills';
         $application->full_name = 'Mikrotik Bills';
+        $application->company_name = 'Mikrotik Company';
+        $application->company_email = 'mikrotik@company.id';
+        $application->company_phone = '+6281234567890';
         $application->save();
     }
 }

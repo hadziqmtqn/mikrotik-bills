@@ -5,18 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
 class ApplicationResource extends Resource implements HasShieldPermissions
 {
@@ -26,6 +20,11 @@ class ApplicationResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationGroup = 'System';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-cog';
+
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('edit', ['record' => Application::first()?->getRouteKey()]);
+    }
 
     public static function getPermissionPrefixes(): array
     {
@@ -118,56 +117,6 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                     ->openable()
                     ->dehydrated(fn($state) => filled($state))
                     ->columnSpanFull(),
-
-                Grid::make()
-                    ->columns()
-                    ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Created Date')
-                            ->content(fn(?Application $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                        Placeholder::make('updated_at')
-                            ->label('Last Modified Date')
-                            ->content(fn(?Application $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
-                    ]),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                SpatieMediaLibraryImageColumn::make('favicon')
-                    ->label('Favicon')
-                    ->collection('favicon')
-                    ->disk('s3')
-                    ->visibility('private')
-                    ->circular()
-                    ->size(32),
-
-                TextColumn::make('short_name')
-                    ->label('Nama Singkat')
-                    ->searchable(),
-
-                TextColumn::make('full_name')
-                    ->label('Nama Lengkap')
-                    ->searchable(),
-
-                TextColumn::make('panel_color')
-                    ->label('Warna Panel')
-                    ->formatStateUsing(fn($state): string => ucfirst($state)),
-
-                TextColumn::make('navigation_position')->formatStateUsing(fn($state): string => ucfirst($state))
-                    ->label('Posisi Navigasi'),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                EditAction::make(),
-            ])
-            ->bulkActions([
-                //
             ]);
     }
 
@@ -175,6 +124,7 @@ class ApplicationResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => Pages\ListApplications::route('/'),
+            'edit' => Pages\EditApplication::route('{record}'),
         ];
     }
 

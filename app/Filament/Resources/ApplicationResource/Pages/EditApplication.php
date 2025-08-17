@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ApplicationResource\Pages;
 
 use App\Filament\Resources\ApplicationResource;
-use Filament\Actions\DeleteAction;
+use App\Models\Application;
 use Filament\Resources\Pages\EditRecord;
 
 class EditApplication extends EditRecord
@@ -13,7 +13,18 @@ class EditApplication extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            //
         ];
+    }
+
+    public function mount($record = null): void
+    {
+        parent::mount(Application::first()?->getRouteKey());
+    }
+
+    // Sembunyikan tombol delete (opsional)
+    protected function canDelete(): bool
+    {
+        return false;
     }
 }

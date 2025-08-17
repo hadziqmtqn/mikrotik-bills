@@ -36,6 +36,11 @@ class Application extends Model implements HasMedia
         });
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     // TODO Attributes
     protected function favicon(): Attribute
     {

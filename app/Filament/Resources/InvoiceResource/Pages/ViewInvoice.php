@@ -10,6 +10,7 @@ use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\UserResource;
 use App\Helpers\DateHelper;
 use App\Models\Application;
+use App\Models\BankAccount;
 use App\Models\CustomerService;
 use App\Models\Invoice;
 use Filament\Infolists\Components\Group;
@@ -41,7 +42,8 @@ class ViewInvoice extends ViewRecord
                 ->content(
                     fn(Invoice $record): View => view('filament.resources.invoice-resource.pages.print', [
                         'invoice' => $record->loadMissing('user:id,name,email', 'user.userProfile', 'invoiceItems.customerService.servicePackage'),
-                        'application' => Application::first()
+                        'application' => Application::first(),
+                        'bankAccounts' => BankAccount::active()->get()
                     ])
                 )
                 ->filename(fn(Invoice $record): string => 'invoice-' . $record->code . '-' . DateHelper::indonesiaDate($record->date) . '.pdf')

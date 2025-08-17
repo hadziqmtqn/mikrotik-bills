@@ -75,44 +75,24 @@
                 <thead>
                 <tr>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-3 ci-font-bold ci-text-main">#</td>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Product details</td>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-right ci-font-bold ci-text-main">Price</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Nama Item</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-right ci-font-bold ci-text-main">Harga</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-center ci-font-bold ci-text-main">Qty.</td>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-center ci-font-bold ci-text-main">VAT</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-right ci-font-bold ci-text-main">Subtotal</td>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-pr-3 ci-text-right ci-font-bold ci-text-main">Subtotal + VAT</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td class="ci-border-b ci-py-3 ci-pl-3">1.</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2">Montly accounting services</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$150.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">20%</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$150.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-pr-3 ci-text-right">$180.00</td>
+                    @foreach($invoice->invoiceItems as $item)
+                        <td class="ci-border-b ci-py-3 ci-pl-3">{{ $loop->iteration }}.</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->customerService?->servicePackage?->package_name }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
+                    @endforeach
                 </tr>
                 <tr>
-                    <td class="ci-border-b ci-py-3 ci-pl-3">2.</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2">Taxation consulting (hour)</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$60.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">2</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">20%</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$120.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-pr-3 ci-text-right">$144.00</td>
-                </tr>
-                <tr>
-                    <td class="ci-border-b ci-py-3 ci-pl-3">3.</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2">Bookkeeping services</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$50.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">20%</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">$50.00</td>
-                    <td class="ci-border-b ci-py-3 ci-pl-2 ci-pr-3 ci-text-right">$60.00</td>
-                </tr>
-                <tr>
-                    <td colspan="7">
+                    <td colspan="5">
                         <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
                             <tbody>
                             <tr>
@@ -122,18 +102,10 @@
                                         <tbody>
                                         <tr>
                                             <td class="ci-border-b ci-p-3">
-                                                <div class="ci-whitespace-nowrap ci-text-slate-400">Net total:</div>
+                                                <div class="ci-whitespace-nowrap ci-text-slate-400">Sub Total:</div>
                                             </td>
                                             <td class="ci-border-b ci-p-3 ci-text-right">
-                                                <div class="ci-whitespace-nowrap ci-font-bold ci-text-main">$320.00</div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="ci-p-3">
-                                                <div class="ci-whitespace-nowrap ci-text-slate-400">VAT total:</div>
-                                            </td>
-                                            <td class="ci-p-3 ci-text-right">
-                                                <div class="ci-whitespace-nowrap ci-font-bold ci-text-main">$64.00</div>
+                                                <div class="ci-whitespace-nowrap ci-font-bold ci-text-main">Rp{{ number_format($invoice->total_price,0,',','.') }}</div>
                                             </td>
                                         </tr>
                                         <tr>
@@ -141,7 +113,7 @@
                                                 <div class="ci-whitespace-nowrap ci-font-bold ci-text-white">Total:</div>
                                             </td>
                                             <td class="ci-bg-main ci-p-3 ci-text-right">
-                                                <div class="ci-whitespace-nowrap ci-font-bold ci-text-white">$384.00</div>
+                                                <div class="ci-whitespace-nowrap ci-font-bold ci-text-white">Rp{{ number_format($invoice->total_price,0,',','.') }}</div>
                                             </td>
                                         </tr>
                                         </tbody>
@@ -157,11 +129,12 @@
         </div>
 
         <div class="ci-px-14 ci-text-sm ci-text-neutral-700">
-            <p class="ci-text-main ci-font-bold">PAYMENT DETAILS</p>
-            <p>Banks of Banks</p>
-            <p>Bank/Sort Code: 1234567</p>
-            <p>Account Number: 123456678</p>
-            <p>Payment Reference: BRA-00335</p>
+            <p class="ci-text-main ci-font-bold">DETAIL PEMBAYARAN</p>
+            <ul>
+                @foreach($bankAccounts as $bankAccount)
+                    <li>{{ $bankAccount->short_name }} - <strong>{{ $bankAccount->account_number }}</strong> a/n {{ $bankAccount->account_name }}</li>
+                @endforeach
+            </ul>
         </div>
 
         <div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">

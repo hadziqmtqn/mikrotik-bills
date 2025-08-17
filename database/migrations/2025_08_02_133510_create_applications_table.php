@@ -14,6 +14,10 @@ return new class extends Migration {
             $table->string('full_name')->nullable();
             $table->enum('navigation_position', ['top', 'left'])->default('left');
             $table->string('panel_color')->default('teal');
+            $table->string('company_name')->nullable();
+            $table->string('company_email')->nullable();
+            $table->string('company_phone')->nullable();
+            $table->string('company_address')->nullable();
             $table->timestamps();
         });
     }
