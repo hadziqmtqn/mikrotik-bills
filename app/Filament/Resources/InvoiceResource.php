@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceForm;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceTable;
+use App\Helpers\DateHelper;
 use App\Models\Invoice;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
@@ -12,6 +13,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class InvoiceResource extends Resource implements HasShieldPermissions
 {
@@ -60,6 +62,29 @@ class InvoiceResource extends Resource implements HasShieldPermissions
     public static function getGloballySearchableAttributes(): array
     {
         return ['code', 'user.name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->code;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Nama Pelanggan' => $record->user?->name,
+            'Tgl.' => DateHelper::indonesiaDate($record->date),
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['user']);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return InvoiceResource::getUrl('view', ['record' => $record]);
     }
 
     public static function getEloquentQuery(): Builder

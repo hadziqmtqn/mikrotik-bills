@@ -14,6 +14,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CustomerServiceResource extends Resource implements HasShieldPermissions
@@ -66,9 +67,42 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with('user.userProfile', 'servicePackage')
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->reference_number ?? 'Layanan Pelanggan';
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'reference_number',
+            'user.name',
+            'servicePackage.package_name',
+        ];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Nama Pelanggan' => $record->user?->name,
+            'Paket' => $record->servicePackage?->package_name,
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['user', 'servicePackage']);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return CustomerServiceResource::getUrl('view', ['record' => $record]);
     }
 
     public static function getRecordSubNavigation(Page $page): array
