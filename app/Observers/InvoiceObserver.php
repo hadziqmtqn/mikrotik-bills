@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\StatusData;
+use App\Models\CustomerService;
 use App\Models\Invoice;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Support\Carbon;
@@ -26,10 +27,20 @@ class InvoiceObserver
     public function updated(Invoice $invoice): void
     {
         $invoice->refresh();
+
         if ($invoice->status === StatusData::OVERDUE->value) {
             $invoice->cancel_date = Carbon::parse($invoice->due_date)->addDays($this->setting()?->cancel_after ?? 7);
-            $invoice->save();
         }
+
+        if ($invoice->status === StatusData::CANCELLED->value) {
+            CustomerService::whereHas('invoiceItems', fn($query) => $query->where('invoice_id', $invoice->id))
+                ->update([
+                    'status' => StatusData::CANCELLED->value,
+                    'notes' => 'Layanan pelanggan dibatalkan otomatis karena tagihan tidak dibayar setelah tanggal jatuh tempo.',
+                ]);
+        }
+
+        $invoice->save();
     }
 
     public function deleted(Invoice $invoice): void

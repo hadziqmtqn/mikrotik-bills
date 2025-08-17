@@ -61,6 +61,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
             'create' => Pages\CreateCustomerService::route('/create'),
             'view' => Pages\ViewCustomerService::route('/{record}'),
             'edit' => Pages\EditCustomerService::route('/{record}/edit'),
+            'invoice_history' => Pages\InvoiceHistory::route('/{record}/invoice-history'),
         ];
     }
 
@@ -110,6 +111,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
         return $page->generateNavigationItems([
             Pages\ViewCustomerService::class,
             Pages\EditCustomerService::class,
+            Pages\InvoiceHistory::class
         ]);
     }
 }

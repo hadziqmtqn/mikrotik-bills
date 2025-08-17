@@ -16,6 +16,9 @@ class InvoiceCancalledCommand extends Command
     {
         Invoice::where('cancel_date', '<', now()->toDateTimeString())
             ->where('status', StatusData::OVERDUE->value)
-            ->update(['status' => StatusData::CANCELLED->value]);
+            ->get()
+            ->each(function (Invoice $invoice) {
+                $invoice->update(['status' => StatusData::CANCELLED->value]);
+            });
     }
 }

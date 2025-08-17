@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([CustomerServiceObserver::class])]
@@ -27,6 +29,7 @@ class CustomerService extends Model
         'start_date',
         'end_date_time',
         'status',
+        'notes'
     ];
 
     protected function casts(): array
@@ -51,6 +54,11 @@ class CustomerService extends Model
     public function servicePackage(): BelongsTo
     {
         return $this->belongsTo(ServicePackage::class, 'service_package_id');
+    }
+
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class, 'customer_service_id');
     }
 
     // TODO Scopes
