@@ -3,40 +3,24 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Payment;
+use Filament\Support\RawJs;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class EarningChart extends ApexChartWidget
 {
-    /**
-     * Chart Id
-     *
-     * @var ?string
-     */
     protected static ?string $chartId = 'earningChart';
+    protected static ?string $heading = 'Pendapatan';
 
-    /**
-     * Widget Title
-     *
-     * @var string|null
-     */
-    protected static ?string $heading = 'EarningChart';
-
-    /**
-     * Chart options (series, labels, types, size, animations...)
-     * https://apexcharts.com/docs/options
-     *
-     * @return array
-     */
     protected function getOptions(): array
     {
         $payments = Payment::selectRaw('EXTRACT(MONTH FROM "date") as month, SUM(amount) as total')
             ->whereRaw('EXTRACT(YEAR FROM "date") = ?', [date('Y')])
+            ->where('status', 'paid')
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
             ->all();
 
-        // Buat array bulan (Jan, Feb, dst)
         $months = [
             1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
             7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
@@ -83,5 +67,20 @@ class EarningChart extends ApexChartWidget
                 'curve' => 'smooth',
             ],
         ];
+    }
+
+    protected function extraJsOptions(): ?RawJs
+    {
+        return RawJs::make(<<<'JS'
+        {
+            yaxis: {
+                labels: {
+                    formatter: function(val) {
+                        return 'Rp ' + val.toLocaleString('id-ID');
+                    }
+                }
+            }
+        }
+        JS);
     }
 }

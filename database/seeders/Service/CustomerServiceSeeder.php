@@ -37,11 +37,13 @@ class CustomerServiceSeeder extends Seeder
             $customerService->save();
 
             // TODO Invoice
+            $date = now()->subMonth();
+
             $invoice = Invoice::where('user_id', $user->id)
                 ->firstOrNew();
             $invoice->user_id = $user->id;
-            $invoice->date = now()->subDays(5);
-            $invoice->due_date = now()->addDays(7);
+            $invoice->date = $date;
+            $invoice->due_date = $date->addDays(7);
             $invoice->status = $customerService->status == 'active' ? 'paid' : 'unpaid';
             $invoice->save();
 
