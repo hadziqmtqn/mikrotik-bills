@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Months;
 use App\Models\Payment;
 use Filament\Support\RawJs;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
@@ -32,16 +33,13 @@ class EarningChart extends ApexChartWidget
             ->pluck('total', 'month')
             ->all();
 
-        $months = [
-            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
-            7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
-        ];
+        $months = Months::all();
 
         $chartData = [];
         $categories = [];
-        foreach ($months as $num => $name) {
-            $categories[] = $name;
-            $chartData[] = $payments[$num] ?? 0;
+        foreach ($months as $month) {
+            $categories[] = $month->short();
+            $chartData[] = $payments[$month->value] ?? 0;
         }
 
         return [

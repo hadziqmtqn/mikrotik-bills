@@ -9,10 +9,12 @@ use App\Models\Payment;
 use CodeWithKyrian\FilamentDateRange\Tables\Filters\DateRangeFilter;
 use Exception;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Query\Builder;
 
 class PaymentTable
 {
@@ -34,7 +36,12 @@ class PaymentTable
 
                 TextColumn::make('amount')
                     ->label('Jml. Bayar')
-                    ->money('idr'),
+                    ->money('idr')
+                    ->summarize([
+                        Sum::make('amount')
+                            ->money('idr')
+                            ->query(fn(Builder $query) => $query->where('status', 'paid'))
+                    ]),
 
                 TextColumn::make('payment_method')
                     ->label('Metode Bayar')
@@ -54,10 +61,6 @@ class PaymentTable
                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'N/A'),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->options(StatusData::options(['pending', 'partially_paid', 'paid', 'cancelled']))
-                    ->native(false),
-
                 SelectFilter::make('payment_method')
                     ->label('Metode Bayar')
                     ->options(PaymentMethod::options())
