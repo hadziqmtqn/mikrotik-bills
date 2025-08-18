@@ -2,51 +2,44 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Months;
 use App\Models\Payment;
+use Filament\Support\RawJs;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class EarningChart extends ApexChartWidget
 {
-    /**
-     * Chart Id
-     *
-     * @var ?string
-     */
     protected static ?string $chartId = 'earningChart';
+    protected static ?string $heading = 'Pendapatan';
 
-    /**
-     * Widget Title
-     *
-     * @var string|null
-     */
-    protected static ?string $heading = 'EarningChart';
+    protected function getFilters(): ?array
+    {
+        $fiveYearsAgo = now()->subYears(5)->year;
+        $years = collect(range($fiveYearsAgo, now()->year))->reverse()->values();
 
-    /**
-     * Chart options (series, labels, types, size, animations...)
-     * https://apexcharts.com/docs/options
-     *
-     * @return array
-     */
+        // Kembalikan associative array: [2025 => 2025, 2024 => 2024, ...]
+        return $years->mapWithKeys(fn ($year) => [$year => $year])->toArray();
+    }
+
     protected function getOptions(): array
     {
+        $year = $this->filter ?? now()->year;
+
         $payments = Payment::selectRaw('EXTRACT(MONTH FROM "date") as month, SUM(amount) as total')
-            ->whereRaw('EXTRACT(YEAR FROM "date") = ?', [date('Y')])
+            ->whereRaw('EXTRACT(YEAR FROM "date") = ?', [$year])
+            ->where('status', 'paid')
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
             ->all();
 
-        // Buat array bulan (Jan, Feb, dst)
-        $months = [
-            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
-            7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
-        ];
+        $months = Months::all();
 
         $chartData = [];
         $categories = [];
-        foreach ($months as $num => $name) {
-            $categories[] = $name;
-            $chartData[] = $payments[$num] ?? 0;
+        foreach ($months as $month) {
+            $categories[] = $month->short();
+            $chartData[] = $payments[$month->value] ?? 0;
         }
 
         return [
@@ -83,5 +76,20 @@ class EarningChart extends ApexChartWidget
                 'curve' => 'smooth',
             ],
         ];
+    }
+
+    protected function extraJsOptions(): ?RawJs
+    {
+        return RawJs::make(<<<'JS'
+        {
+            yaxis: {
+                labels: {
+                    formatter: function(val) {
+                        return 'Rp ' + val.toLocaleString('id-ID');
+                    }
+                }
+            }
+        }
+        JS);
     }
 }

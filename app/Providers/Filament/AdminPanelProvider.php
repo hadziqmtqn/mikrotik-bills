@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
 use App\Models\Application;
 use Exception;
@@ -95,6 +96,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 /*Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,*/
+                CustomerStatsOverview::class,
                 EarningChart::class
             ])
             ->navigationGroups([
