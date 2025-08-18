@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Observers\InvoiceObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,7 +60,14 @@ class Invoice extends Model
     protected function totalPrice(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->invoiceItems->sum('amount'),
+            get: fn() => $this->invoiceItems->sum('amount'),
         );
+    }
+
+    // TODO Scope
+    #[Scope]
+    protected function filterByStatus(Builder $query, $status): Builder
+    {
+        return $query->where('status', $status);
     }
 }

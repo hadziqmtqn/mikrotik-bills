@@ -13,6 +13,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class InvoiceTable
 {
@@ -64,7 +65,9 @@ class InvoiceTable
             ->filters([
                 SelectFilter::make('status')
                     ->options(StatusData::options(['unpaid', 'paid', 'overdue', 'cancelled']))
-                    ->native(false)
+                    ->native(false),
+
+                DateRangeFilter::make('date')
             ])
             ->actions([
                 ActionGroup::make([
