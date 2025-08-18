@@ -31,7 +31,8 @@ class CustomerServiceTable
                     ->searchable(),
 
                 TextColumn::make('user.name')
-                    ->label('Pelanggan'),
+                    ->label('Pelanggan')
+                    ->searchable(),
 
                 TextColumn::make('servicePackage.package_name')
                     ->label('Paket Layanan')
