@@ -11,10 +11,21 @@ class EarningChart extends ApexChartWidget
     protected static ?string $chartId = 'earningChart';
     protected static ?string $heading = 'Pendapatan';
 
+    protected function getFilters(): ?array
+    {
+        $fiveYearsAgo = now()->subYears(5)->year;
+        $years = collect(range($fiveYearsAgo, now()->year))->reverse()->values();
+
+        // Kembalikan associative array: [2025 => 2025, 2024 => 2024, ...]
+        return $years->mapWithKeys(fn ($year) => [$year => $year])->toArray();
+    }
+
     protected function getOptions(): array
     {
+        $year = $this->filter ?? now()->year;
+
         $payments = Payment::selectRaw('EXTRACT(MONTH FROM "date") as month, SUM(amount) as total')
-            ->whereRaw('EXTRACT(YEAR FROM "date") = ?', [date('Y')])
+            ->whereRaw('EXTRACT(YEAR FROM "date") = ?', [$year])
             ->where('status', 'paid')
             ->groupBy('month')
             ->orderBy('month')
