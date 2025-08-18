@@ -5,12 +5,15 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
 use App\Models\Invoice;
+use CodeWithKyrian\FilamentDateRange\Tables\Filters\DateRangeFilter;
 use Exception;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -64,8 +67,13 @@ class InvoiceTable
             ->filters([
                 SelectFilter::make('status')
                     ->options(StatusData::options(['unpaid', 'paid', 'overdue', 'cancelled']))
-                    ->native(false)
-            ])
+                    ->native(false),
+
+                DateRangeFilter::make('date')
+                    ->label('Tanggal')
+                    ->locale('id_ID')
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormWidth(MaxWidth::Medium)
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),

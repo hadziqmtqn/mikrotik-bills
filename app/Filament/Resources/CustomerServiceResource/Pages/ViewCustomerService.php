@@ -112,7 +112,15 @@ class ViewCustomerService extends ViewRecord
 
                                 TextEntry::make('start_date')
                                     ->label('Tanggal Mulai Aktif')
-                                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : '-'),
+                                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : '-')
+                                    ->visible(fn(CustomerService $record): bool => $record->status === StatusData::ACTIVE->value),
+                            ]),
+
+                        Section::make('Note')
+                            ->schema([
+                                TextEntry::make('notes')
+                                    ->hiddenLabel()
+                                    ->extraAttributes(['class' => 'italic']),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),

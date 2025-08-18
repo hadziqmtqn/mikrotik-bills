@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InvoiceResource\Pages;
+use App\Filament\Resources\InvoiceResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceForm;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceTable;
+use App\Filament\Resources\InvoiceResource\Widgets\InvoiceOverview;
 use App\Helpers\DateHelper;
 use App\Models\Invoice;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
@@ -92,5 +94,19 @@ class InvoiceResource extends Resource implements HasShieldPermissions
         return parent::getEloquentQuery()
             ->with(['user', 'invoiceItems.customerService'])
             ->whereHas('invoiceItems');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            PaymentsRelationManager::class
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            InvoiceOverview::class
+        ];
     }
 }

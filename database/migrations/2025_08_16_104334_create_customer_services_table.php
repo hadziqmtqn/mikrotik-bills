@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date_time')->nullable();
             $table->enum('status', ['pending', 'active', 'suspended', 'cancelled'])->default('pending');
+            $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
