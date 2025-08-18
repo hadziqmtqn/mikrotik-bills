@@ -17,7 +17,7 @@ class Dashboard extends \Filament\Pages\Dashboard
         return false;
     }
 
-    public function filtersForm(Form $form): Form
+    /*public function filtersForm(Form $form): Form
     {
         return $form
             ->schema([
@@ -26,5 +26,5 @@ class Dashboard extends \Filament\Pages\Dashboard
 
                     ])
             ]);
-    }
+    }*/
 }
