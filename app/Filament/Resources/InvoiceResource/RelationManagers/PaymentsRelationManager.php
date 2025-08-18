@@ -33,13 +33,17 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
 
     public function form(Form $form): Form
     {
-        return PaymentForm::form($form);
+        $invoice = $this->getOwnerRecord();
+
+        return PaymentForm::form($form, $invoice);
     }
 
     public function table(Table $table): Table
     {
+        $invoice = $this->getOwnerRecord();
+
         return $table
-            ->recordTitleAttribute('invoice_id')
+            ->recordTitleAttribute('code')
             ->columns([
                 Tables\Columns\TextColumn::make('code')
                     ->label('Kode')
@@ -49,6 +53,10 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
                     ->label('Tgl. Bayar')
                     ->date()
                     ->formatStateUsing(fn ($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
+
+                Tables\Columns\TextColumn::make('amount')
+                    ->label('Jml. Bayar')
+                    ->money('idr'),
 
                 Tables\Columns\TextColumn::make('payment_method')
                     ->label('Metode Pembayaran')
@@ -68,11 +76,11 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->createAnother(false)
-                    ->visible(fn() => $this->getOwnerRecord()->status === StatusData::UNPAID->value && $this->getOwnerRecord()?->payments()->count() === 0)
+                    ->visible(fn() => $invoice->status === StatusData::UNPAID->value && $invoice?->payments()->count() === 0)
                     ->closeModalByClickingAway(false)
-                    ->mutateFormDataUsing(function (array $data) {
-                        $data['user_id'] = $this->getOwnerRecord()->user_id;
-                        $data['invoice_id'] = $this->getOwnerRecord()->id;
+                    ->mutateFormDataUsing(function (array $data) use ($invoice) {
+                        $data['user_id'] = $invoice->user_id;
+                        $data['invoice_id'] = $invoice->id;
                         return $data;
                     })
             ])

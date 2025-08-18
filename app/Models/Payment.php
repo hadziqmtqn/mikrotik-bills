@@ -23,6 +23,7 @@ class Payment extends Model implements HasMedia
         'invoice_id',
         'payment_method',
         'bank_account_id',
+        'amount',
         'date',
         'status',
         'notes',

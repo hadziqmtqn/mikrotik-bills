@@ -14,6 +14,7 @@ enum StatusData: string implements HasColor, HasLabel
     case SUSPENDED = 'suspended';
     case CANCELLED = 'cancelled';
     case OVERDUE = 'overdue';
+    case PARTIALLY_PAID = 'partially_paid';
 
     public function getLabel(): ?string
     {
@@ -25,13 +26,14 @@ enum StatusData: string implements HasColor, HasLabel
             self::SUSPENDED => 'Suspended',
             self::CANCELLED => 'Cancelled',
             self::OVERDUE => 'Overdue',
+            self::PARTIALLY_PAID => 'Partially Paid',
         };
     }
 
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::PENDING, self::UNPAID, self::OVERDUE => 'warning',
+            self::PENDING, self::UNPAID, self::OVERDUE, self::PARTIALLY_PAID => 'warning',
             self::PAID, self::ACTIVE => 'primary',
             self::SUSPENDED, self::CANCELLED => 'danger',
         };
@@ -40,7 +42,7 @@ enum StatusData: string implements HasColor, HasLabel
     public function htmlColor(): string
     {
         return match ($this) {
-            self::PENDING, self::UNPAID, self::OVERDUE => '#ffc107',
+            self::PENDING, self::UNPAID, self::OVERDUE, self::PARTIALLY_PAID => '#ffc107',
             self::PAID, self::ACTIVE => '#007bff',
             self::SUSPENDED, self::CANCELLED => '#dc3545',
         };

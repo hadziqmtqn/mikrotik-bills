@@ -5,9 +5,12 @@ namespace App\Filament\Resources\PaymentResource\Schemas;
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
+use App\Models\Payment;
+use CodeWithKyrian\FilamentDateRange\Tables\Filters\DateRangeFilter;
 use Exception;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -22,15 +25,16 @@ class PaymentTable
             ->columns([
                 TextColumn::make('code')
                     ->label('Kode')
+                    ->description(fn(Payment $record): string => 'Kode Tagihan: ' . $record->invoice?->code)
                     ->searchable(),
 
                 TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable(),
 
-                TextColumn::make('invoice.code')
-                    ->label('Kode Faktur')
-                    ->searchable(),
+                TextColumn::make('amount')
+                    ->label('Jml. Bayar')
+                    ->money('idr'),
 
                 TextColumn::make('payment_method')
                     ->label('Metode Bayar')
@@ -50,8 +54,22 @@ class PaymentTable
                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? 'N/A'),
             ])
             ->filters([
-                TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options(StatusData::options(['pending', 'partially_paid', 'paid', 'cancelled']))
+                    ->native(false),
+
+                SelectFilter::make('payment_method')
+                    ->label('Metode Bayar')
+                    ->options(PaymentMethod::options())
+                    ->native(false),
+
+                DateRangeFilter::make('date')
+                    ->timezone('Asia/Jakarta'),
+
+                TrashedFilter::make()
+                    ->native(false),
             ])
+            ->filtersFormColumns(2)
             ->actions([
                 ViewAction::make()
             ])

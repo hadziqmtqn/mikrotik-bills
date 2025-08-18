@@ -9,6 +9,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -16,13 +17,37 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PaymentForm
 {
-    public static function form(Form $form): Form
+    public static function form(Form $form, $invoice = null): Form
     {
         return $form
             ->schema([
                 Section::make()
                     ->columns()
                     ->schema([
+                        TextInput::make('amount')
+                            ->label('Jumlah Pembayaran')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->maxValue(fn(): ?int => $invoice?->total_price)
+                            ->required()
+                            ->afterStateHydrated(function ($state, $set) use ($invoice) {
+                                if (blank($state)) {
+                                    $set('amount', $invoice?->total_price);
+                                }
+                            })
+                            ->afterStateUpdated(function ($state, $set) use ($invoice) {
+                                if (blank($state)) {
+                                    // Kosongkan status jika amount kosong
+                                    $set('status', null);
+                                } elseif ($state < $invoice?->total_price) {
+                                    $set('status', 'partially_paid');
+                                } else {
+                                    $set('status', 'paid');
+                                }
+                            })
+                            ->reactive()
+                            ->placeholder('Masukkan Jumlah Pembayaran'),
+
                         ToggleButtons::make('payment_method')
                             ->label('Metode Pembayaran')
                             ->required()
@@ -81,8 +106,8 @@ class PaymentForm
                         ToggleButtons::make('status')
                             ->hiddenLabel()
                             ->inline()
-                            ->options(StatusData::options(['paid', 'cancelled']))
-                            ->colors(StatusData::colors(['paid', 'cancelled']))
+                            ->options(StatusData::options(['partially_paid', 'paid', 'cancelled']))
+                            ->colors(StatusData::colors(['partially_paid', 'paid', 'cancelled']))
                             ->default('paid')
                             ->required()
                     ]),
