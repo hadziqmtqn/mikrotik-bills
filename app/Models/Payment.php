@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\PaymentObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -55,5 +56,13 @@ class Payment extends Model implements HasMedia
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    // TODO Attributes
+    protected function proofOfPayment(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->hasMedia('proof_of_payment') ? $this->getFirstTemporaryUrl(now()->addHour(), 'proof_of_payment') : null,
+        );
     }
 }
