@@ -2077,7 +2077,7 @@
         },
         {
             "name": "filament/actions",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/actions.git",
@@ -2130,7 +2130,7 @@
         },
         {
             "name": "filament/filament",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/panels.git",
@@ -2195,16 +2195,16 @@
         },
         {
             "name": "filament/forms",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/forms.git",
-                "reference": "6d2eddf754f30dee8730535dfcbcefb4cd5e1136"
+                "reference": "5cb8623735691d65b9a08c43be9b4431b017c51a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/forms/zipball/6d2eddf754f30dee8730535dfcbcefb4cd5e1136",
-                "reference": "6d2eddf754f30dee8730535dfcbcefb4cd5e1136",
+                "url": "https://api.github.com/repos/filamentphp/forms/zipball/5cb8623735691d65b9a08c43be9b4431b017c51a",
+                "reference": "5cb8623735691d65b9a08c43be9b4431b017c51a",
                 "shasum": ""
             },
             "require": {
@@ -2247,11 +2247,11 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2025-08-12T13:15:47+00:00"
+            "time": "2025-08-18T11:12:37+00:00"
         },
         {
             "name": "filament/infolists",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/infolists.git",
@@ -2302,7 +2302,7 @@
         },
         {
             "name": "filament/notifications",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/notifications.git",
@@ -2354,7 +2354,7 @@
         },
         {
             "name": "filament/spatie-laravel-media-library-plugin",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/spatie-laravel-media-library-plugin.git",
@@ -2392,7 +2392,7 @@
         },
         {
             "name": "filament/support",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/support.git",
@@ -2451,7 +2451,7 @@
         },
         {
             "name": "filament/tables",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/tables.git",
@@ -2503,7 +2503,7 @@
         },
         {
             "name": "filament/widgets",
-            "version": "v3.3.36",
+            "version": "v3.3.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/widgets.git",
@@ -3690,16 +3690,16 @@
         },
         {
             "name": "laravel-lang/lang",
-            "version": "15.22.8",
+            "version": "15.23.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/lang.git",
-                "reference": "cc45f0d1df17c3521429cfae9b78b42ae7b2ad32"
+                "reference": "31025ed0c7922ef1b10d1e967b2f7c11e6ddfbdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/cc45f0d1df17c3521429cfae9b78b42ae7b2ad32",
-                "reference": "cc45f0d1df17c3521429cfae9b78b42ae7b2ad32",
+                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/31025ed0c7922ef1b10d1e967b2f7c11e6ddfbdf",
+                "reference": "31025ed0c7922ef1b10d1e967b2f7c11e6ddfbdf",
                 "shasum": ""
             },
             "require": {
@@ -3711,6 +3711,7 @@
                 "laravel/framework": "<11.0.7"
             },
             "require-dev": {
+                "dragon-code/codestyler": "^6.0",
                 "laravel-lang/status-generator": "^2.11",
                 "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
                 "symfony/var-dumper": "^7.0"
@@ -3749,7 +3750,7 @@
                 "issues": "https://github.com/Laravel-Lang/lang/issues",
                 "source": "https://github.com/Laravel-Lang/lang"
             },
-            "time": "2025-08-09T14:38:01+00:00"
+            "time": "2025-08-17T16:09:10+00:00"
         },
         {
             "name": "laravel-lang/locale-list",
