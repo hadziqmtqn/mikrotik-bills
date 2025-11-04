@@ -10,10 +10,13 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $title = 'Pelanggan';
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
+                ->label('Tambah Baru')
                 ->closeModalByClickingAway(false),
         ];
     }

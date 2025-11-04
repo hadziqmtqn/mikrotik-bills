@@ -22,8 +22,6 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     protected static ?string $model = CustomerService::class;
     protected static ?string $slug = 'customer-services';
     protected static ?string $navigationLabel = 'Layanan Pelanggan';
-    protected static ?string $navigationGroup = 'Service';
-    protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-server';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

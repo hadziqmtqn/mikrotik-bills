@@ -21,8 +21,6 @@ class InvoiceResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Invoice::class;
     protected static ?string $slug = 'invoices';
-    protected static ?string $navigationGroup = 'Invoice';
-    protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Faktur';
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 

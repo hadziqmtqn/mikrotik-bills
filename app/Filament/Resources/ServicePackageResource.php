@@ -21,7 +21,6 @@ class ServicePackageResource extends Resource implements HasShieldPermissions
     protected static ?string $model = ServicePackage::class;
     protected static ?string $slug = 'service-packages';
     protected static ?string $navigationLabel = 'Paket Layanan';
-    protected static ?string $navigationGroup = 'Service';
     protected static ?string $navigationIcon = 'heroicon-o-server-stack';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

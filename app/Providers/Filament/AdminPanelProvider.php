@@ -3,9 +3,20 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\AdminResource;
+use App\Filament\Resources\ApplicationResource;
+use App\Filament\Resources\BankAccountResource;
+use App\Filament\Resources\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\InvoiceSettingResource;
+use App\Filament\Resources\PaymentResource;
+use App\Filament\Resources\RouterResource;
+use App\Filament\Resources\ServicePackageResource;
+use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
 use App\Models\Application;
+use BezhanSalleh\FilamentShield\Resources\RoleResource;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -13,6 +24,8 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Livewire\Notifications;
+use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -22,7 +35,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 
@@ -94,8 +109,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             //->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                /*Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,*/
                 CustomerStatsOverview::class,
                 EarningChart::class
             ])
@@ -124,6 +137,54 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->navigation(function (NavigationBuilder $navigationBuilder): NavigationBuilder {
+                return $navigationBuilder
+                    ->items([
+                        ...Dashboard::getNavigationItems()
+                    ])
+                    ->groups([
+                        NavigationGroup::make('Main')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(UserResource::class)
+                            ]),
+                        NavigationGroup::make('Service')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(ServicePackageResource::class),
+                                ...$this->filterResourceNavigationItems(CustomerServiceResource::class),
+                            ]),
+                        NavigationGroup::make('Payment')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(PaymentResource::class),
+                                ...$this->filterResourceNavigationItems(BankAccountResource::class),
+                            ]),
+                        NavigationGroup::make('Invoice')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(InvoiceSettingResource::class),
+                                ...$this->filterResourceNavigationItems(InvoiceResource::class),
+                            ]),
+                        NavigationGroup::make('Network')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(RouterResource::class),
+                            ]),
+                        NavigationGroup::make('System')
+                            ->items([
+                                ...$this->filterResourceNavigationItems(RoleResource::class),
+                                ...$this->filterResourceNavigationItems(AdminResource::class),
+                                ...$this->filterResourceNavigationItems(ApplicationResource::class),
+                            ]),
+                    ]);
+            });
+    }
+
+    function filterResourceNavigationItems($resource) {
+        // Buang namespace model menjadi dan pisahkan dengan ::, misal model InvoicePayment menjadi invoice::payment
+        $permission = 'view_any_' . str_replace('_', '::', Str::snake(class_basename($resource::getModel())));
+
+        if (Gate::allows($permission)) {
+            return $resource::getNavigationItems();
+        }
+
+        return [];
     }
 }
