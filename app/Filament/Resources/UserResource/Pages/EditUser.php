@@ -15,12 +15,17 @@ class EditUser extends EditRecord
 
     protected static string $resource = UserResource::class;
 
+    protected static ?string $title = 'Ubah Data Pelanggan';
+
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            DeleteAction::make()
+                ->modalHeading('Hapus pelanggan'),
+            ForceDeleteAction::make()
+                ->modalHeading('Hapus selamanya'),
+            RestoreAction::make()
+                ->modalHeading('Pulihkan data'),
         ];
     }
 }

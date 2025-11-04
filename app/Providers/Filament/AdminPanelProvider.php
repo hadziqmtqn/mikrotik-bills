@@ -83,7 +83,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('/')
             ->login()
             ->profile()
             ->passwordReset()
@@ -141,13 +141,10 @@ class AdminPanelProvider extends PanelProvider
             ->navigation(function (NavigationBuilder $navigationBuilder): NavigationBuilder {
                 return $navigationBuilder
                     ->items([
-                        ...Dashboard::getNavigationItems()
+                        ...Dashboard::getNavigationItems(),
+                        ...$this->filterResourceNavigationItems(UserResource::class)
                     ])
                     ->groups([
-                        NavigationGroup::make('Main')
-                            ->items([
-                                ...$this->filterResourceNavigationItems(UserResource::class)
-                            ]),
                         NavigationGroup::make('Service')
                             ->items([
                                 ...$this->filterResourceNavigationItems(ServicePackageResource::class),
@@ -174,7 +171,11 @@ class AdminPanelProvider extends PanelProvider
                                 ...$this->filterResourceNavigationItems(ApplicationResource::class),
                             ]),
                     ]);
-            });
+            })
+            ->spa()
+            ->spaUrlExceptions([
+                '*/users/*'
+            ]);
     }
 
     function filterResourceNavigationItems($resource) {
