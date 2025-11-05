@@ -9,6 +9,8 @@ class CreateCustomerService extends CreateRecord
 {
     protected static string $resource = CustomerServiceResource::class;
 
+    protected static ?string $title = 'Buat Layanan Pelanggan';
+
     protected function getHeaderActions(): array
     {
         return [

@@ -21,7 +21,7 @@ class InvoiceHistory extends ManageRelatedRecords
 {
     protected static string $resource = CustomerServiceResource::class;
     protected static string $relationship = 'invoiceItems';
-    protected static ?string $title = 'Invoice History';
+    protected static ?string $title = 'Faktur';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public function table(Table $table): Table

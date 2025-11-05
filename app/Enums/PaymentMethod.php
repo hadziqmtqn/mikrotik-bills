@@ -2,12 +2,15 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumOptions;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
 enum PaymentMethod: string implements HasLabel, HasColor, HasIcon
 {
+    use EnumOptions;
+
     case CASH = 'cash';
     case BANK_TRANSFER = 'bank_transfer';
 
@@ -34,14 +37,6 @@ enum PaymentMethod: string implements HasLabel, HasColor, HasIcon
             self::CASH => 'heroicon-s-credit-card',
             self::BANK_TRANSFER => 'heroicon-s-wallet',
         };
-    }
-
-    public static function options(): array
-    {
-        return [
-            self::CASH->value => self::CASH->getLabel(),
-            self::BANK_TRANSFER->value => self::BANK_TRANSFER->getLabel(),
-        ];
     }
 
     public static function colors(): array

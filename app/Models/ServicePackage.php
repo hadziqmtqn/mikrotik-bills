@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -61,6 +62,11 @@ class ServicePackage extends Model implements HasMedia
     public function router(): BelongsTo
     {
         return $this->belongsTo(Router::class);
+    }
+
+    public function customerServices(): ServicePackage|HasMany
+    {
+        return $this->hasMany(CustomerService::class, 'service_package_id');
     }
 
     // TODO More

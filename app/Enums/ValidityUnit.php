@@ -2,10 +2,13 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumOptions;
 use Filament\Support\Contracts\HasLabel;
 
 enum ValidityUnit: string implements HasLabel
 {
+    use EnumOptions;
+
     case MENIT = 'menit';
     case JAM = 'jam';
     case HARI = 'hari';
@@ -20,15 +23,5 @@ enum ValidityUnit: string implements HasLabel
             self::HARI => 'Hari',
             self::BULAN => 'Bulan',
         };
-    }
-
-    public static function options(): array
-    {
-        return [
-            self::MENIT->value => self::MENIT->getLabel(),
-            self::JAM->value => self::JAM->getLabel(),
-            self::HARI->value => self::HARI->getLabel(),
-            self::BULAN->value => self::BULAN->getLabel(),
-        ];
     }
 }

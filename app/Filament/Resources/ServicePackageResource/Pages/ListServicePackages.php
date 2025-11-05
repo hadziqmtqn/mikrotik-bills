@@ -10,10 +10,14 @@ class ListServicePackages extends ListRecords
 {
     protected static string $resource = ServicePackageResource::class;
 
+    protected static ?string $title = 'Paket Layanan';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah Baru')
+                ->modalHeading('Tambah Paket Layanan'),
         ];
     }
 }

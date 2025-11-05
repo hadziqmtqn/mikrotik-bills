@@ -19,4 +19,9 @@ class InvoiceSettingPolicy
     {
         return !$user->hasRole('user') && $user->can('update_invoice::setting', $invoiceSetting);
     }
+
+    public function delete(): bool
+    {
+        return false;
+    }
 }

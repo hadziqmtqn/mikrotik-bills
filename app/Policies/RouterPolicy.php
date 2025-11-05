@@ -17,7 +17,7 @@ class RouterPolicy
 
     public function view(User $user, Router $router): bool
     {
-        return $user->can('view_router');
+        return $user->can('view_router', $router);
     }
 
     public function create(User $user): bool
@@ -27,11 +27,13 @@ class RouterPolicy
 
     public function update(User $user, Router $router): bool
     {
-        return $user->can('update_router');
+        return $user->can('update_router', $router);
     }
 
     public function delete(User $user, Router $router): bool
     {
-        return $user->can('delete_router');
+        $router->loadCount('servicePackages');
+
+        return $user->can('delete_router') && $router->service_packages_count === 0;
     }
 }

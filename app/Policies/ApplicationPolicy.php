@@ -17,16 +17,16 @@ class ApplicationPolicy
 
     public function view(User $user, Application $application): bool
     {
-        return $user->can('view_application');
+        return $user->can('view_application', $application);
     }
 
     public function create(User $user): bool
     {
-        return $user->can('create_application');
+        return false;
     }
 
     public function update(User $user, Application $application): bool
     {
-        return $user->can('update_application');
+        return $user->can('update_application', $application);
     }
 }

@@ -12,6 +12,8 @@ class EditServicePackage extends EditRecord
 {
     protected static string $resource = ServicePackageResource::class;
 
+    protected static ?string $title = 'Ubah Paket Layanan';
+
     protected function getHeaderActions(): array
     {
         return [

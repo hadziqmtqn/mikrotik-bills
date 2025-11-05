@@ -11,7 +11,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditCustomerService extends EditRecord
 {
     protected static string $resource = CustomerServiceResource::class;
-    protected static ?string $title = 'Edit';
+    protected static ?string $title = 'Edit Layanan';
 
     protected function getHeaderActions(): array
     {

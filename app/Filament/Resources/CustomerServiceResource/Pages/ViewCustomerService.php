@@ -22,7 +22,7 @@ use Filament\Support\Enums\IconPosition;
 class ViewCustomerService extends ViewRecord
 {
     protected static string $resource = CustomerServiceResource::class;
-    protected static ?string $title = 'Detail';
+    protected static ?string $title = 'Detail Layanan';
 
     public function infolist(Infolist $infolist): Infolist
     {

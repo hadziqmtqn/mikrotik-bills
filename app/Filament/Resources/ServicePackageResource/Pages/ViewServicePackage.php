@@ -8,4 +8,6 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewServicePackage extends ViewRecord
 {
     protected static string $resource = ServicePackageResource::class;
+
+    protected static ?string $title = 'Detail Paket Layanan';
 }

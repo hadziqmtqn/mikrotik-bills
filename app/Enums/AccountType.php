@@ -2,12 +2,15 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumOptions;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
 enum AccountType: string implements HasLabel, HasIcon, HasColor
 {
+    use EnumOptions;
+
     case PRIBADI = 'pribadi';
     case BISNIS = 'bisnis';
 
@@ -36,14 +39,6 @@ enum AccountType: string implements HasLabel, HasIcon, HasColor
             self::PRIBADI => __('Pribadi'),
             self::BISNIS => __('Bisnis')
         };
-    }
-
-    public static function options(): array
-    {
-        return [
-            self::PRIBADI->value => self::PRIBADI->getLabel(),
-            self::BISNIS->value => self::BISNIS->getLabel(),
-        ];
     }
 
     public static function colors(): array

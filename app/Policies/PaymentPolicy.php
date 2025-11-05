@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatusData;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -32,7 +33,7 @@ class PaymentPolicy
 
     public function delete(User $user, Payment $payment): bool
     {
-        return $user->can('delete_payment', $payment);
+        return $user->can('delete_payment') && $payment->status != StatusData::PAID->value;
     }
 
     public function restore(User $user, Payment $payment): bool
