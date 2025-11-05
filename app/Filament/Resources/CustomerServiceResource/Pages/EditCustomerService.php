@@ -16,9 +16,9 @@ class EditCustomerService extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            DeleteAction::make()->modalHeading('Hapus layanan'),
+            ForceDeleteAction::make()->modalHeading('Hapus selamanya'),
+            RestoreAction::make()->modalHeading('Pulihkan data'),
         ];
     }
 }

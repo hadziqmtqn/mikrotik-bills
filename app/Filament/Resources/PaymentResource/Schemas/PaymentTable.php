@@ -75,6 +75,8 @@ class PaymentTable
             ->filtersFormColumns(2)
             ->actions([
                 ViewAction::make()
+                    ->modalHeading('Detail Pembayaran')
+                    ->button()
             ])
             ->bulkActions([
                 //

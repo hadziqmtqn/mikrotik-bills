@@ -104,13 +104,12 @@ class BankAccountResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 ActionGroup::make([
-                    EditAction::make(),
-                    DeleteAction::make(),
-                    RestoreAction::make(),
-                    ForceDeleteAction::make(),
+                    EditAction::make()->modalHeading('Ubah Rekening Bank'),
+                    DeleteAction::make()->modalHeading('Hapus rekening bank'),
+                    RestoreAction::make()->modalHeading('Pulihkan data'),
+                    ForceDeleteAction::make()->modalHeading('Hapus selamanya'),
                 ])
-                ->link()
-                ->label('Actions'),
+                ->button()
             ])
             ->bulkActions([
                 //
