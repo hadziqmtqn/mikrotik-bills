@@ -17,6 +17,7 @@ use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Resources\RoleResource;
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -133,7 +134,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentApexChartsPlugin::make()
+                FilamentApexChartsPlugin::make(),
+                FilamentDeveloperLoginsPlugin::make()
+                    ->enabled(app()->environment('local'))
+                    ->users([
+                        'Super Admin' => 'superadmin@bkn.my.id',
+                    ])
             ])
             ->authMiddleware([
                 Authenticate::class,
