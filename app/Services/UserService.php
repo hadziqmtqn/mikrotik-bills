@@ -3,15 +3,18 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserService
 {
-    public static function dropdownOptions($selfId = null): array
+    public static function dropdownOptions($selfId = null, $accountType = null): array
     {
         return User::with('userProfile')
-            ->whereHas('userProfile')
-            ->whereHas('roles', fn($query) => $query->where('name', 'user'))
-            ->when($selfId, function ($query) use ($selfId) {
+            ->whereHas('userProfile', function (Builder $query) use ($accountType) {
+                $query->when($accountType, fn(Builder $query) => $query->where('account_type', $accountType));
+            })
+            ->whereHas('roles', fn(Builder $query) => $query->where('name', 'user'))
+            ->when($selfId, function (Builder $query) use ($selfId) {
                 return $query->where('id', $selfId);
             })
             ->orderBy('name')

@@ -9,6 +9,10 @@ class CreateInvoice extends CreateRecord
 {
     protected static string $resource = InvoiceResource::class;
 
+    protected static ?string $title = 'Tambah Faktur';
+
+    protected static bool $canCreateAnother = false;
+
     protected function getHeaderActions(): array
     {
         return [

@@ -17,6 +17,8 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
     protected static string $relationship = 'payments';
     protected static ?string $recordTitleAttribute = 'number';
 
+    protected static ?string $title = 'Pembayaran';
+
     public static function getPermissionPrefixes(): array
     {
         // TODO: Implement getPermissionPrefixes() method.
@@ -75,6 +77,7 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->label('Tambah Pembayaran')
                     ->createAnother(false)
                     ->visible(fn() => $invoice->status === StatusData::UNPAID->value && $invoice?->payments()->count() === 0)
                     ->closeModalByClickingAway(false)
@@ -85,18 +88,13 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
                     })
             ])
             ->filters([
-                //Tables\Filters\TrashedFilter::make()
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                /*Tables\Actions\DeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
-                Tables\Actions\ForceDeleteAction::make()*/
             ])
             ->bulkActions([
-                /*Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),*/
+                //
             ]);
     }
 }
