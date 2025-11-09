@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
+use App\Services\CustomerServicesService;
 use App\Services\UserService;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
@@ -44,9 +46,14 @@ class InvoiceForm
 
                                         return UserService::dropdownOptions(accountType: $accountType);
                                     })
+                                    ->searchable()
+                                    ->preload()
                                     ->required()
                                     ->native(false)
                                     ->reactive()
+                                    ->afterStateUpdated(function (callable $set): void {
+                                        $set('invoice_items', null);
+                                    })
                             ]),
 
                         Section::make('Masa Faktur')
@@ -69,6 +76,32 @@ class InvoiceForm
                                     ->placeholder('Masukkan tanggal jatuh tempo')
                                     ->closeOnDateSelection(),
                             ]),
+
+                        Section::make('Item Tagihan')
+                            ->schema([
+                                CheckboxList::make('invoice_items')
+                                    ->label('Item Layanan')
+                                    ->options(function (Get $get): array {
+                                        $userId = $get('user_id');
+
+                                        if (!$userId) return [];
+
+                                        return collect(CustomerServicesService::options($userId))
+                                            ->map(fn($data) => $data['name'])
+                                            ->toArray();
+                                    })
+                                    ->descriptions(function (Get $get): array {
+                                        $userId = $get('user_id');
+
+                                        if (!$userId) return [];
+
+                                        return collect(CustomerServicesService::options($userId))
+                                            ->map(fn($data) => 'Rp' . number_format($data['price'],0,',','.'))
+                                            ->toArray();
+                                    })
+                                    ->required()
+                                    ->reactive()
+                            ])
                     ]),
 
                 Group::make()
