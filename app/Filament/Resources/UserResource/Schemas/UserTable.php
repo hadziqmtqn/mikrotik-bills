@@ -5,7 +5,6 @@ namespace App\Filament\Resources\UserResource\Schemas;
 use App\Enums\AccountType;
 use App\Filament\Exports\UserExporter;
 use App\Helpers\DateHelper;
-use App\Models\User;
 use Exception;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -127,13 +126,13 @@ class UserTable
                     EditAction::make()
                         ->closeModalByClickingAway(false),
                     DeleteAction::make()
-                        ->visible(fn(User $record): bool => $record->invoices->count() === 0 || $record->customerServices->count() === 0),
-                    RestoreAction::make(),
+                        ->modalHeading('Hapus Pelanggan'),
+                    RestoreAction::make()
+                        ->modalHeading('Pulihkan Data'),
                     ForceDeleteAction::make()
-                        ->visible(fn(User $record): bool => $record->invoices->count() === 0 || $record->customerServices->count() === 0),
+                        ->modalHeading('Hapus Selamanya'),
                 ])
-                    ->link()
-                    ->label('Actions')
+                    ->button()
             ])
             ->bulkActions([
                 BulkActionGroup::make([

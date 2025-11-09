@@ -9,6 +9,8 @@ class CreateServicePackage extends CreateRecord
 {
     protected static string $resource = ServicePackageResource::class;
 
+    protected static ?string $title = 'Buat Paket Layanan';
+
     protected function getHeaderActions(): array
     {
         return [

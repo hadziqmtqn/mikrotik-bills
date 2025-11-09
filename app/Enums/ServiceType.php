@@ -2,11 +2,14 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumOptions;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum ServiceType: string implements HasLabel, HasColor
 {
+    use EnumOptions;
+
     case HOTSPOT = 'hotspot';
     case PPPOE = 'pppoe';
 
@@ -26,13 +29,5 @@ enum ServiceType: string implements HasLabel, HasColor
             self::HOTSPOT => 'primary',
             self::PPPOE => 'danger',
         };
-    }
-
-    public static function options(): array
-    {
-        return [
-            self::HOTSPOT->value => self::HOTSPOT->getLabel(),
-            self::PPPOE->value => self::PPPOE->getLabel(),
-        ];
     }
 }

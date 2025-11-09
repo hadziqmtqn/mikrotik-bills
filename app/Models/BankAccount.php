@@ -38,6 +38,11 @@ class BankAccount extends Model
         });
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'bank_account_id');
+    }
+
     // TODO Scopes
     #[Scope]
     protected function active(Builder $query): Builder

@@ -27,8 +27,6 @@ class BankAccountResource extends Resource implements HasShieldPermissions
     protected static ?string $model = BankAccount::class;
     protected static ?string $slug = 'bank-accounts';
     protected static ?string $navigationLabel = 'Rekening Bank';
-    protected static ?string $navigationGroup = 'Payment';
-    protected static ?int $navigationSort = 1;
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
     public static function getPermissionPrefixes(): array
@@ -106,13 +104,12 @@ class BankAccountResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 ActionGroup::make([
-                    EditAction::make(),
-                    DeleteAction::make(),
-                    RestoreAction::make(),
-                    ForceDeleteAction::make(),
+                    EditAction::make()->modalHeading('Ubah Rekening Bank'),
+                    DeleteAction::make()->modalHeading('Hapus rekening bank'),
+                    RestoreAction::make()->modalHeading('Pulihkan data'),
+                    ForceDeleteAction::make()->modalHeading('Hapus selamanya'),
                 ])
-                ->link()
-                ->label('Actions'),
+                ->button()
             ])
             ->bulkActions([
                 //

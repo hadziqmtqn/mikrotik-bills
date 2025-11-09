@@ -31,31 +31,34 @@ class UserPolicy
 
     public function delete(User $user, User $model): bool
     {
-        return $user->can('delete_user');
+        $model->loadCount('invoices')
+            ->loadCount('customerServices');
+
+        return $user->can('delete_user') && $model->invoices_count === 0 && $model->customer_services_count === 0;
     }
 
     public function deleteAny(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return false;
     }
 
     public function restore(User $user, User $model): bool
     {
-        return $user->can('restore_user');
+        return $user->can('restore_user', $model);
     }
 
     public function restoreAny(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return false;
     }
 
     public function forceDelete(User $user, User $model): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->hasRole('super_admin', $model);
     }
 
     public function forceDeleteAny(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return false;
     }
 }

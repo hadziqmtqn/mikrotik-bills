@@ -14,13 +14,12 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-    
+
 class PaymentResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Payment::class;
     protected static ?string $slug = 'payments';
     protected static ?string $navigationLabel = 'Pembayaran';
-    protected static ?string $navigationGroup = 'Payment';
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function getPermissionPrefixes(): array

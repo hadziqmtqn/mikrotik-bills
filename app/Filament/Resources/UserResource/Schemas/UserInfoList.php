@@ -21,7 +21,7 @@ class UserInfoList
             ->schema([
                 Group::make()
                     ->schema([
-                        Section::make('Profile')
+                        Section::make('Profil')
                             ->inlineLabel()
                             ->schema([
                                 TextEntry::make('userProfile.account_type')
@@ -56,7 +56,7 @@ class UserInfoList
                                     ->color(fn($state): string => $state ? 'success' : 'danger'),
                             ]),
 
-                        Section::make('Address')
+                        Section::make('Alamat')
                             ->inlineLabel()
                             ->schema([
                                 TextEntry::make('userProfile.place_name')

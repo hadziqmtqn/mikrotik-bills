@@ -32,7 +32,9 @@ class BankAccountPolicy
 
     public function delete(User $user, BankAccount $bankAccount): bool
     {
-        return $user->can('delete_bank::account', $bankAccount);
+        $bankAccount->loadCount('payments');
+
+        return $user->can('delete_bank::account') && $bankAccount->payments_count === 0;
     }
 
     public function restore(User $user, BankAccount $bankAccount): bool

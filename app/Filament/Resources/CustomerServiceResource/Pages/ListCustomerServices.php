@@ -10,10 +10,13 @@ class ListCustomerServices extends ListRecords
 {
     protected static string $resource = CustomerServiceResource::class;
 
+    protected static ?string $title = 'Layanan Pelanggan';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah Baru'),
         ];
     }
 }

@@ -32,6 +32,8 @@ class InvoicePolicy
 
     public function delete(User $user, Invoice $invoice): bool
     {
-        return $user->can('delete_invoice', $invoice);
+        $invoice->loadCount('payments');
+
+        return $user->can('delete_invoice') && $invoice->payments_count === 0;
     }
 }

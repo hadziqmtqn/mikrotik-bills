@@ -10,10 +10,13 @@ class ListInvoices extends ListRecords
 {
     protected static string $resource = InvoiceResource::class;
 
+    protected static ?string $title = 'Faktur';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->hidden(),
+            CreateAction::make()
+                ->label('Tambah Baru'),
         ];
     }
 

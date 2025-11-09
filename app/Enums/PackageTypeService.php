@@ -2,11 +2,14 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumOptions;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum PackageTypeService: string implements HasLabel, HasColor
 {
+    use EnumOptions;
+
     case SUBSCRIPTION = 'subscription';
     case ONE_TIME = 'one-time';
 
@@ -24,14 +27,6 @@ enum PackageTypeService: string implements HasLabel, HasColor
             self::SUBSCRIPTION => 'primary',
             self::ONE_TIME => 'warning',
         };
-    }
-
-    public static function options(): array
-    {
-        return [
-            self::SUBSCRIPTION->value => self::SUBSCRIPTION->getLabel(),
-            self::ONE_TIME->value => self::ONE_TIME->getLabel(),
-        ];
     }
 
     public static function colors(): array
