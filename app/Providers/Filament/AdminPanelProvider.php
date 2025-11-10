@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Clusters\ReferenceCluster;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\AdminResource;
 use App\Filament\Resources\ApplicationResource;
@@ -107,6 +108,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('30s')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
                 Dashboard::class,
             ])
@@ -174,6 +176,7 @@ class AdminPanelProvider extends PanelProvider
                         NavigationGroup::make('Pengaturan')
                             ->icon('heroicon-o-cog')
                             ->items([
+                                ...ReferenceCluster::getNavigationItems(),
                                 ...$this->filterResourceNavigationItems(RouterResource::class),
                                 ...$this->filterResourceNavigationItems(AdminResource::class),
                                 ...$this->filterResourceNavigationItems(ApplicationResource::class),

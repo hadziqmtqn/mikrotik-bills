@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class ExtraCost extends Model
@@ -31,5 +32,10 @@ class ExtraCost extends Model
         static::creating(function (ExtraCost $extraCost) {
             $extraCost->slug = Str::uuid()->toString();
         });
+    }
+
+    public function invExtraCosts(): HasMany
+    {
+        return $this->hasMany(InvExtraCost::class, 'extra_cost_id');
     }
 }
