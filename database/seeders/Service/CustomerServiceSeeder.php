@@ -3,6 +3,8 @@
 namespace Database\Seeders\Service;
 
 use App\Models\CustomerService;
+use App\Models\ExtraCost;
+use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\InvCustomerService;
 use App\Models\Payment;
@@ -23,6 +25,8 @@ class CustomerServiceSeeder extends Seeder
             ->active()
             ->limit(40)
             ->get();
+
+        $extraCosts = ExtraCost::pluck('fee', 'id');
 
         foreach ($users as $user) {
             $servicePackage = ServicePackage::where('plan_type', $user->userProfile?->account_type)
@@ -52,7 +56,7 @@ class CustomerServiceSeeder extends Seeder
             $invoice->status = $customerService->status == 'active' ? 'paid' : 'unpaid';
             $invoice->save();
 
-            // TODO Invoice Items
+            // TODO Item Customer Service
             $invCustomerService = InvCustomerService::query()
                 ->where('customer_service_id', $customerService->id)
                 ->lockForUpdate()
@@ -62,12 +66,24 @@ class CustomerServiceSeeder extends Seeder
             $invCustomerService->amount = $customerService->price;
             $invCustomerService->save();
 
+            // TODO Extra Cost
+            $totalFee = 0;
+            foreach ($extraCosts as $key => $extraCost) {
+                $invExtraCost = new InvExtraCost();
+                $invExtraCost->invoice_id = $invoice->id;
+                $invExtraCost->extra_cost_id = $key;
+                $invExtraCost->fee = $extraCost;
+                $invExtraCost->save();
+
+                $totalFee += $extraCost;
+            }
+
             // TODO Payment
             if ($invoice->status == 'paid') {
                 $payment = new Payment();
                 $payment->user_id = $user->id;
                 $payment->invoice_id = $invoice->id;
-                $payment->amount = $customerService->price;
+                $payment->amount = $customerService->price + $totalFee;
                 $payment->payment_method = 'cash';
                 $payment->date = $invoice->date->addDays(2);
                 $payment->status = 'paid';
