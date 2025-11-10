@@ -94,7 +94,7 @@ class ViewInvoice extends ViewRecord
 
                         Section::make('Items')
                             ->schema([
-                                RepeatableEntry::make('invoiceItems')
+                                RepeatableEntry::make('invCustomerServices')
                                     ->hiddenLabel()
                                     ->schema([
                                         TextEntry::make('customerService.reference_number')

@@ -18,7 +18,6 @@ class InvoiceSettingResource extends Resource implements HasShieldPermissions
     protected static ?string $model = InvoiceSetting::class;
     protected static ?string $slug = 'invoice-settings';
     protected static ?string $navigationLabel = 'Pengaturan Tagihan';
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 
     public static function getNavigationUrl(): string
     {

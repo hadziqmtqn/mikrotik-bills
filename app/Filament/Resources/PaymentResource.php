@@ -20,7 +20,6 @@ class PaymentResource extends Resource implements HasShieldPermissions
     protected static ?string $model = Payment::class;
     protected static ?string $slug = 'payments';
     protected static ?string $navigationLabel = 'Pembayaran';
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function getPermissionPrefixes(): array
     {

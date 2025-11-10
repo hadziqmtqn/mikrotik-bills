@@ -25,6 +25,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Livewire\Notifications;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
@@ -36,6 +37,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -148,36 +150,43 @@ class AdminPanelProvider extends PanelProvider
                 return $navigationBuilder
                     ->items([
                         ...Dashboard::getNavigationItems(),
-                        ...$this->filterResourceNavigationItems(UserResource::class)
                     ])
                     ->groups([
-                        NavigationGroup::make('Service')
+                        NavigationGroup::make('Layanan')
+                            ->icon('heroicon-o-server-stack')
                             ->items([
+                                ...$this->filterResourceNavigationItems(UserResource::class),
                                 ...$this->filterResourceNavigationItems(ServicePackageResource::class),
                                 ...$this->filterResourceNavigationItems(CustomerServiceResource::class),
                             ]),
-                        NavigationGroup::make('Payment')
+                        NavigationGroup::make('Pembayaran')
+                            ->icon('heroicon-o-credit-card')
                             ->items([
                                 ...$this->filterResourceNavigationItems(PaymentResource::class),
                                 ...$this->filterResourceNavigationItems(BankAccountResource::class),
                             ]),
-                        NavigationGroup::make('Invoice')
+                        NavigationGroup::make('Faktur')
+                            ->icon('heroicon-o-receipt-percent')
                             ->items([
                                 ...$this->filterResourceNavigationItems(InvoiceSettingResource::class),
                                 ...$this->filterResourceNavigationItems(InvoiceResource::class),
                             ]),
-                        NavigationGroup::make('Network')
+                        NavigationGroup::make('Pengaturan')
+                            ->icon('heroicon-o-cog')
                             ->items([
                                 ...$this->filterResourceNavigationItems(RouterResource::class),
-                            ]),
-                        NavigationGroup::make('System')
-                            ->items([
-                                ...$this->filterResourceNavigationItems(RoleResource::class),
                                 ...$this->filterResourceNavigationItems(AdminResource::class),
                                 ...$this->filterResourceNavigationItems(ApplicationResource::class),
                             ]),
                     ]);
             })
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Roles')
+                    ->url(fn(): string => RoleResource::getUrl())
+                    ->icon('heroicon-o-shield-check')
+                    ->visible(fn(): bool => Auth::check() && Auth::user()->can('view_any_role'))
+            ])
             ->spa()
             ->spaUrlExceptions([
                 '*/users/*'
