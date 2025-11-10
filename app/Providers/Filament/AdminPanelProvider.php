@@ -6,7 +6,6 @@ use App\Filament\Clusters\ReferenceCluster;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\AdminResource;
 use App\Filament\Resources\ApplicationResource;
-use App\Filament\Resources\BankAccountResource;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceSettingResource;
@@ -17,11 +16,11 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
 use App\Models\Application;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\RoleResource;
 use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -161,17 +160,12 @@ class AdminPanelProvider extends PanelProvider
                                 ...$this->filterResourceNavigationItems(ServicePackageResource::class),
                                 ...$this->filterResourceNavigationItems(CustomerServiceResource::class),
                             ]),
-                        NavigationGroup::make('Pembayaran')
-                            ->icon('heroicon-o-credit-card')
-                            ->items([
-                                ...$this->filterResourceNavigationItems(PaymentResource::class),
-                                ...$this->filterResourceNavigationItems(BankAccountResource::class),
-                            ]),
                         NavigationGroup::make('Faktur')
                             ->icon('heroicon-o-receipt-percent')
                             ->items([
                                 ...$this->filterResourceNavigationItems(InvoiceSettingResource::class),
                                 ...$this->filterResourceNavigationItems(InvoiceResource::class),
+                                ...$this->filterResourceNavigationItems(PaymentResource::class),
                             ]),
                         NavigationGroup::make('Pengaturan')
                             ->icon('heroicon-o-cog')

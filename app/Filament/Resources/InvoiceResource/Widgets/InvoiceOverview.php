@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceResource\Widgets;
 
+use App\Enums\StatusData;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
 use App\Models\Invoice;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
@@ -22,17 +23,28 @@ class InvoiceOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total', number_format($this->getPageTableQuery()->get()->sum(fn(Invoice $invoice) => $invoice->total_price),0,',','.'))
+            Stat::make('Total', $this->data())
                 ->description('Total Tagihan')
                 ->color('success'),
 
-            Stat::make('Total Paid', number_format($this->getPageTableQuery()->where('status', 'paid')->get()->sum(fn(Invoice $invoice) => $invoice->total_price),0,',','.'))
+            Stat::make('Total Paid', $this->data(inStatus: StatusData::PAID->value))
                 ->description('Total lunas')
                 ->color('info'),
 
-            Stat::make('Total Unpiad', number_format($this->getPageTableQuery()->where('status', '!=', 'paid')->get()->sum(fn(Invoice $invoice) => $invoice->total_price),0,',','.'))
+            Stat::make('Total Unpiad', $this->data(notInStatus: StatusData::PAID->value))
                 ->description('Total tidak lunas')
                 ->color('danger'),
         ];
+    }
+
+    private function data($inStatus = null, $notInStatus = null): string
+    {
+        return number_format($this->getPageTableQuery()
+            ->when($inStatus, fn($query) => $query->where('status', $inStatus))
+            ->when($notInStatus, fn($query) => $query->where('status', '!=', $notInStatus))
+            ->get()
+            ->sum(function (Invoice $invoice): int {
+                return $invoice->total_price ?? 0;
+            }),0,',','.');
     }
 }

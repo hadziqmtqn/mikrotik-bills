@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Service;
 
+use App\Enums\ServiceType;
 use App\Models\CustomerService;
 use App\Models\ExtraCost;
 use App\Models\InvExtraCost;
@@ -68,14 +69,17 @@ class CustomerServiceSeeder extends Seeder
 
             // TODO Extra Cost
             $totalFee = 0;
-            foreach ($extraCosts as $key => $extraCost) {
-                $invExtraCost = new InvExtraCost();
-                $invExtraCost->invoice_id = $invoice->id;
-                $invExtraCost->extra_cost_id = $key;
-                $invExtraCost->fee = $extraCost;
-                $invExtraCost->save();
 
-                $totalFee += $extraCost;
+            if ($servicePackage->service_type === ServiceType::HOTSPOT->value && $servicePackage->limit_type == 'data') {
+                foreach ($extraCosts as $key => $extraCost) {
+                    $invExtraCost = new InvExtraCost();
+                    $invExtraCost->invoice_id = $invoice->id;
+                    $invExtraCost->extra_cost_id = $key;
+                    $invExtraCost->fee = $extraCost;
+                    $invExtraCost->save();
+
+                    $totalFee += $extraCost;
+                }
             }
 
             // TODO Payment

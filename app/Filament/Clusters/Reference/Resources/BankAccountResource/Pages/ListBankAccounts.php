@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\BankAccountResource\Pages;
+namespace App\Filament\Clusters\Reference\Resources\BankAccountResource\Pages;
 
-use App\Filament\Resources\BankAccountResource;
+use App\Filament\Clusters\Reference\Resources\BankAccountResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
