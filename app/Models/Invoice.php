@@ -41,9 +41,9 @@ class Invoice extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function invoiceItems(): HasMany
+    public function invCustomerServices(): HasMany
     {
-        return $this->hasMany(InvoiceItem::class, 'invoice_id');
+        return $this->hasMany(InvCustomerService::class, 'invoice_id');
     }
 
     public function payments(): HasMany
@@ -60,7 +60,7 @@ class Invoice extends Model
     protected function totalPrice(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->invoiceItems->sum('amount'),
+            get: fn() => $this->invCustomerServices->sum('amount'),
         );
     }
 

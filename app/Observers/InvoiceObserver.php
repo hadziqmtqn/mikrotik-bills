@@ -33,7 +33,7 @@ class InvoiceObserver
         }
 
         if ($invoice->status === StatusData::CANCELLED->value) {
-            CustomerService::whereHas('invoiceItems', fn($query) => $query->where('invoice_id', $invoice->id))
+            CustomerService::whereHas('invCustomerServices', fn($query) => $query->where('invoice_id', $invoice->id))
                 ->update([
                     'status' => StatusData::CANCELLED->value,
                     'notes' => 'Layanan pelanggan dibatalkan otomatis karena tagihan tidak dibayar setelah tanggal jatuh tempo.',
@@ -41,7 +41,7 @@ class InvoiceObserver
         }
 
         if ($invoice->status === StatusData::PAID->value) {
-            $invoiceItems = $invoice->invoiceItems;
+            $invoiceItems = $invoice->invCustomerServices;
             foreach ($invoiceItems as $item) {
                 $customerService = $item->customerService;
                 $customerService->status = StatusData::ACTIVE->value;

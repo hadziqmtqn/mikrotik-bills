@@ -90,8 +90,8 @@ class InvoiceResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user', 'invoiceItems.customerService'])
-            ->whereHas('invoiceItems');
+            ->with(['user', 'invCustomerServices.customerService'])
+            ->whereHas('invCustomerServices');
     }
 
     public static function getRelations(): array

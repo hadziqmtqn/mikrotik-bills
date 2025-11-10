@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\CustomerService;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
+use App\Models\InvCustomerService;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Support\Str;
 
@@ -29,7 +29,7 @@ class CustomerServiceObserver
         $invoice->save();
 
         // TODO Create Invoice Items
-        $invoiceItem = new InvoiceItem();
+        $invoiceItem = new InvCustomerService();
         $invoiceItem->invoice_id = $invoice->id;
         $invoiceItem->customer_service_id = $customerService->id;
         $invoiceItem->amount = $customerService->price;

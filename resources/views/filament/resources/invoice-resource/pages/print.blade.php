@@ -91,7 +91,7 @@
                 </thead>
                 <tbody>
                 <tr>
-                    @foreach($invoice->invoiceItems as $item)
+                    @foreach($invoice->invCustomerServices as $item)
                         <td class="ci-border-b ci-py-3 ci-pl-3">{{ $loop->iteration }}.</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->customerService?->servicePackage?->package_name }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>

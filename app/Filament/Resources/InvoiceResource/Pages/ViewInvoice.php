@@ -50,7 +50,7 @@ class ViewInvoice extends ViewRecord
                 ->savePdf()
                 ->content(
                     fn(Invoice $record): View => view('filament.resources.invoice-resource.pages.print', [
-                        'invoice' => $record->loadMissing('user:id,name,email', 'user.userProfile', 'invoiceItems.customerService.servicePackage'),
+                        'invoice' => $record->loadMissing('user:id,name,email', 'user.userProfile', 'invCustomerServices.customerService.servicePackage'),
                         'application' => Application::first(),
                         'bankAccounts' => BankAccount::where('is_active', true)
                             ->orderBy('bank_name')

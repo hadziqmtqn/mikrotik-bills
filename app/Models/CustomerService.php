@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([CustomerServiceObserver::class])]
@@ -56,9 +55,9 @@ class CustomerService extends Model
         return $this->belongsTo(ServicePackage::class, 'service_package_id');
     }
 
-    public function invoiceItems(): HasMany
+    public function invCustomerServices(): HasMany
     {
-        return $this->hasMany(InvoiceItem::class, 'customer_service_id');
+        return $this->hasMany(InvCustomerService::class, 'customer_service_id');
     }
 
     // TODO Scopes

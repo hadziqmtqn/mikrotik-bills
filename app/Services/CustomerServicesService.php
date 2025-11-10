@@ -20,7 +20,7 @@ class CustomerServicesService
                 'package_type' => PackageTypeService::SUBSCRIPTION->value
             ])
             ->where(function (Builder $query) {
-                $query->whereHas('invoiceItems.invoice.payments', function (Builder $query) {
+                $query->whereHas('invCustomerServices.invoice.payments', function (Builder $query) {
                     $query->where('status', StatusData::PAID->value);
                     $query->whereDate('date', '<=', now()->subMonth()->lastOfMonth());
                 });
