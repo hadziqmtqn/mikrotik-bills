@@ -93,7 +93,7 @@ class InvoiceResource extends Resource implements HasShieldPermissions
     {
         return parent::getEloquentQuery()
             ->with([
-                'user',
+                'user.userProfile',
                 'invCustomerServices.customerService',
                 'invExtraCosts.extraCost'
             ])

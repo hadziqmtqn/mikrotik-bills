@@ -6,7 +6,6 @@ use App\Enums\AccountType;
 use App\Enums\BillingType;
 use App\Services\CustomerServicesService;
 use App\Services\ExtraCostService;
-use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
@@ -16,6 +15,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class InvoiceForm
@@ -43,15 +44,20 @@ class InvoiceForm
 
                                 Select::make('user_id')
                                     ->label('Pelanggan')
-                                    ->options(function (Get $get): array {
+                                    ->relationship(name: 'user', titleAttribute: 'name', modifyQueryUsing: function (Builder $query, callable $get) {
                                         $accountType = $get('account_type');
 
-                                        if (!$accountType) return [];
-
-                                        return UserService::dropdownOptions(accountType: $accountType);
+                                        $query->whereHas('roles', fn(Builder $query) => $query->where('name', 'user'));
+                                        $query->whereHas('userProfile', function (Builder $query) use ($accountType) {
+                                            $query->when($accountType, fn(Builder $query) => $query->where('account_type', $accountType));
+                                        });
+                                        $query->where('is_active', true);
+                                        $query->orderBy('name');
                                     })
+                                    ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->name . ' (' . $record->userProfile?->ppoe_name . ')')
                                     ->searchable()
                                     ->preload()
+                                    ->disabled(fn(Get $get): bool => !$get('account_type'))
                                     ->required()
                                     ->native(false)
                                     ->reactive()
