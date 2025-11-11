@@ -143,8 +143,6 @@ class ViewInvoice extends ViewRecord
                                     ->tooltip(fn($state): string => 'Dibatalkan pada ' . DateHelper::indonesiaDate($state, 'D MMMM Y HH:mm')),
 
                                 TextEntry::make('status')
-                                    ->weight(FontWeight::Bold)
-                                    ->size(TextEntry\TextEntrySize::Large)
                                     ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
                                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? '-'),
                             ]),

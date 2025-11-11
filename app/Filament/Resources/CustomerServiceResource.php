@@ -19,9 +19,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CustomerServiceResource extends Resource implements HasShieldPermissions
 {
+
     protected static ?string $model = CustomerService::class;
+
     protected static ?string $slug = 'customer-services';
+
     protected static ?string $navigationLabel = 'Layanan Pelanggan';
+
+    protected static ?string $breadcrumb = 'Layanan Pelanggan';
+
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getPermissionPrefixes(): array

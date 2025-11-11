@@ -3,16 +3,20 @@
 namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
+use App\Enums\BillingType;
 use App\Services\CustomerServicesService;
+use App\Services\ExtraCostService;
 use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Illuminate\Support\HtmlString;
 
 class InvoiceForm
 {
@@ -51,8 +55,8 @@ class InvoiceForm
                                     ->required()
                                     ->native(false)
                                     ->reactive()
-                                    ->afterStateUpdated(function (callable $set): void {
-                                        $set('invoice_items', null);
+                                    ->afterStateUpdated(function ($state, callable $set): void {
+                                        $set('inv_customer_services', []);
                                     })
                             ]),
 
@@ -79,15 +83,16 @@ class InvoiceForm
 
                         Section::make('Item Tagihan')
                             ->schema([
-                                CheckboxList::make('invoice_items')
+                                CheckboxList::make('inv_customer_services')
                                     ->label('Item Layanan')
+                                    ->bulkToggleable()
                                     ->options(function (Get $get): array {
                                         $userId = $get('user_id');
 
                                         if (!$userId) return [];
 
                                         return collect(CustomerServicesService::options($userId))
-                                            ->map(fn($data) => $data['name'])
+                                            ->mapWithKeys(fn($data, $id) => [$id => $data['name']])
                                             ->toArray();
                                     })
                                     ->descriptions(function (Get $get): array {
@@ -96,10 +101,26 @@ class InvoiceForm
                                         if (!$userId) return [];
 
                                         return collect(CustomerServicesService::options($userId))
-                                            ->map(fn($data) => 'Rp' . number_format($data['price'],0,',','.'))
+                                            ->mapWithKeys(fn($data, $id) => [$id => 'Rp' . number_format($data['price'], 0, ',', '.') . ' (' . $data['packageType'] . ')'])
                                             ->toArray();
                                     })
                                     ->required()
+                                    ->reactive(),
+
+                                CheckboxList::make('inv_extra_costs')
+                                    ->label('Biaya Tambahan')
+                                    ->bulkToggleable()
+                                    ->columns()
+                                    ->options(function (): array {
+                                        return collect(ExtraCostService::options(BillingType::RECURRING->value))
+                                            ->mapWithKeys(fn($data, $id) => [$id => $data['name']])
+                                            ->toArray();
+                                    })
+                                    ->descriptions(function (): array {
+                                        return collect(ExtraCostService::options(BillingType::RECURRING->value))
+                                            ->mapWithKeys(fn($data, $id) => [$id => 'Rp' . number_format($data['fee'], 0, ',', '.')])
+                                            ->toArray();
+                                    })
                                     ->reactive()
                             ])
                     ]),
@@ -109,7 +130,31 @@ class InvoiceForm
                     ->schema([
                         Section::make('Ringkasan')
                             ->schema([
+                                Placeholder::make('total')
+                                    ->label('Total Faktur')
+                                    ->content(function (Get $get): string|HtmlString {
+                                        $userId = $get('user_id');
 
+                                        if (!$userId) {
+                                            $total = 0;
+                                        }else {
+                                            // Ambil data item layanan
+                                            $totalInvoice = collect(CustomerServicesService::options($userId))
+                                                ->only(collect($get('inv_customer_services') ?? []))
+                                                ->sum('price');
+
+                                            // Ambil data biaya tambahan
+                                            $totalExtra = collect(ExtraCostService::options(BillingType::RECURRING->value))
+                                                ->only(collect($get('inv_extra_costs') ?? []))
+                                                ->sum('fee');
+
+                                            $total = $totalInvoice + $totalExtra;
+                                            $total = number_format($total, 0, ',', '.');
+                                        }
+
+                                        return new HtmlString('<span style="font-weight: bold; color: #00bb00; font-size: large">Rp '. $total .'</span>');
+                                    })
+                                    ->reactive(),
                             ])
                     ]),
             ]);

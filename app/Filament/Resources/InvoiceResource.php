@@ -20,8 +20,12 @@ use Illuminate\Database\Eloquent\Model;
 class InvoiceResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Invoice::class;
+
     protected static ?string $slug = 'invoices';
+
     protected static ?string $navigationLabel = 'Faktur';
+
+    protected static ?string $breadcrumb = 'Faktur';
 
     public static function getPermissionPrefixes(): array
     {
@@ -53,7 +57,6 @@ class InvoiceResource extends Resource implements HasShieldPermissions
         return [
             'index' => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
-            //'edit' => Pages\EditInvoice::route('/{record}/edit'),
             'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }

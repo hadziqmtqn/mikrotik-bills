@@ -98,7 +98,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Poppins')
             ->collapsibleNavigationGroups(false)
-            ->breadcrumbs(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop(false)
             ->unsavedChangesAlerts(false)

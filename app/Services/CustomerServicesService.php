@@ -27,9 +27,12 @@ class CustomerServicesService
             })
             ->get()
             ->mapWithKeys(function (CustomerService $customerService) {
+                $packageType = $customerService->package_type;
+
                 return [$customerService->id => [
                     'name' => $customerService->servicePackage?->package_name,
-                    'price' => $customerService->price
+                    'price' => $customerService->price,
+                    'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType
                 ]];
             })
             ->toArray();

@@ -18,8 +18,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PaymentResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Payment::class;
+
     protected static ?string $slug = 'payments';
+
     protected static ?string $navigationLabel = 'Pembayaran';
+
+    protected static ?string $breadcrumb = 'Pembayaran';
 
     public static function getPermissionPrefixes(): array
     {
