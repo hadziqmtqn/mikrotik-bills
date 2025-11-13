@@ -82,7 +82,6 @@
             <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
                 <thead>
                 <tr>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-3 ci-font-bold ci-text-main">#</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Nama Item</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-right ci-font-bold ci-text-main">Harga</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-center ci-font-bold ci-text-main">Qty.</td>
@@ -90,15 +89,22 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    @foreach($invoice->invCustomerServices as $item)
-                        <td class="ci-border-b ci-py-3 ci-pl-3">{{ $loop->iteration }}.</td>
+                @foreach($invoice->invCustomerServices as $item)
+                    <tr>
                         <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->customerService?->servicePackage?->package_name }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
-                    @endforeach
-                </tr>
+                    </tr>
+                @endforeach
+                @foreach($invoice->invExtraCosts as $item)
+                    <tr>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->extraCost?->name }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
+                    </tr>
+                @endforeach
                 <tr>
                     <td colspan="5">
                         <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
@@ -137,7 +143,7 @@
         </div>
 
         <div class="ci-px-14 ci-text-sm ci-text-neutral-700">
-            <p class="ci-text-main ci-font-bold">DETAIL PEMBAYARAN</p>
+            <p class="ci-text-main ci-font-bold">METODE PEMBAYARAN</p>
             <ul>
                 @foreach($bankAccounts as $bankAccount)
                     <li>{{ $bankAccount->short_name }} - <strong>{{ $bankAccount->account_number }}</strong> a/n {{ $bankAccount->account_name }}</li>

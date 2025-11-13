@@ -6,7 +6,9 @@ use App\Enums\PackageTypeService;
 use App\Models\CustomerService;
 use App\Models\ServicePackage;
 use App\Models\UserProfile;
+use App\Services\ExtraCostService;
 use App\Services\UserService;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
@@ -81,6 +83,16 @@ class CustomerServiceForm
                                             ->numeric()
                                             ->prefix('Rp'),
                                     ])
+                            ]),
+
+                        Section::make('Biaya Lain')
+                            ->schema([
+                                CheckboxList::make('inv_extra_costs')
+                                    ->label('Biaya Tambahan')
+                                    ->options(collect(ExtraCostService::options())->map(fn($data) => $data['name']))
+                                    ->descriptions(collect(ExtraCostService::options())->map(fn($data) => 'Rp' . number_format($data['fee'],0,',','.')))
+                                    ->columns()
+                                    ->bulkToggleable()
                             ])
                     ])
                     ->columnSpan([
