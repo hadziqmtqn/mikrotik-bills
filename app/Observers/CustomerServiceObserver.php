@@ -35,16 +35,4 @@ class CustomerServiceObserver
         $invoiceItem->amount = $customerService->price;
         $invoiceItem->save();
     }
-
-    public function updated(CustomerService $customerService): void
-    {
-    }
-
-    public function deleted(CustomerService $customerService): void
-    {
-    }
-
-    public function restored(CustomerService $customerService): void
-    {
-    }
 }

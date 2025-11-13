@@ -71,7 +71,11 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('user.userProfile', 'servicePackage')
+            ->with([
+                'user.userProfile',
+                'servicePackage',
+                'invCustomerServices'
+            ])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

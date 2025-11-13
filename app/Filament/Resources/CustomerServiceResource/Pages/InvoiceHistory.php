@@ -20,7 +20,7 @@ use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 class InvoiceHistory extends ManageRelatedRecords
 {
     protected static string $resource = CustomerServiceResource::class;
-    protected static string $relationship = 'invoiceItems';
+    protected static string $relationship = 'invCustomerServices';
     protected static ?string $title = 'Faktur';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
