@@ -36,10 +36,12 @@ class InvoiceActions
                             'user:id,name,email',
                             'user.userProfile',
                             'invCustomerServices.customerService.servicePackage',
-                            'invExtraCosts.extraCost:id,name'
+                            'invExtraCosts.extraCost:id,name',
+                            'payments'
                         ]),
                         'application' => Application::first(),
-                        'bankAccounts' => BankAccount::where('is_active', true)
+                        'bankAccounts' => BankAccount::query()
+                            ->where('is_active', true)
                             ->orderBy('bank_name')
                             ->get(),
                     ])
