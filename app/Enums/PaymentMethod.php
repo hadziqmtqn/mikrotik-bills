@@ -18,8 +18,8 @@ enum PaymentMethod: string implements HasLabel, HasColor, HasIcon
     {
         // TODO: Implement getLabel() method.
         return match ($this) {
-            self::CASH => 'Cash',
-            self::BANK_TRANSFER => 'Bank Transfer',
+            self::CASH => 'Tunai',
+            self::BANK_TRANSFER => 'Transfer Bank',
         };
     }
 

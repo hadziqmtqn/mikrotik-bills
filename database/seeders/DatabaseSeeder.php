@@ -9,6 +9,7 @@ use Database\Seeders\Auth\UserSeeder;
 use Database\Seeders\Network\RouterSeeder;
 use Database\Seeders\Reference\BankAccountSeeder;
 use Database\Seeders\Service\CustomerServiceSeeder;
+use Database\Seeders\Service\ExtraCostSeeder;
 use Database\Seeders\Service\ServicePackageSeeder;
 use Database\Seeders\Setting\ApplicationSeeder;
 use Database\Seeders\Setting\InvoiceSettingSeeder;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             BankAccountSeeder::class,
             ServicePackageSeeder::class,
+            ExtraCostSeeder::class,
             // PAYMENT
             InvoiceSettingSeeder::class,
             CustomerServiceSeeder::class,

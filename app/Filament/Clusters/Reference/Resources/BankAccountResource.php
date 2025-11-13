@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\Reference\Resources;
 
-use App\Filament\Resources\BankAccountResource\Pages;
+use App\Filament\Clusters\Reference\Resources\BankAccountResource\Pages\ListBankAccounts;
+use App\Filament\Clusters\ReferenceCluster;
 use App\Models\BankAccount;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
@@ -25,9 +26,17 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class BankAccountResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = BankAccount::class;
+
+
     protected static ?string $slug = 'bank-accounts';
+
     protected static ?string $navigationLabel = 'Rekening Bank';
+
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
+    protected static ?string $cluster = ReferenceCluster::class;
+
+    protected static ?int $navigationSort = 2;
 
     public static function getPermissionPrefixes(): array
     {
@@ -119,7 +128,7 @@ class BankAccountResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBankAccounts::route('/'),
+            'index' => ListBankAccounts::route('/'),
         ];
     }
 

@@ -20,20 +20,19 @@ class InvoiceObserver
         $invoice->code = 'INV' . Str::padLeft($invoice->serial_number, 6, '0');
     }
 
-    public function created(Invoice $invoice): void
-    {
-    }
-
     public function updated(Invoice $invoice): void
     {
         $invoice->refresh();
 
         if ($invoice->status === StatusData::OVERDUE->value) {
+            /**
+             * Tagihan yang sudah jatuh tempo dan belum dibayar sampai 7 hari kedepan, akan otomatis dibatalkan
+            */
             $invoice->cancel_date = Carbon::parse($invoice->due_date)->addDays($this->setting()?->cancel_after ?? 7);
         }
 
         if ($invoice->status === StatusData::CANCELLED->value) {
-            CustomerService::whereHas('invoiceItems', fn($query) => $query->where('invoice_id', $invoice->id))
+            CustomerService::whereHas('invCustomerServices', fn($query) => $query->where('invoice_id', $invoice->id))
                 ->update([
                     'status' => StatusData::CANCELLED->value,
                     'notes' => 'Layanan pelanggan dibatalkan otomatis karena tagihan tidak dibayar setelah tanggal jatuh tempo.',
@@ -41,8 +40,8 @@ class InvoiceObserver
         }
 
         if ($invoice->status === StatusData::PAID->value) {
-            $invoiceItems = $invoice->invoiceItems;
-            foreach ($invoiceItems as $item) {
+            $invCustomerServices = $invoice->invCustomerServices;
+            foreach ($invCustomerServices as $item) {
                 $customerService = $item->customerService;
                 $customerService->status = StatusData::ACTIVE->value;
                 $customerService->save();
@@ -50,13 +49,5 @@ class InvoiceObserver
         }
 
         $invoice->save();
-    }
-
-    public function deleted(Invoice $invoice): void
-    {
-    }
-
-    public function restored(Invoice $invoice): void
-    {
     }
 }

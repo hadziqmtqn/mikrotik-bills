@@ -2,17 +2,99 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
+use App\Enums\StatusData;
 use App\Filament\Resources\InvoiceResource;
+use App\Models\CustomerService;
+use App\Models\ExtraCost;
+use App\Models\InvCustomerService;
+use App\Models\InvExtraCost;
+use App\Models\Invoice;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CreateInvoice extends CreateRecord
 {
     protected static string $resource = InvoiceResource::class;
+
+    protected static ?string $title = 'Tambah Faktur';
+
+    protected static bool $canCreateAnother = false;
 
     protected function getHeaderActions(): array
     {
         return [
 
         ];
+    }
+
+    /**
+     * @throws Halt
+     */
+    protected function beforeValidate(): void
+    {
+        // Runs before the form fields are saved to the database.
+        $data = $this->form->getState();
+
+        $invoiceThisMonth = InvCustomerService::query()
+            ->whereHas('invoice', function (Builder $query) use ($data) {
+                $query->where('user_id', $data['user_id']);
+                $query->whereIn('status', [StatusData::PAID->value, StatusData::UNPAID->value]);
+                $query->whereMonth('date', date('m', strtotime($data['date'])));
+                $query->whereYear('date', date('Y', strtotime($data['date'])));
+            })
+            ->whereIn('id', $data['inv_customer_services'])
+            ->exists();
+
+        if ($invoiceThisMonth) {
+            Notification::make()
+                ->warning()
+                ->title('Faktur bulan ini telah dibuat dengan status lunas atau belum dibayar')
+                ->send();
+
+            throw new Halt();
+        }
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        /**
+         * Cek tagihan sesuai layanan pelanggan pada bulan saat ini dengan status sudah lunas atau masih tertunda
+         * jika ada tolak pembuatan faktur baru agar tidak duplikat
+        */
+
+        //dd($data);
+        $invoice = new Invoice();
+        $invoice->user_id = $data['user_id'];
+        $invoice->date = $data['date'];
+        $invoice->due_date = $data['due_date'];
+        $invoice->note = 'Dibuat manual oleh admin';
+        $invoice->save();
+
+        // Customer Serives
+        foreach ($data['inv_customer_services'] as $inv_customer_service) {
+            $customerService = CustomerService::find($inv_customer_service);
+
+            $invCustomerService = new InvCustomerService();
+            $invCustomerService->invoice_id = $invoice->id;
+            $invCustomerService->customer_service_id = $customerService?->id;
+            $invCustomerService->amount = $customerService?->price;
+            $invCustomerService->save();
+        }
+
+        // Extra Cost
+        foreach ($data['inv_extra_costs'] as $extra_cost) {
+            $extraCost = ExtraCost::find($extra_cost);
+
+            $invExtraCost = new InvExtraCost();
+            $invExtraCost->invoice_id = $invoice->id;
+            $invExtraCost->extra_cost_id = $extraCost?->id;
+            $invExtraCost->fee = $extraCost?->fee;
+            $invExtraCost->save();
+        }
+
+        return $invoice;
     }
 }

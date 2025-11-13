@@ -18,10 +18,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ServicePackageResource extends Resource implements HasShieldPermissions
 {
+
     protected static ?string $model = ServicePackage::class;
+
     protected static ?string $slug = 'service-packages';
+
     protected static ?string $navigationLabel = 'Paket Layanan';
-    protected static ?string $navigationIcon = 'heroicon-o-server-stack';
+
+    protected static ?string $breadcrumb = 'Paket Layanan';
+
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getPermissionPrefixes(): array

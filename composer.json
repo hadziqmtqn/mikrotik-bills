@@ -12,6 +12,7 @@
         "cheesegrits/filament-google-maps": "^3.0",
         "codewithkyrian/filament-date-range": "^1.1",
         "dotswan/filament-map-picker": "^1.8",
+        "dutchcodingcompany/filament-developer-logins": "^1.10",
         "filament/filament": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "laravel-lang/common": "^6.7",

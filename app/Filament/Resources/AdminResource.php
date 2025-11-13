@@ -17,9 +17,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AdminResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = User::class;
+
     protected static ?string $slug = 'admins';
+
     protected static ?string $navigationLabel = 'Admin';
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $breadcrumb = 'Admin';
 
     public static function getPermissionPrefixes(): array
     {

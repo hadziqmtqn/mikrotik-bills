@@ -1,6 +1,8 @@
 @php
     use App\Helpers\DateHelper;
     use App\Enums\StatusData;
+    use Illuminate\Support\Carbon;
+    use App\Enums\PaymentMethod;
 @endphp
 
 <link rel="stylesheet" href="{{ asset('css/invoice/style.css') }}">
@@ -82,7 +84,6 @@
             <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
                 <thead>
                 <tr>
-                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-3 ci-font-bold ci-text-main">#</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Nama Item</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-right ci-font-bold ci-text-main">Harga</td>
                     <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-text-center ci-font-bold ci-text-main">Qty.</td>
@@ -90,15 +91,22 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    @foreach($invoice->invoiceItems as $item)
-                        <td class="ci-border-b ci-py-3 ci-pl-3">{{ $loop->iteration }}.</td>
+                @foreach($invoice->invCustomerServices as $item)
+                    <tr>
                         <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->customerService?->servicePackage?->package_name }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
-                    @endforeach
-                </tr>
+                    </tr>
+                @endforeach
+                @foreach($invoice->invExtraCosts as $item)
+                    <tr>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->extraCost?->name }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
+                    </tr>
+                @endforeach
                 <tr>
                     <td colspan="5">
                         <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
@@ -137,7 +145,7 @@
         </div>
 
         <div class="ci-px-14 ci-text-sm ci-text-neutral-700">
-            <p class="ci-text-main ci-font-bold">DETAIL PEMBAYARAN</p>
+            <p class="ci-text-main ci-font-bold">METODE PEMBAYARAN</p>
             <ul>
                 @foreach($bankAccounts as $bankAccount)
                     <li>{{ $bankAccount->short_name }} - <strong>{{ $bankAccount->account_number }}</strong> a/n {{ $bankAccount->account_name }}</li>
@@ -145,9 +153,35 @@
             </ul>
         </div>
 
-        {{--<div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">
-            <p class="ci-text-main ci-font-bold">Notes</p>
-            <p class="ci-italic">Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.</p>
-        </div>--}}
+        <div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">
+            <p class="ci-text-main ci-font-bold">Catatan</p>
+            <p class="ci-italic">{{ $invoice->note }}</p>
+        </div>
+
+        <div class="ci-px-14 ci-py-10 ci-text-sm ci-text-neutral-700">
+            <p class="ci-text-main ci-font-bold mb-4">Riyawat Pembayaran</p>
+            <table class="ci-w-full ci-border-collapse ci-border-spacing-0">
+                <thead>
+                <tr>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Kode</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Tanggal</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Jumlah</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Metode</td>
+                    <td class="ci-border-b-2 ci-border-main ci-pb-3 ci-pl-2 ci-font-bold ci-text-main">Status</td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($invoice->payments as $payment)
+                    <tr>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ $payment->code }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ Carbon::parse($payment->date)->isoFormat('D MMM Y') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">Rp{{ number_format($payment->amount,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ PaymentMethod::tryFrom($payment->payment_method)?->getLabel() ?? $payment->payment_method }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ StatusData::tryFrom($payment->status)?->getLabel() ?? $payment->status }}</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

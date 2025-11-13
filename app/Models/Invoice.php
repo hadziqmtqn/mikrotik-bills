@@ -41,14 +41,19 @@ class Invoice extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function invoiceItems(): HasMany
+    public function invCustomerServices(): HasMany
     {
-        return $this->hasMany(InvoiceItem::class, 'invoice_id');
+        return $this->hasMany(InvCustomerService::class, 'invoice_id');
     }
 
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'invoice_id');
+    }
+
+    public function invExtraCosts(): HasMany
+    {
+        return $this->hasMany(InvExtraCost::class, 'invoice_id');
     }
 
     public function getRouteKeyName(): string
@@ -59,8 +64,11 @@ class Invoice extends Model
     // TODO Attributes
     protected function totalPrice(): Attribute
     {
+        $invCustomerServiceTotal = $this->invCustomerServices->sum('amount');
+        $invExtraCostTotal = $this->invExtraCosts->sum('fee');
+
         return Attribute::make(
-            get: fn() => $this->invoiceItems->sum('amount'),
+            get: fn() => $invCustomerServiceTotal + $invExtraCostTotal,
         );
     }
 

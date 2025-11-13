@@ -2,10 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Clusters\ReferenceCluster;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\AdminResource;
 use App\Filament\Resources\ApplicationResource;
-use App\Filament\Resources\BankAccountResource;
 use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceSettingResource;
@@ -16,14 +16,16 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
 use App\Models\Application;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\RoleResource;
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Livewire\Notifications;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
@@ -35,6 +37,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -95,7 +98,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Poppins')
             ->collapsibleNavigationGroups(false)
-            ->breadcrumbs(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop(false)
             ->unsavedChangesAlerts(false)
@@ -104,6 +106,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('30s')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
                 Dashboard::class,
             ])
@@ -133,7 +136,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentApexChartsPlugin::make()
+                FilamentApexChartsPlugin::make(),
+                FilamentDeveloperLoginsPlugin::make()
+                    ->enabled(app()->environment('local'))
+                    ->users([
+                        'Super Admin' => 'superadmin@bkn.my.id',
+                    ])
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -142,36 +150,39 @@ class AdminPanelProvider extends PanelProvider
                 return $navigationBuilder
                     ->items([
                         ...Dashboard::getNavigationItems(),
-                        ...$this->filterResourceNavigationItems(UserResource::class)
                     ])
                     ->groups([
-                        NavigationGroup::make('Service')
+                        NavigationGroup::make('Layanan')
+                            ->icon('heroicon-o-server-stack')
                             ->items([
+                                ...$this->filterResourceNavigationItems(UserResource::class),
                                 ...$this->filterResourceNavigationItems(ServicePackageResource::class),
                                 ...$this->filterResourceNavigationItems(CustomerServiceResource::class),
                             ]),
-                        NavigationGroup::make('Payment')
-                            ->items([
-                                ...$this->filterResourceNavigationItems(PaymentResource::class),
-                                ...$this->filterResourceNavigationItems(BankAccountResource::class),
-                            ]),
-                        NavigationGroup::make('Invoice')
+                        NavigationGroup::make('Faktur')
+                            ->icon('heroicon-o-receipt-percent')
                             ->items([
                                 ...$this->filterResourceNavigationItems(InvoiceSettingResource::class),
                                 ...$this->filterResourceNavigationItems(InvoiceResource::class),
+                                ...$this->filterResourceNavigationItems(PaymentResource::class),
                             ]),
-                        NavigationGroup::make('Network')
+                        NavigationGroup::make('Pengaturan')
+                            ->icon('heroicon-o-cog')
                             ->items([
+                                ...ReferenceCluster::getNavigationItems(),
                                 ...$this->filterResourceNavigationItems(RouterResource::class),
-                            ]),
-                        NavigationGroup::make('System')
-                            ->items([
-                                ...$this->filterResourceNavigationItems(RoleResource::class),
                                 ...$this->filterResourceNavigationItems(AdminResource::class),
                                 ...$this->filterResourceNavigationItems(ApplicationResource::class),
                             ]),
                     ]);
             })
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Roles')
+                    ->url(fn(): string => RoleResource::getUrl())
+                    ->icon('heroicon-o-shield-check')
+                    ->visible(fn(): bool => Auth::check() && Auth::user()->can('view_any_role'))
+            ])
             ->spa()
             ->spaUrlExceptions([
                 '*/users/*'

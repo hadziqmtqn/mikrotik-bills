@@ -2,9 +2,12 @@
 
 namespace Database\Seeders\Service;
 
+use App\Enums\ServiceType;
 use App\Models\CustomerService;
+use App\Models\ExtraCost;
+use App\Models\InvExtraCost;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
+use App\Models\InvCustomerService;
 use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
@@ -17,21 +20,27 @@ class CustomerServiceSeeder extends Seeder
     {
         $faker = Factory::create();
 
-        $users = User::whereHas('roles', fn($query) => $query->where('name', 'user'))
+        $users = User::query()
+            ->with('userProfile')
+            ->whereHas('roles', fn($query) => $query->where('name', 'user'))
             ->active()
             ->limit(40)
             ->get();
 
-        $servicePackages = ServicePackage::get(['id', 'package_price']);
+        $extraCosts = ExtraCost::pluck('fee', 'id');
 
         foreach ($users as $user) {
-            $servicePackageRandom = $servicePackages->random();
+            $servicePackage = ServicePackage::where('plan_type', $user->userProfile?->account_type)
+                ->inRandomOrder()
+                ->first();
+
+            if (!$servicePackage) continue;
 
             // TODO Customer Service
             $customerService = new CustomerService();
-            $customerService->service_package_id = $servicePackageRandom->id;
+            $customerService->service_package_id = $servicePackage->id;
             $customerService->user_id = $user->id;
-            $customerService->price = $servicePackageRandom->package_price;
+            $customerService->price = $servicePackage->package_price;
             $customerService->package_type = $faker->randomElement(['subscription', 'one-time']);
             $customerService->status = $faker->randomElement(['active', 'pending']);
             $customerService->save();
@@ -39,7 +48,8 @@ class CustomerServiceSeeder extends Seeder
             // TODO Invoice
             $date = now()->subMonth();
 
-            $invoice = Invoice::where('user_id', $user->id)
+            $invoice = Invoice::query()
+                ->where('user_id', $user->id)
                 ->firstOrNew();
             $invoice->user_id = $user->id;
             $invoice->date = $date;
@@ -47,20 +57,37 @@ class CustomerServiceSeeder extends Seeder
             $invoice->status = $customerService->status == 'active' ? 'paid' : 'unpaid';
             $invoice->save();
 
-            // TODO Invoice Items
-            $invoiceItem = InvoiceItem::where('customer_service_id', $customerService->id)
+            // TODO Item Customer Service
+            $invCustomerService = InvCustomerService::query()
+                ->where('customer_service_id', $customerService->id)
+                ->lockForUpdate()
                 ->firstOrNew();
-            $invoiceItem->invoice_id = $invoice->id;
-            $invoiceItem->customer_service_id = $customerService->id;
-            $invoiceItem->amount = $customerService->price;
-            $invoiceItem->save();
+            $invCustomerService->invoice_id = $invoice->id;
+            $invCustomerService->customer_service_id = $customerService->id;
+            $invCustomerService->amount = $customerService->price;
+            $invCustomerService->save();
+
+            // TODO Extra Cost
+            $totalFee = 0;
+
+            if ($servicePackage->service_type === ServiceType::HOTSPOT->value && $servicePackage->limit_type == 'data') {
+                foreach ($extraCosts as $key => $extraCost) {
+                    $invExtraCost = new InvExtraCost();
+                    $invExtraCost->invoice_id = $invoice->id;
+                    $invExtraCost->extra_cost_id = $key;
+                    $invExtraCost->fee = $extraCost;
+                    $invExtraCost->save();
+
+                    $totalFee += $extraCost;
+                }
+            }
 
             // TODO Payment
             if ($invoice->status == 'paid') {
                 $payment = new Payment();
                 $payment->user_id = $user->id;
                 $payment->invoice_id = $invoice->id;
-                $payment->amount = $customerService->price;
+                $payment->amount = $customerService->price + $totalFee;
                 $payment->payment_method = 'cash';
                 $payment->date = $invoice->date->addDays(2);
                 $payment->status = 'paid';

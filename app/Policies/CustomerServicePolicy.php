@@ -32,7 +32,7 @@ class CustomerServicePolicy
 
     public function delete(User $user, CustomerService $customerService): bool
     {
-        $customerService->loadCount('invoiceItems');
+        $customerService->loadCount('invCustomerServices');
 
         return $user->can('delete_customer::service') && $customerService->invoice_items_count === 0;
     }

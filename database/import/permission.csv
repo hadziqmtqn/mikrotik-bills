@@ -82,3 +82,8 @@ update_payment;YES;NO;NO
 delete_payment;YES;NO;NO
 restore_payment;YES;NO;NO
 force_delete_payment;YES;NO;NO
+view_any_extra::cost;YES;NO;NO
+view_extra::cost;YES;NO;NO
+create_extra::cost;YES;NO;NO
+update_extra::cost;YES;NO;NO
+delete_extra::cost;YES;NO;NO

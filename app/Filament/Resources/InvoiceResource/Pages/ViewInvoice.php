@@ -9,11 +9,8 @@ use App\Filament\Resources\CustomerServiceResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\UserResource;
 use App\Helpers\DateHelper;
-use App\Models\Application;
-use App\Models\BankAccount;
 use App\Models\CustomerService;
 use App\Models\Invoice;
-use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
@@ -22,41 +19,16 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
-use Illuminate\Contracts\View\View;
-use Torgodly\Html2Media\Actions\Html2MediaAction;
 
 class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;
 
+    protected static ?string $title = 'Detail Faktur';
+
     protected function getActions(): array
     {
-        return [
-            EditAction::make()
-                ->label('Ubah')
-                ->icon('heroicon-o-pencil')
-                ->color('warning')
-                ->visible(fn(Invoice $record): bool => $record->status === StatusData::UNPAID->value || $record->status === StatusData::OVERDUE->value),
-
-            Html2MediaAction::make('export')
-                ->label('Cetak')
-                ->icon('heroicon-o-printer')
-                ->color('primary')
-                ->modalHeading('Cetak Invoice')
-                ->modalDescription('Apakah Anda yakin ingin mencetak invoice ini?')
-                ->successNotificationTitle('Invoice berhasil dicetak.')
-                ->savePdf()
-                ->content(
-                    fn(Invoice $record): View => view('filament.resources.invoice-resource.pages.print', [
-                        'invoice' => $record->loadMissing('user:id,name,email', 'user.userProfile', 'invoiceItems.customerService.servicePackage'),
-                        'application' => Application::first(),
-                        'bankAccounts' => BankAccount::where('is_active', true)
-                            ->orderBy('bank_name')
-                            ->get(),
-                    ])
-                )
-                ->filename(fn(Invoice $record): string => 'invoice-' . $record->code . '-' . DateHelper::indonesiaDate($record->date) . '.pdf')
-        ];
+        return InvoiceResource\Actions\InvoiceActions::actions();
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -91,9 +63,10 @@ class ViewInvoice extends ViewRecord
                             ]),
 
                         Section::make('Items')
+                            ->inlineLabel()
                             ->schema([
-                                RepeatableEntry::make('invoiceItems')
-                                    ->hiddenLabel()
+                                RepeatableEntry::make('invCustomerServices')
+                                    ->label('Paket Layanan')
                                     ->schema([
                                         TextEntry::make('customerService.reference_number')
                                             ->label('No. Referensi')
@@ -122,6 +95,19 @@ class ViewInvoice extends ViewRecord
                                             ->inlineLabel()
                                             ->money('idr')
                                             ->weight(FontWeight::Bold)
+                                    ]),
+
+                                RepeatableEntry::make('invExtraCosts')
+                                    ->label('Biaya Tambahan')
+                                    ->schema([
+                                        TextEntry::make('extraCost.name')
+                                            ->label('Nama')
+                                            ->inlineLabel(),
+
+                                        TextEntry::make('fee')
+                                            ->label('Biaya')
+                                            ->money('IDR')
+                                            ->inlineLabel(),
                                     ])
                             ])
                     ]),
@@ -132,6 +118,13 @@ class ViewInvoice extends ViewRecord
                         Section::make()
                             ->inlineLabel()
                             ->schema([
+                                TextEntry::make('total_price')
+                                    ->label('Total Tagihan')
+                                    ->money('IDR')
+                                    ->color('primary')
+                                    ->weight(FontWeight::Bold)
+                                    ->size(TextEntry\TextEntrySize::Large),
+
                                 TextEntry::make('date')
                                     ->label('Tanggal')
                                     ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state)),
@@ -150,8 +143,6 @@ class ViewInvoice extends ViewRecord
                                     ->tooltip(fn($state): string => 'Dibatalkan pada ' . DateHelper::indonesiaDate($state, 'D MMMM Y HH:mm')),
 
                                 TextEntry::make('status')
-                                    ->weight(FontWeight::Bold)
-                                    ->size(TextEntry\TextEntrySize::Large)
                                     ->color(fn($state): string => StatusData::tryFrom($state)?->getColor() ?? 'gray')
                                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? '-'),
                             ]),
