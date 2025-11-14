@@ -9,6 +9,8 @@ class EditApplication extends EditRecord
 {
     protected static string $resource = ApplicationResource::class;
 
+    protected static ?string $title = 'Ubah Aplikasi';
+
     protected function getHeaderActions(): array
     {
         return [

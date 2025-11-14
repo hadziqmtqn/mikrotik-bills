@@ -18,7 +18,7 @@ class ManageCustomerServices extends ManageRelatedRecords
 
     protected static string $relationship = 'customerServices';
 
-    protected static ?string $title = 'Layanan Pelanggan';
+    protected static ?string $title = 'Layanan';
 
     protected static ?string $navigationIcon = 'heroicon-o-server-stack';
 

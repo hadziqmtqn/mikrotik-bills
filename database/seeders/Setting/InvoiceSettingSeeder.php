@@ -10,6 +10,7 @@ class InvoiceSettingSeeder extends Seeder
     public function run(): void
     {
         $paymentSetting = new InvoiceSetting();
+        $paymentSetting->setup_auto_recurring_invoice = true;
         $paymentSetting->repeat_every_date = 5; // Buat invoice baru setiap tanggal 5
         $paymentSetting->due_date_after = 20; // Jatuh tempo setiap tanggal 20, untuk layanan lama
         $paymentSetting->due_date_after_new_service = 7; // Jatuh tempo setiap tanggal 7 untuk layanan baru

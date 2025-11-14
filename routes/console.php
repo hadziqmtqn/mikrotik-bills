@@ -13,9 +13,6 @@ Artisan::command('inspire', function () {
     ->withoutOverlapping()
     ->onFailure(function () {
         \Illuminate\Support\Facades\Log::error('Failed to run invoice:over-due command');
-    })
-    ->onSuccess(function () {
-        \Illuminate\Support\Facades\Log::info('Successfully ran invoice:over-due command');
     });
 
 \Illuminate\Support\Facades\Schedule::command('invoice:cancalled')
@@ -25,7 +22,13 @@ Artisan::command('inspire', function () {
     ->withoutOverlapping()
     ->onFailure(function () {
         \Illuminate\Support\Facades\Log::error('Failed to run invoice:cancelled command');
-    })
-    ->onSuccess(function () {
-        \Illuminate\Support\Facades\Log::info('Successfully ran invoice:cancelled command');
+    });
+
+\Illuminate\Support\Facades\Schedule::command('make:recurring-invoice')
+    ->dailyAt('02:30') // Adjust the time as needed
+    //->everyMinute() // For testing purposes, you can use everyMinute
+    ->timezone('Asia/Jakarta')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('Failed to run make:recurring-invoice command');
     });
