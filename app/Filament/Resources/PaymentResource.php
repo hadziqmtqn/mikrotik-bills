@@ -72,7 +72,13 @@ class PaymentResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user', 'user.userProfile', 'invoice', 'bankAccount'])
+            ->with([
+                'user',
+                'user.userProfile',
+                'invoice.invCustomerServices',
+                'invoice.invExtraCosts',
+                'bankAccount',
+            ])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
