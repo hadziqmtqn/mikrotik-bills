@@ -11,7 +11,7 @@ class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected static ?string $title = 'Detail Pelanggn';
+    protected static ?string $title = 'Detail';
 
     public function infolist(Infolist $infolist): Infolist
     {

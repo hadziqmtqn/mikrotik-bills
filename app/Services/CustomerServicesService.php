@@ -13,7 +13,10 @@ class CustomerServicesService
     {
         return CustomerService::query()
             ->with('servicePackage')
-            ->whereHas('user', fn($q) => $q->where('is_active', true))
+            ->whereHas('user', function (Builder $query) {
+                $query->active();
+                $query->whereNull('deleted_at');
+            })
             ->where([
                 'user_id' => $userId,
                 'status' => StatusData::ACTIVE->value,
