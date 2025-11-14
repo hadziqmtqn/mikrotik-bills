@@ -9,8 +9,10 @@ class InvoiceSetting extends Model
 {
     protected $fillable = [
         'slug',
+        'setup_auto_recurring_invoice',
         'repeat_every_date',
         'due_date_after',
+        'due_date_after_new_service',
         'cancel_after',
     ];
 

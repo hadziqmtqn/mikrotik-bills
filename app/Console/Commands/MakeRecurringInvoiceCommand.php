@@ -26,7 +26,7 @@ class MakeRecurringInvoiceCommand extends Command
         try {
             $invoiceSetting = InvoiceSetting::first();
 
-            if ($invoiceSetting && Carbon::now()->day >= $invoiceSetting->repeat_every_date) {
+            if ($invoiceSetting?->setup_auto_recurring_invoice && (Carbon::now()->day >= $invoiceSetting->repeat_every_date)) {
                 $users = User::query()
                     ->with([
                         'customerServices' => function ($query) {

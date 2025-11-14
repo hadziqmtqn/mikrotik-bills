@@ -50,9 +50,13 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                     ->aside()
                     ->schema([
                         TextInput::make('short_name')
-                            ->required(),
+                            ->label('Nama Singkatan')
+                            ->required()
+                            ->placeholder('Nama singkatan aplikasi'),
 
-                        TextInput::make('full_name'),
+                        TextInput::make('full_name')
+                            ->label('Nama Lengkap')
+                            ->placeholder('Nama lengkap aplikasi'),
 
                         Select::make('panel_color')
                             ->label('Warna Panel')
@@ -134,20 +138,24 @@ class ApplicationResource extends Resource implements HasShieldPermissions
                     ->schema([
                         TextInput::make('business_name')
                             ->label('Nama Usaha')
-                            ->required(),
+                            ->required()
+                            ->placeholder('Masukkan nama usaha/layanan'),
 
                         TextInput::make('business_phone')
                             ->label('Nomor Telepon Usaha')
-                            ->required(),
+                            ->required()
+                            ->placeholder('Masukkan nomor telephone/HP'),
 
                         TextInput::make('business_email')
                             ->label('Email Usaha')
                             ->email()
-                            ->required(),
+                            ->required()
+                            ->placeholder('Masukkan email bisnis'),
 
                         Textarea::make('business_address')
                             ->label('Alamat Usaha')
-                            ->rows(2),
+                            ->autosize()
+                            ->placeholder('Masukkan alamat tempat bisnis'),
                     ]),
             ]);
     }

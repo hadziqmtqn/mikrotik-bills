@@ -10,7 +10,8 @@ return new class extends Migration {
         Schema::create('invoice_settings', function (Blueprint $table) {
             $table->id();
             $table->uuid('slug');
-            $table->integer('repeat_every_date');
+            $table->boolean('setup_auto_recurring_invoice')->default(true);
+            $table->integer('repeat_every_date')->nullable();
             $table->integer('due_date_after');
             $table->integer('due_date_after_new_service');
             $table->integer('cancel_after');
