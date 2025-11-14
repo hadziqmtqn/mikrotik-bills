@@ -86,8 +86,8 @@ class CustomerServiceTable
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                 ])
-                ->link()
-                ->label('Actions')
+                ->button()
+                ->outlined()
             ])
             ->bulkActions([
                 //

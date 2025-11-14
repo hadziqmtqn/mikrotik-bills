@@ -61,7 +61,6 @@ class ViewPayment
                             ]),
 
                         Section::make('Faktur')
-                            ->inlineLabel()
                             ->collapsed()
                             ->schema([
                                 TextEntry::make('code')
@@ -69,14 +68,30 @@ class ViewPayment
                                     ->color('primary')
                                     ->icon('heroicon-s-arrow-top-right-on-square')
                                     ->iconPosition(IconPosition::After)
-                                    ->url(fn(Payment $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug])),
+                                    ->url(fn(Payment $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug]))
+                                    ->inlineLabel(),
 
-                                RepeatableEntry::make('invoice.invoiceItems')
-                                    ->label('Item')
+                                RepeatableEntry::make('invoice.invCustomerServices')
+                                    ->label('Item Layanan')
+                                    ->columns()
                                     ->schema([
                                         TextEntry::make('customerService.servicePackage.package_name')
-                                            ->label('Paket')
-                                    ])
+                                            ->label('Paket'),
+                                        TextEntry::make('amount')
+                                            ->label('Jumlah')
+                                            ->money('IDR'),
+                                    ]),
+
+                                RepeatableEntry::make('invoice.invExtraCosts')
+                                    ->label('Biaya Tambahan')
+                                    ->columns()
+                                    ->schema([
+                                        TextEntry::make('extraCost.name')
+                                            ->label('Nama'),
+                                        TextEntry::make('fee')
+                                            ->label('Jumlah')
+                                            ->money('IDR'),
+                                    ]),
                             ])
                     ])
                     ->columnSpan(['lg' => 2]),
