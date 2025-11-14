@@ -14,6 +14,8 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class CreateInvoice extends CreateRecord
 {
@@ -58,6 +60,9 @@ class CreateInvoice extends CreateRecord
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     protected function handleRecordCreation(array $data): Model
     {
         /**
@@ -65,36 +70,37 @@ class CreateInvoice extends CreateRecord
          * jika ada tolak pembuatan faktur baru agar tidak duplikat
         */
 
-        //dd($data);
-        $invoice = new Invoice();
-        $invoice->user_id = $data['user_id'];
-        $invoice->date = $data['date'];
-        $invoice->due_date = $data['due_date'];
-        $invoice->note = 'Dibuat manual oleh admin';
-        $invoice->save();
+        return DB::transaction(function () use ($data) {
+            $invoice = new Invoice();
+            $invoice->user_id = $data['user_id'];
+            $invoice->date = $data['date'];
+            $invoice->due_date = $data['due_date'];
+            $invoice->note = 'Dibuat manual oleh admin';
+            $invoice->save();
 
-        // Customer Serives
-        foreach ($data['inv_customer_services'] as $inv_customer_service) {
-            $customerService = CustomerService::find($inv_customer_service);
+            // Customer Serives
+            foreach ($data['inv_customer_services'] as $inv_customer_service) {
+                $customerService = CustomerService::find($inv_customer_service);
 
-            $invCustomerService = new InvCustomerService();
-            $invCustomerService->invoice_id = $invoice->id;
-            $invCustomerService->customer_service_id = $customerService?->id;
-            $invCustomerService->amount = $customerService?->price;
-            $invCustomerService->save();
-        }
+                $invCustomerService = new InvCustomerService();
+                $invCustomerService->invoice_id = $invoice->id;
+                $invCustomerService->customer_service_id = $customerService?->id;
+                $invCustomerService->amount = $customerService?->price;
+                $invCustomerService->save();
+            }
 
-        // Extra Cost
-        foreach ($data['inv_extra_costs'] as $extra_cost) {
-            $extraCost = ExtraCost::find($extra_cost);
+            // Extra Cost
+            foreach ($data['inv_extra_costs'] as $extra_cost) {
+                $extraCost = ExtraCost::find($extra_cost);
 
-            $invExtraCost = new InvExtraCost();
-            $invExtraCost->invoice_id = $invoice->id;
-            $invExtraCost->extra_cost_id = $extraCost?->id;
-            $invExtraCost->fee = $extraCost?->fee;
-            $invExtraCost->save();
-        }
+                $invExtraCost = new InvExtraCost();
+                $invExtraCost->invoice_id = $invoice->id;
+                $invExtraCost->extra_cost_id = $extraCost?->id;
+                $invExtraCost->fee = $extraCost?->fee;
+                $invExtraCost->save();
+            }
 
-        return $invoice;
+            return $invoice;
+        });
     }
 }
