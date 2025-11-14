@@ -12,6 +12,8 @@ class EarningChart extends ApexChartWidget
     protected static ?string $chartId = 'earningChart';
     protected static ?string $heading = 'Pendapatan';
 
+    protected int | string | array $columnSpan = ['lg' => 2];
+
     protected function getFilters(): ?array
     {
         $fiveYearsAgo = now()->subYears(5)->year;

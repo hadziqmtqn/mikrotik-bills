@@ -15,6 +15,7 @@ use App\Filament\Resources\ServicePackageResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\CustomerStatsOverview;
 use App\Filament\Widgets\EarningChart;
+use App\Filament\Widgets\UnpaidInvoiceTable;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\RoleResource;
@@ -113,6 +114,7 @@ class AdminPanelProvider extends PanelProvider
             //->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 CustomerStatsOverview::class,
+                UnpaidInvoiceTable::class,
                 EarningChart::class
             ])
             ->navigationGroups([

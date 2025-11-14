@@ -2,8 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class Dashboard extends \Filament\Pages\Dashboard
@@ -17,14 +15,8 @@ class Dashboard extends \Filament\Pages\Dashboard
         return false;
     }
 
-    /*public function filtersForm(Form $form): Form
+    public function getColumns(): int|string|array
     {
-        return $form
-            ->schema([
-                Section::make()
-                    ->schema([
-
-                    ])
-            ]);
-    }*/
+        return 4;
+    }
 }
