@@ -102,6 +102,11 @@ class User extends Authenticatable implements HasMedia, FilamentUser
         return $this->hasMany(Invoice::class, 'user_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'user_id');
+    }
+
     // TODO Scopes
     #[Scope]
     protected function active(Builder $query): Builder

@@ -29,7 +29,7 @@ class PaymentTable
             ->columns([
                 TextColumn::make('code')
                     ->label('Kode')
-                    ->description(fn(Payment $record): string => 'Kode Tagihan: ' . $record->invoice?->code)
+                    ->description(fn(Payment $record): string => 'Kode Faktur: ' . $record->invoice?->code)
                     ->searchable(),
 
                 TextColumn::make('user.name')

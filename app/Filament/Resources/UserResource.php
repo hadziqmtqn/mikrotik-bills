@@ -67,7 +67,8 @@ class UserResource extends Resource implements HasShieldPermissions
             'edit' => Pages\EditUser::route('/{record}/edit'),
             'view' => Pages\ViewUser::route('/{record}'),
             'customer-services' => Pages\ManageCustomerServices::route('/{record}/manage-customer-services'),
-            'invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices')
+            'invoices' => Pages\ManageInvoices::route('/{record}/manage-invoices'),
+            'payments' => Pages\ManagePayments::route('/{record}/manage-payments'),
         ];
     }
 
@@ -114,7 +115,8 @@ public static function getGlobalSearchResultTitle(Model $record): string
             Pages\ViewUser::class,
             Pages\EditUser::class,
             Pages\ManageCustomerServices::class,
-            Pages\ManageInvoices::class
+            Pages\ManageInvoices::class,
+            Pages\ManagePayments::class
         ]);
     }
 }
