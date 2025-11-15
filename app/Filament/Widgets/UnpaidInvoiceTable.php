@@ -7,7 +7,7 @@ use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Exception;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -57,8 +57,7 @@ class UnpaidInvoiceTable extends TableWidget
                     ->formatStateUsing(fn($state): string => StatusData::tryFrom($state)?->getLabel() ?? $state)
             ])
             ->actions([
-                Action::make('view')
-                    ->label('Detail')
+                ViewAction::make()
                     ->button()
                     ->url(fn(Invoice $invoice): string => InvoiceResource::getUrl('view', ['record' => $invoice]))
             ])
