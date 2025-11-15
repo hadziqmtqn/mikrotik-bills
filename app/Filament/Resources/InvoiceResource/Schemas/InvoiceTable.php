@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\InvoiceResource\Schemas;
 
-use App\Enums\AccountType;
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
 use App\Models\Invoice;
@@ -34,7 +33,7 @@ class InvoiceTable
 
                 TextColumn::make('user.name')
                     ->label('Pelanggan')
-                    ->description(fn(Invoice $invoice): string => AccountType::tryFrom($invoice->user?->userProfile?->account_type)?->getLabel() ?? 'N/A')
+                    ->description(fn(Invoice $invoice): string => $invoice->user?->userProfile?->place_name)
                     ->searchable(),
 
                 TextColumn::make('total_price')
