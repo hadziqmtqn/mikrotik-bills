@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServicePackageResource\Pages;
 use App\Filament\Resources\ServicePackageResource\Schemas\ServicePackageForm;
-use App\Filament\Resources\ServicePackageResource\Schemas\ServicePackageTable;
+use App\Filament\Resources\ServicePackageResource\Tables\ServicePackageTable;
 use App\Models\ServicePackage;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;

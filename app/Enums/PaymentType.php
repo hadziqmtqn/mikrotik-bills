@@ -3,9 +3,10 @@
 namespace App\Enums;
 
 use App\Traits\EnumOptions;
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum PaymentType: string implements HasLabel
+enum PaymentType: string implements HasLabel, HasColor
 {
     use EnumOptions;
 
@@ -18,6 +19,15 @@ enum PaymentType: string implements HasLabel
         return match ($this) {
             self::PREPAID => 'Prabayar',
             self::POSTPAID => 'Pascabayar'
+        };
+    }
+
+    public function getColor(): string|array|null
+    {
+        // TODO: Implement getColor() method.
+        return match ($this) {
+            self::PREPAID => 'success',
+            self::POSTPAID => 'warning'
         };
     }
 }

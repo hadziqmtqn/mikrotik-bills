@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\ServicePackageResource\Schemas;
+namespace App\Filament\Resources\ServicePackageResource\Tables;
 
 use App\Enums\AccountType;
+use App\Enums\PaymentType;
 use App\Enums\ServiceType;
 use App\Models\ServicePackage;
 use Exception;
@@ -56,10 +57,18 @@ class ServicePackageTable
                     ->money('idr')
                     ->sortable(),
 
+                TextColumn::make('payment_type')
+                    ->label('Jenis Pembayaran')
+                    ->badge()
+                    ->color(fn($state): string => PaymentType::tryFrom($state)?->getColor() ?? 'gray')
+                    ->formatStateUsing(fn($state): string => PaymentType::tryFrom($state)?->getLabel() ?? $state)
+                    ->sortable(),
+
                 TextColumn::make('router.name')
                     ->label('Router')
                     ->getStateUsing(fn(ServicePackage $record) => $record->router?->name ?? '-')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 ToggleColumn::make('is_active')
                     ->label('Aktif')
