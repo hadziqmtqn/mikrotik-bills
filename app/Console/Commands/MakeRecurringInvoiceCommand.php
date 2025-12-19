@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\PackageTypeService;
 use App\Enums\StatusData;
-use App\Enums\ValidityUnit;
+use App\Enums\TimeLimitType;
 use App\Jobs\RecurringInvoiceJob;
 use App\Models\InvoiceSetting;
 use App\Models\User;
@@ -33,7 +33,7 @@ class MakeRecurringInvoiceCommand extends Command
                             $query->where('status', StatusData::ACTIVE->value);
                             $query->where('package_type', PackageTypeService::SUBSCRIPTION->value);
                             $query->whereHas('servicePackage', function ($query) {
-                                $query->where('validity_unit', ValidityUnit::BULAN->value);
+                                $query->where('validity_unit', TimeLimitType::BULAN->value);
                             });
                             $query->whereDoesntHave('invCustomerServices.invoice', function ($query) {
                                 $query->whereMonth('date', now()->month)
@@ -52,7 +52,7 @@ class MakeRecurringInvoiceCommand extends Command
                         $query->where('status', StatusData::ACTIVE->value);
                         $query->where('package_type', PackageTypeService::SUBSCRIPTION->value);
                         $query->whereHas('servicePackage', function ($query) {
-                            $query->where('validity_unit', ValidityUnit::BULAN->value);
+                            $query->where('validity_unit', TimeLimitType::BULAN->value);
                         });
                         $query->whereDoesntHave('invCustomerServices.invoice', function ($query) {
                             $query->whereMonth('date', now()->month)

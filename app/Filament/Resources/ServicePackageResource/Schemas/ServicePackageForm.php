@@ -8,7 +8,6 @@ use App\Enums\PackageLimitType;
 use App\Enums\PaymentType;
 use App\Enums\ServiceType;
 use App\Enums\TimeLimitType;
-use App\Enums\ValidityUnit;
 use App\Models\ServicePackage;
 use App\Services\RouterService;
 use Filament\Forms\Components\Group;
@@ -87,8 +86,8 @@ class ServicePackageForm
                             ]),
 
                         // TODO: Hotspot settings
-                        Section::make('Hotspot Settings')
-                            ->description('Pengaturan khusus untuk paket layanan Hotspot.')
+                        Section::make('Batasan Layanan')
+                            ->description('Batasan khusus untuk paket layanan Hotspot.')
                             ->hidden(fn(Get $get) => $get('service_type') !== ServiceType::HOTSPOT->value)
                             ->columns()
                             ->schema([
@@ -146,7 +145,7 @@ class ServicePackageForm
 
                                 Select::make('time_limit_unit')
                                     ->label('Satuan Batasan Waktu')
-                                    ->options(TimeLimitType::options())
+                                    ->options(TimeLimitType::options(['menit', 'jam', 'hari']))
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== PackageLimitType::LIMITED->value || ($get('limit_type') !== LimitType::TIME->value && $get('limit_type') !== LimitType::BOTH->value))
                                     ->required(fn(Get $get) => $get('package_limit_type') === PackageLimitType::LIMITED->value && ($get('limit_type') === LimitType::TIME->value || $get('limit_type') === LimitType::BOTH->value))
                                     ->default('menit')
@@ -173,8 +172,8 @@ class ServicePackageForm
                             ]),
 
                         // TODO: PPPoE settings
-                        Section::make('PPPeE Settings')
-                            ->description('Pengaturan khusus untuk paket layanan PPPoE.')
+                        Section::make('Batasan Layanan')
+                            ->description('Batasan khusus untuk paket layanan PPPoE.')
                             ->hidden(fn(Get $get) => $get('service_type') !== ServiceType::PPPOE->value)
                             ->columns()
                             ->schema([
@@ -189,7 +188,7 @@ class ServicePackageForm
 
                                 Select::make('validity_unit')
                                     ->label('Satuan Masa Berlaku')
-                                    ->options(ValidityUnit::options())
+                                    ->options(TimeLimitType::options(['bulan']))
                                     ->hidden(fn(Get $get) => $get('service_type') !== ServiceType::PPPOE->value)
                                     ->required(fn(Get $get) => $get('service_type') === ServiceType::PPPOE->value)
                                     ->default('hari')
@@ -197,7 +196,7 @@ class ServicePackageForm
                             ]),
 
                         // TODO: Package Price
-                        Section::make('Package Price')
+                        Section::make('Harga Paket')
                             ->description('Pengaturan harga paket layanan.')
                             ->columns()
                             ->schema([
@@ -225,6 +224,7 @@ class ServicePackageForm
                                     ->fileAttachmentsDisk('s3')
                                     ->fileAttachmentsDirectory('attachments')
                                     ->fileAttachmentsVisibility('private')
+                                    ->placeholder('Masukkan deskripsi layanan')
                             ])
                     ])->columnSpan(['lg' => 2]),
 

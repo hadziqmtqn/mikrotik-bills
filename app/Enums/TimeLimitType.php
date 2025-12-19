@@ -12,7 +12,12 @@ enum TimeLimitType: string implements HasLabel
     case MENIT = 'menit';
     case JAM = 'jam';
     case HARI = 'hari';
-    //case BULAN = 'bulan';
+    case BULAN = 'bulan';
+
+    /**
+     * - Paket layanan Hostpot => Menit, Jam, Hari
+     * - Paket layanan PPoE => Bulan
+    */
 
     public function getLabel(): ?string
     {
@@ -21,7 +26,7 @@ enum TimeLimitType: string implements HasLabel
             self::MENIT => 'Menit',
             self::JAM => 'Jam',
             self::HARI => 'Hari',
-            //self::BULAN => 'Bulan'
+            self::BULAN => 'Bulan'
         };
     }
 }
