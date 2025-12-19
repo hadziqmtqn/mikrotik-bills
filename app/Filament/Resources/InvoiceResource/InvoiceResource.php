@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\InvoiceResource;
 
-use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceForm;
-use App\Filament\Resources\InvoiceResource\Schemas\InvoiceTable;
+use App\Filament\Resources\InvoiceResource\Tables\InvoiceTable;
 use App\Filament\Resources\InvoiceResource\Widgets\InvoiceOverview;
 use App\Helpers\DateHelper;
 use App\Models\Invoice;

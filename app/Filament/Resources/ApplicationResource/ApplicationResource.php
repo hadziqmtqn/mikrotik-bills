@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ApplicationResource;
 
-use App\Filament\Resources\ApplicationResource\Pages;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Section;

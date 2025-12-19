@@ -6,7 +6,7 @@ use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
 use App\Enums\ServiceType;
 use App\Enums\StatusData;
-use App\Filament\Resources\CustomerServiceResource;
+use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
 use App\Filament\Resources\ServicePackageResource\Pages\ViewServicePackage;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Helpers\DateHelper;

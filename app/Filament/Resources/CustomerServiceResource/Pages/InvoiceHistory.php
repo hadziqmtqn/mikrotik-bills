@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\StatusData;
-use App\Filament\Resources\CustomerServiceResource;
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Helpers\DateHelper;
 use App\Models\Application;
 use App\Models\BankAccount;

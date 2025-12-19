@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Enums\StatusData;
-use App\Filament\Resources\InvoiceResource;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
+use App\Filament\Resources\UserResource\UserResource;
 use App\Helpers\DateHelper;
 use App\Models\Invoice;
 use Filament\Resources\Pages\ManageRelatedRecords;

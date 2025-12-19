@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\RouterResource\Pages;
 
-use App\Filament\Resources\RouterResource;
+use App\Filament\Resources\RouterResource\RouterResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceSettingResource\Pages;
 
-use App\Filament\Resources\InvoiceSettingResource;
+use App\Filament\Resources\InvoiceSettingResource\InvoiceSettingResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListPaymentSettings extends ListRecords

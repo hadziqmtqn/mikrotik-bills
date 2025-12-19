@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Enums\StatusData;
-use App\Filament\Resources\PaymentResource;
+use App\Filament\Resources\PaymentResource\PaymentResource;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;

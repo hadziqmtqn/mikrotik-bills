@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ServicePackageResource;
 
-use App\Filament\Resources\ServicePackageResource\Pages;
 use App\Filament\Resources\ServicePackageResource\Schemas\ServicePackageForm;
 use App\Filament\Resources\ServicePackageResource\Tables\ServicePackageTable;
 use App\Models\ServicePackage;

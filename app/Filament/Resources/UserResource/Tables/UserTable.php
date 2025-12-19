@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\UserResource\Schemas;
+namespace App\Filament\Resources\UserResource\Tables;
 
 use App\Enums\AccountType;
 use App\Filament\Exports\UserExporter;

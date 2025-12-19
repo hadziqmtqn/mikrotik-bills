@@ -5,7 +5,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Enums\PackageTypeService;
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource\Pages\ViewCustomerService;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\UserResource;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\ViewAction;

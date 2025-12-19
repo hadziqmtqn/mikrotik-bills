@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PaymentResource\Pages;
 
-use App\Filament\Resources\PaymentResource;
+use App\Filament\Resources\PaymentResource\PaymentResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreatePayment extends CreateRecord

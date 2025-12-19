@@ -4,7 +4,7 @@ namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Helpers\DateHelper;
 use App\Models\Payment;
 use Filament\Infolists\Components\Group;

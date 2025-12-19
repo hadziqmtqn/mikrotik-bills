@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\PaymentResource\Schemas;
+namespace App\Filament\Resources\PaymentResource\Tables;
 
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;

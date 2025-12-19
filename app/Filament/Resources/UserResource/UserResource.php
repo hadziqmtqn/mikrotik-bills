@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\UserResource;
 
-use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\Schemas\UserForm;
-use App\Filament\Resources\UserResource\Schemas\UserTable;
+use App\Filament\Resources\UserResource\Tables\UserTable;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;

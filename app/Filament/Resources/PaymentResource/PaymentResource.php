@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\PaymentResource;
 
-use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Resources\PaymentResource\Schemas\PaymentForm;
-use App\Filament\Resources\PaymentResource\Schemas\PaymentTable;
+use App\Filament\Resources\PaymentResource\Tables\PaymentTable;
 use App\Models\Payment;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ServicePackageResource\Pages;
 
-use App\Filament\Resources\ServicePackageResource;
+use App\Filament\Resources\ServicePackageResource\ServicePackageResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;

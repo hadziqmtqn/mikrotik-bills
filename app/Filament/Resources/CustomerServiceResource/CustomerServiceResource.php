@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\CustomerServiceResource;
 
-use App\Filament\Resources\CustomerServiceResource\Pages;
 use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceForm;
-use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceTable;
+use App\Filament\Resources\CustomerServiceResource\Tables\CustomerServiceTable;
 use App\Models\CustomerService;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;
@@ -91,7 +90,7 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
         return [
             'reference_number',
             'user.name',
-            'servicePackage.package_name',
+            'servicePackage:id,service_type,package_name',
         ];
     }
 

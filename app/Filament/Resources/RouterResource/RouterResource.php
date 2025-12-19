@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\RouterResource;
 
-use App\Filament\Resources\RouterResource\Pages;
 use App\Models\Router;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Grid;

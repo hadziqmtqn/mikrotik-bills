@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
-use App\Filament\Resources\CustomerServiceResource;
+use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
 use App\Models\CustomerService;
 use App\Models\ExtraCost;
 use App\Models\InvCustomerService;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\Schemas;
+namespace App\Filament\Resources\InvoiceResource\Tables;
 
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;

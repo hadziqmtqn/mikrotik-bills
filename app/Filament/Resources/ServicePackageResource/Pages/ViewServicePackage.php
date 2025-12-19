@@ -8,7 +8,7 @@ use App\Enums\PaymentType;
 use App\Enums\ServiceType;
 use App\Enums\StatusData;
 use App\Enums\TimeLimitType;
-use App\Filament\Resources\ServicePackageResource;
+use App\Filament\Resources\ServicePackageResource\ServicePackageResource;
 use App\Models\ServicePackage;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;

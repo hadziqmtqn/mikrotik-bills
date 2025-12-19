@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Schemas\UserInfoList;
+use App\Filament\Resources\UserResource\UserResource;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 

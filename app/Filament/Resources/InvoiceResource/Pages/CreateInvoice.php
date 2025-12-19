@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Enums\StatusData;
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Models\CustomerService;
 use App\Models\ExtraCost;
 use App\Models\InvCustomerService;

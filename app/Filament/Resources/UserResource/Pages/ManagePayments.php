@@ -5,7 +5,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
 use App\Filament\Resources\PaymentResource\Pages\ViewPayment;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\UserResource;
 use App\Helpers\DateHelper;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;

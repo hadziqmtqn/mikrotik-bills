@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\StatusData;
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Models\Invoice;
 use Exception;
 use Filament\Forms\Components\DatePicker;

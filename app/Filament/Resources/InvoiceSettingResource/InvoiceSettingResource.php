@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\InvoiceSettingResource;
 
-use App\Filament\Resources\InvoiceSettingResource\Pages;
 use App\Models\InvoiceSetting;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Section;

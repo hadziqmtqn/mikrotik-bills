@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\AdminResource\Schemas;
+namespace App\Filament\Resources\AdminResource\Tables;
 
 use Exception;
 use Filament\Tables\Actions\ActionGroup;

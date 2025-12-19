@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\AdminResource;
 
-use App\Filament\Resources\AdminResource\Pages;
 use App\Filament\Resources\AdminResource\Schemas\AdminForm;
-use App\Filament\Resources\AdminResource\Schemas\AdminTable;
+use App\Filament\Resources\AdminResource\Tables\AdminTable;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Exception;

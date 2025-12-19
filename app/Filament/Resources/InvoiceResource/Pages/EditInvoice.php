@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
