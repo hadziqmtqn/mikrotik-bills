@@ -74,6 +74,12 @@ class UserResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with([
+                'customerServices.servicePackage',
+                'invoices.invCustomerServices',
+                'invoices.invExtraCosts',
+                'payments'
+            ])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])

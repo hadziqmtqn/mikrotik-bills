@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Enums\PackageTypeService;
+use App\Enums\ServiceType;
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource\Pages\ViewCustomerService;
 use App\Filament\Resources\UserResource\UserResource;
@@ -26,6 +27,11 @@ class ManageCustomerServices extends ManageRelatedRecords
     {
         return $table
             ->columns([
+                TextColumn::make('servicePackage.service_type')
+                    ->label('Jenis Layanan')
+                    ->formatStateUsing(fn($state): string => ServiceType::tryFrom($state)?->getLabel() ?? $state)
+                    ->searchable(),
+
                 TextColumn::make('servicePackage.package_name')
                     ->label('Nama Paket')
                     ->searchable(),

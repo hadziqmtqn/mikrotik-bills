@@ -144,6 +144,7 @@ class AdminPanelProvider extends PanelProvider
                     ->users([
                         'Super Admin' => 'superadmin@bkn.my.id',
                     ])
+                    ->switchable(false)
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -22,6 +22,7 @@ class Invoice extends Model
         'date',
         'due_date',
         'cancel_date',
+        'total_price',
         'status',
         'note',
     ];
@@ -59,17 +60,6 @@ class Invoice extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
-    }
-
-    // TODO Attributes
-    protected function totalPrice(): Attribute
-    {
-        $invCustomerServiceTotal = $this->invCustomerServices->sum('amount');
-        $invExtraCostTotal = $this->invExtraCosts->sum('fee');
-
-        return Attribute::make(
-            get: fn() => $invCustomerServiceTotal + $invExtraCostTotal,
-        );
     }
 
     // TODO Scope

@@ -41,7 +41,7 @@ class CustomerServiceSeeder extends Seeder
             $customerService->service_package_id = $servicePackage->id;
             $customerService->user_id = $user->id;
             $customerService->price = $servicePackage->package_price;
-            $customerService->package_type = $faker->randomElement(['subscription', 'one-time']);
+            $customerService->package_type = $servicePackage->service_type == ServiceType::PPPOE->value ? 'subscription' : 'one-time';
             $customerService->status = $faker->randomElement(['active', 'pending']);
             $customerService->save();
 
@@ -70,7 +70,7 @@ class CustomerServiceSeeder extends Seeder
             // TODO Extra Cost
             $totalFee = 0;
 
-            if ($servicePackage->service_type === ServiceType::HOTSPOT->value && $servicePackage->limit_type == 'data') {
+            if ($servicePackage->service_type === ServiceType::PPPOE->value) {
                 foreach ($extraCosts as $key => $extraCost) {
                     $invExtraCost = new InvExtraCost();
                     $invExtraCost->invoice_id = $invoice->id;
@@ -82,12 +82,17 @@ class CustomerServiceSeeder extends Seeder
                 }
             }
 
+            $totalBill = $servicePackage->service_type === ServiceType::PPPOE->value ? $totalFee : $customerService->price;
+
+            $invoice->total_price = $totalBill;
+            $invoice->save();
+
             // TODO Payment
             if ($invoice->status == 'paid') {
                 $payment = new Payment();
                 $payment->user_id = $user->id;
                 $payment->invoice_id = $invoice->id;
-                $payment->amount = $customerService->price + $totalFee;
+                $payment->amount = $totalBill;
                 $payment->payment_method = 'cash';
                 $payment->date = $invoice->date->addDays(2);
                 $payment->status = 'paid';

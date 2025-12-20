@@ -4,8 +4,10 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
+use App\Enums\ServiceType;
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource\Actions\InvoiceActions;
 use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Filament\Resources\UserResource\UserResource;
 use App\Helpers\DateHelper;
@@ -28,7 +30,7 @@ class ViewInvoice extends ViewRecord
 
     protected function getActions(): array
     {
-        return InvoiceResource\Actions\InvoiceActions::actions();
+        return InvoiceActions::actions();
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -85,6 +87,11 @@ class ViewInvoice extends ViewRecord
                                             ->label('Paket Layanan')
                                             ->inlineLabel(),
 
+                                        TextEntry::make('customerService.servicePackage.service_type')
+                                            ->label('Jenis Layanan')
+                                            ->formatStateUsing(fn($state): string => ServiceType::tryFrom($state)?->getLabel() ?? $state)
+                                            ->inlineLabel(),
+
                                         TextEntry::make('customerService.package_type')
                                             ->label('Tipe Paket')
                                             ->inlineLabel()
@@ -99,6 +106,7 @@ class ViewInvoice extends ViewRecord
 
                                 RepeatableEntry::make('invExtraCosts')
                                     ->label('Biaya Tambahan')
+                                    ->visible(fn(Invoice $invoice): bool => $invoice->invExtraCosts->isNotEmpty())
                                     ->schema([
                                         TextEntry::make('extraCost.name')
                                             ->label('Nama')

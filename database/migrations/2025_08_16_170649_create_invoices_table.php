@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->dateTime('date');
             $table->dateTime('due_date');
             $table->dateTime('cancel_date')->nullable();
+            $table->decimal('total_price', 20, 0)->default(0);
             $table->enum('status', ['unpaid', 'paid', 'overdue', 'cancelled'])->default('unpaid');
             $table->text('note')->nullable();
             $table->timestamps();

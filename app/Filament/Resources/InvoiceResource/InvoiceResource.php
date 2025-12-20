@@ -95,8 +95,7 @@ class InvoiceResource extends Resource implements HasShieldPermissions
                 'user.userProfile',
                 'invCustomerServices.customerService',
                 'invExtraCosts.extraCost'
-            ])
-            ->whereHas('invCustomerServices');
+            ]);
     }
 
     public static function getRelations(): array
