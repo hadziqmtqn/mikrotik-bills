@@ -29,7 +29,8 @@ return new class extends Migration {
             $table->enum('data_limit_unit', ['MBs', 'GBs'])->nullable();
             $table->integer('validity_period')->nullable();
             $table->enum('validity_unit', array_keys(TimeLimitType::options()))->nullable();
-            $table->decimal('package_price', 20, 0);
+            $table->decimal('daily_price', 20, 0)->nullable()->default(0);
+            $table->decimal('package_price', 20, 0)->default(0);
             $table->decimal('price_before_discount', 20, 0)->nullable();
             $table->unsignedBigInteger('router_id');
             $table->text('description')->nullable();

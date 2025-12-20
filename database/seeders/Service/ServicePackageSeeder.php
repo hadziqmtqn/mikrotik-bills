@@ -36,6 +36,7 @@ class ServicePackageSeeder extends Seeder
             $servicePackage->data_limit_unit = !empty($row['data_limit_unit']) ? $row['data_limit_unit'] : null;
             $servicePackage->validity_period = !empty($row['validity_period']) ? $row['validity_period'] : null;
             $servicePackage->validity_unit = !empty($row['validity_unit']) ? $row['validity_unit'] : null;
+            $servicePackage->daily_price = !empty($row['daily_price']) ? $row['daily_price'] : null;
             $servicePackage->package_price = $row['package_price'];
             $servicePackage->price_before_discount = !empty($row['price_before_discount']) ? $row['price_before_discount'] : null;
             $servicePackage->router_id = $row['router_id'];

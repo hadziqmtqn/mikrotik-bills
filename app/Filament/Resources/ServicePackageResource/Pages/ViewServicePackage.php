@@ -24,7 +24,9 @@ class ViewServicePackage extends ViewRecord
 
     public function infolist(Infolist $infolist): Infolist
     {
-        $servicePackage = ServicePackage::findOrFail($this->record->id);
+        $servicePackage = ServicePackage::find($this->record->id);
+        $isPpoe = $servicePackage?->service_type === ServiceType::PPPOE->value;
+        $isHotspot = $servicePackage?->service_type === ServiceType::HOTSPOT->value;
 
         return $infolist
             ->columns(3)
@@ -69,10 +71,10 @@ class ViewServicePackage extends ViewRecord
                                 TextEntry::make('package_limit_type')
                                     ->label('Jenis Batasan Paket')
                                     ->formatStateUsing(fn($state): string => PackageLimitType::tryFrom($state)?->getLabel() ?? $state)
-                                    ->visible(fn(): bool => $servicePackage->service_type == ServiceType::HOTSPOT->value),
+                                    ->visible(fn(): bool => $isHotspot),
 
                                 Group::make()
-                                    ->visible(fn(): bool => $servicePackage->package_limit_type === PackageLimitType::LIMITED->value)
+                                    ->visible(fn(): bool => $servicePackage?->package_limit_type === PackageLimitType::LIMITED->value)
                                     ->schema([
                                         TextEntry::make('limit_type')
                                             ->label('Jenis Batasan')
@@ -80,21 +82,21 @@ class ViewServicePackage extends ViewRecord
 
                                         TextEntry::make('time_limit')
                                             ->label('Batasan Waktu')
-                                            ->visible(fn(): bool => $servicePackage->limit_type != LimitType::DATA->value)
-                                            ->formatStateUsing(fn($state): string => $state . ' ' . TimeLimitType::tryFrom($servicePackage->time_limit_unit)?->getLabel() ?? $state),
+                                            ->visible(fn(): bool => $servicePackage?->limit_type != LimitType::DATA->value)
+                                            ->formatStateUsing(fn($state): string => $state . ' ' . TimeLimitType::tryFrom($servicePackage?->time_limit_unit)?->getLabel() ?? $state),
 
                                         TextEntry::make('data_limit')
                                             ->label('Batasan Data')
-                                            ->visible(fn(): bool => $servicePackage->limit_type != LimitType::TIME->value)
-                                            ->formatStateUsing(fn($state): string => $state . ' ' . $servicePackage->data_limit_unit),
+                                            ->visible(fn(): bool => $servicePackage?->limit_type != LimitType::TIME->value)
+                                            ->formatStateUsing(fn($state): string => $state . ' ' . $servicePackage?->data_limit_unit),
                                     ]),
 
                                 Group::make()
-                                    ->visible(fn(): bool => $servicePackage->service_type == ServiceType::PPPOE->value)
+                                    ->visible(fn(): bool => $isPpoe)
                                     ->schema([
                                         TextEntry::make('validity_period')
                                             ->label('Masa Berlaku')
-                                            ->formatStateUsing(fn($state): string => $state . ' ' . TimeLimitType::tryFrom($servicePackage->validity_unit)?->getLabel() ?? 'N/A')
+                                            ->formatStateUsing(fn($state): string => $state . ' ' . TimeLimitType::tryFrom($servicePackage?->validity_unit)?->getLabel() ?? 'N/A')
                                     ])
                             ]),
 
@@ -102,9 +104,15 @@ class ViewServicePackage extends ViewRecord
                             ->collapsible()
                             ->columns()
                             ->schema([
+                                TextEntry::make('daily_price')
+                                    ->label('Harga Harian')
+                                    ->money('IDR')
+                                    ->visible(fn(): bool => $isPpoe),
+
                                 TextEntry::make('package_price')
                                     ->label('Harga Paket')
-                                    ->money('IDR'),
+                                    ->money('IDR')
+                                    ->hintIcon(fn(): string|null => $isPpoe ? 'heroicon-o-information-circle' : null, 'Harga harian x 30 hari'),
 
                                 TextEntry::make('price_before_discount')
                                     ->label('Harga Sebelum Diskon')

@@ -11,11 +11,10 @@ use App\Enums\TimeLimitType;
 use App\Models\ServicePackage;
 use App\Services\RouterService;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -40,18 +39,19 @@ class ServicePackageForm
                                     ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state !== ServiceType::HOTSPOT->value) {
-                                            $set('package_limit_type', null);
-                                            $set('limit_type', null);
-                                            $set('time_limit', null);
-                                            $set('time_limit_unit', null);
-                                            $set('data_limit', null);
-                                            $set('data_limit_unit', null);
+                                        if ($state === ServiceType::HOTSPOT->value) {
+                                            $set('validity_period', null);
+                                            $set('validity_unit', []);
+                                            $set('daily_price', null);
                                         }
 
-                                        if ($state !== ServiceType::PPPOE->value) {
-                                            $set('validity_period', null);
-                                            $set('validity_unit', null);
+                                        if ($state === ServiceType::PPPOE->value) {
+                                            $set('package_limit_type', []);
+                                            $set('limit_type', null);
+                                            $set('time_limit', null);
+                                            $set('time_limit_unit', []);
+                                            $set('data_limit', null);
+                                            $set('data_limit_unit', []);
                                         }
                                     })
                                     ->columnSpanFull(),
@@ -71,7 +71,7 @@ class ServicePackageForm
 
                                 Select::make('plan_type')
                                     ->label('Tipe Paket')
-                                    ->hintIcon('heroicon-o-information-circle', 'Pilih tipe paket layanan untuk jenis pelanggan yang sesuai.')
+                                    ->hintIcon('heroicon-o-information-circle', 'Pilih tipe paket layanan yang sesuai untuk jenis pelanggan')
                                     ->options(AccountType::options())
                                     ->native(false)
                                     ->required(),
@@ -98,7 +98,7 @@ class ServicePackageForm
                                     ->required(fn(Get $get) => $get('service_type') === ServiceType::HOTSPOT->value)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state !== 'limited') {
+                                        if ($state === PackageLimitType::UNLIMITED->value) {
                                             $set('limit_type', null);
                                             $set('time_limit', null);
                                             $set('time_limit_unit', null);
@@ -116,21 +116,21 @@ class ServicePackageForm
                                     ->hidden(fn(Get $get) => $get('package_limit_type') !== PackageLimitType::LIMITED->value)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state !== 'time') {
-                                            $set('time_limit', null);
-                                            $set('time_limit_unit', null);
+                                        if ($state === LimitType::TIME->value) {
+                                            $set('data_limit', null);
+                                            $set('data_limit_unit', []);
                                         }
 
-                                        if ($state !== 'data') {
-                                            $set('data_limit', null);
-                                            $set('data_limit_unit', null);
+                                        if ($state === LimitType::DATA->value) {
+                                            $set('time_limit', null);
+                                            $set('time_limit_unit', []);
                                         }
 
-                                        if ($state !== 'both') {
+                                        if ($state !== LimitType::BOTH->value) {
                                             $set('time_limit', null);
-                                            $set('time_limit_unit', null);
+                                            $set('time_limit_unit', []);
                                             $set('data_limit', null);
-                                            $set('data_limit_unit', null);
+                                            $set('data_limit_unit', []);
                                         }
                                     })
                                     ->columnSpanFull(),
@@ -191,7 +191,7 @@ class ServicePackageForm
                                     ->options(TimeLimitType::options(['bulan']))
                                     ->hidden(fn(Get $get) => $get('service_type') !== ServiceType::PPPOE->value)
                                     ->required(fn(Get $get) => $get('service_type') === ServiceType::PPPOE->value)
-                                    ->default('hari')
+                                    ->default('bulan')
                                     ->native(false),
                             ]),
 
@@ -200,53 +200,54 @@ class ServicePackageForm
                             ->description('Pengaturan harga paket layanan.')
                             ->columns()
                             ->schema([
+                                TextInput::make('daily_price')
+                                    ->label('Harga Paket Harian')
+                                    ->numeric()
+                                    ->required()
+                                    ->visible(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
+                                    ->prefix('Rp')
+                                    ->default(0)
+                                    ->helperText('Harga paket harian')
+                                    ->reactive()
+                                    ->debounce()
+                                    ->afterStateUpdated(function ($state, callable $set): void {
+                                        $set('package_price', (int)$state * 30);
+                                    }),
+
                                 TextInput::make('package_price')
                                     ->label('Harga Paket Layanan')
                                     ->numeric()
                                     ->required()
                                     ->prefix('Rp')
                                     ->default(0)
-                                    ->helperText('Harga paket layanan ini.'),
+                                    ->readOnly(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
+                                    ->helperText(fn(Get $get): string => $get('service_type') === ServiceType::PPPOE->value ? 'Harga paket harian x 30 hari' : 'Harga paket layanan ini'),
 
                                 TextInput::make('price_before_discount')
                                     ->label('Harga Sebelum Diskon')
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->default(0)
-                                    ->helperText('Harga sebelum diskon, jika ada.'),
-                            ]),
-
-                        // TODO: Description
-                        Section::make()
-                            ->schema([
-                                RichEditor::make('description')
-                                    ->label('Deskripsi Paket Layanan')
-                                    ->fileAttachmentsDisk('s3')
-                                    ->fileAttachmentsDirectory('attachments')
-                                    ->fileAttachmentsVisibility('private')
-                                    ->placeholder('Masukkan deskripsi layanan')
+                                    ->helperText('Harga sebelum diskon, jika ada'),
                             ])
                     ])->columnSpan(['lg' => 2]),
 
                 Group::make()
                     ->schema([
-                        Section::make('Status')
+                        Section::make('Lainnya')
                             ->schema([
+                                Textarea::make('description')
+                                    ->label('Deskripsi Paket Layanan')
+                                    ->autosize()
+                                    ->placeholder('Masukkan deskripsi layanan'),
+
                                 Toggle::make('is_active')
                                     ->label('Aktif')
                                     ->default(true)
                                     ->inline()
                                     ->required()
                                     ->helperText('Aktifkan paket layanan ini untuk membuatnya tersedia bagi pelanggan.')
-                                    ->columnSpanFull(),
-
-                                Placeholder::make('created_at')
-                                    ->label('Created Date')
-                                    ->content(fn(?ServicePackage $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                                Placeholder::make('updated_at')
-                                    ->label('Last Modified Date')
-                                    ->content(fn(?ServicePackage $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
+                                    ->columnSpanFull()
                             ])
                     ])->columnSpan(['lg' => 1]),
             ])

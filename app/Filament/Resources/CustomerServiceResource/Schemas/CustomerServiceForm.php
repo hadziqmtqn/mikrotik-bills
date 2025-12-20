@@ -62,7 +62,7 @@ class CustomerServiceForm
                                     ->reactive()
                                     ->native(false)
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        $set('service_package_id', null);
+                                        $set('service_package_id', []);
                                         $set('price', null);
                                     }),
 

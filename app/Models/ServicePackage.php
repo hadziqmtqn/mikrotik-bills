@@ -33,6 +33,7 @@ class ServicePackage extends Model implements HasMedia
         'data_limit_unit',
         'validity_period',
         'validity_unit',
+        'daily_price',
         'package_price',
         'price_before_discount',
         'router_id',
