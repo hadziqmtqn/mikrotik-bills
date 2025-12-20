@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
+use App\Enums\AccountType;
 use App\Enums\PackageTypeService;
 use App\Enums\ServiceType;
 use App\Models\CustomerService;
@@ -32,11 +33,30 @@ class CustomerServiceForm
                     ->schema([
                         Section::make()
                             ->schema([
+                                ToggleButtons::make('account_type')
+                                    ->label('Jenis Pelanggan')
+                                    ->options(AccountType::options())
+                                    ->required()
+                                    ->inline()
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set): void {
+                                        $set('user_id', []);
+                                    }),
+
                                 Select::make('user_id')
                                     ->label('Pelanggan')
                                     ->required()
-                                    ->options(function (?CustomerService $record) {
-                                        return UserService::dropdownOptions($record?->user_id);
+                                    ->options(function (?CustomerService $record, Get $get) {
+                                        $accountType = $get('account_type');
+
+                                        if (!$accountType) {
+                                            return [];
+                                        }
+
+                                        return UserService::dropdownOptions(
+                                            selfId: $record?->user_id,
+                                            accountType: $accountType
+                                        );
                                     })
                                     ->searchable()
                                     ->reactive()

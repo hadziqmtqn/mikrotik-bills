@@ -11,7 +11,7 @@ class RecalculateInvoiceTotalService
      * - PPoE jenis pembayaran postpaid (pasca bayar) tagihan paket internet dibebankan pada bulan berikutnya.
      * - PPoE jenis pembayaran prepaid (pra bayar) tagihan paket internet dibebenkan pada pasang baru
      */
-    public static function totalPrice(Invoice $invoice): void
+    public static function totalPrice(Invoice $invoice, $locationFile = null): void
     {
         $invoice->refresh();
         $invoice->loadMissing('invCustomerServices.customerService.servicePackage');
@@ -26,6 +26,13 @@ class RecalculateInvoiceTotalService
 
         $invoice->updateQuietly([
             'total_price' => $totalCustomerServiceBill + $invoice->total_fee
+        ]);
+
+        logger([
+            'message' => 'Successfully recalculated the total bill',
+            'locationFile' => $locationFile,
+            'totalInvCustomerService' => $totalCustomerServiceBill,
+            'totalFee' => $invoice->total_fee
         ]);
     }
 }

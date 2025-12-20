@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\CustomerService;
+use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Observers\CustomerServiceObserver;
+use App\Observers\InvCustomerServiceObserver;
 use App\Observers\InvExtraCostObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\PaymentObserver;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         CustomerService::observe(CustomerServiceObserver::class);
+        InvCustomerService::observe(InvCustomerServiceObserver::class);
         InvExtraCost::observe(InvExtraCostObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Payment::observe(PaymentObserver::class);

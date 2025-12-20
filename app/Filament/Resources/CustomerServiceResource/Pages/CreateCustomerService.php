@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\PaymentType;
+use App\Enums\ServiceType;
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
 use App\Models\CustomerService;
 use App\Models\ExtraCost;
@@ -59,7 +60,11 @@ class CreateCustomerService extends CreateRecord
             $invCustomerService->invoice_id = $invoice->id;
             $invCustomerService->customer_service_id = $customerService->id;
             $invCustomerService->amount = $customerService->price;
-            $invCustomerService->include_bill = $servicePackage?->payment_type === PaymentType::PREPAID->value;
+
+            if ($servicePackage?->service_type === ServiceType::PPPOE->value) {
+                $invCustomerService->include_bill = $servicePackage?->payment_type === PaymentType::PREPAID->value;
+            }
+            
             $invCustomerService->save();
 
             // TODO Create Extra Cost Items

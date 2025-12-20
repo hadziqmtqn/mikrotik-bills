@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\InvCustomerServiceObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy([InvCustomerServiceObserver::class])]
 class InvCustomerService extends Model
 {
     protected $fillable = [
