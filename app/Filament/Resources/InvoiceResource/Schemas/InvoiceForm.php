@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
 use App\Enums\BillingType;
+use App\Models\Invoice;
 use App\Services\CustomerServicesService;
 use App\Services\ExtraCostService;
 use Filament\Forms\Components\CheckboxList;
@@ -89,42 +90,42 @@ class InvoiceForm
 
                         Section::make('Item Tagihan')
                             ->schema([
-                                CheckboxList::make('inv_customer_services')
+                                CheckboxList::make('invCustomerServices')
                                     ->label('Item Layanan')
                                     ->bulkToggleable()
-                                    ->options(function (Get $get): array {
-                                        $userId = $get('user_id');
+                                    ->options(function (?Invoice $invoice, Get $get): array {
+                                        $userId = $invoice?->user_id ?? $get('user_id');
 
                                         if (!$userId) return [];
 
-                                        return collect(CustomerServicesService::options($userId))
-                                            ->mapWithKeys(fn($data, $id) => [$id => $data['name']])
+                                        return collect(CustomerServicesService::options(userId: $userId))
+                                            ->map(fn($data) => $data['name'])
                                             ->toArray();
                                     })
-                                    ->descriptions(function (Get $get): array {
-                                        $userId = $get('user_id');
+                                    ->descriptions(function (?Invoice $invoice, Get $get): array {
+                                        $userId = $invoice?->user_id ?? $get('user_id');
 
                                         if (!$userId) return [];
 
-                                        return collect(CustomerServicesService::options($userId))
-                                            ->mapWithKeys(fn($data, $id) => [$id => 'Rp' . number_format($data['price'], 0, ',', '.') . ' (' . $data['packageType'] . ')'])
+                                        return collect(CustomerServicesService::options(userId: $userId))
+                                            ->map(fn($data) => 'Rp' . number_format($data['price'], 0, ',', '.') . ' (' . $data['packageType'] . ')')
                                             ->toArray();
                                     })
                                     ->required()
                                     ->reactive(),
 
-                                CheckboxList::make('inv_extra_costs')
+                                CheckboxList::make('invExtraCosts')
                                     ->label('Biaya Tambahan')
                                     ->bulkToggleable()
                                     ->columns()
                                     ->options(function (): array {
                                         return collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                            ->mapWithKeys(fn($data, $id) => [$id => $data['name']])
+                                            ->map(fn($item) => $item['name'])
                                             ->toArray();
                                     })
                                     ->descriptions(function (): array {
                                         return collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                            ->mapWithKeys(fn($data, $id) => [$id => 'Rp' . number_format($data['fee'], 0, ',', '.')])
+                                            ->map(fn($data) => 'Rp' . number_format($data['fee'], 0, ',', '.'))
                                             ->toArray();
                                     })
                                     ->reactive()
@@ -146,12 +147,12 @@ class InvoiceForm
                                         }else {
                                             // Ambil data item layanan
                                             $totalInvoice = collect(CustomerServicesService::options($userId))
-                                                ->only(collect($get('inv_customer_services') ?? []))
+                                                ->only(collect($get('invCustomerServices') ?? []))
                                                 ->sum('price');
 
                                             // Ambil data biaya tambahan
                                             $totalExtra = collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                                ->only(collect($get('inv_extra_costs') ?? []))
+                                                ->only(collect($get('invExtraCosts') ?? []))
                                                 ->sum('fee');
 
                                             $total = $totalInvoice + $totalExtra;

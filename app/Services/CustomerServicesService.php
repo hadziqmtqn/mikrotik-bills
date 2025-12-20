@@ -19,10 +19,10 @@ class CustomerServicesService
             })
             ->where([
                 'user_id' => $userId,
-                'status' => StatusData::ACTIVE->value,
-                'package_type' => PackageTypeService::SUBSCRIPTION->value
+                /*'status' => StatusData::ACTIVE->value,
+                'package_type' => PackageTypeService::SUBSCRIPTION->value*/
             ])
-            ->where(function (Builder $query) {
+            /*->where(function (Builder $query) {
                 $query->whereDoesntHave('invCustomerServices.invoice', function (Builder $query) {
                     $query->whereMonth('date', now()->month)
                         ->whereYear('date', now()->year);
@@ -32,7 +32,7 @@ class CustomerServicesService
                     $query->where('status', StatusData::PAID->value);
                     $query->whereDate('date', '<=', now()->subMonth()->lastOfMonth());
                 });
-            })
+            })*/
             ->get()
             ->mapWithKeys(function (CustomerService $customerService) {
                 $packageType = $customerService->package_type;

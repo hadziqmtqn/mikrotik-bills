@@ -79,7 +79,7 @@ class CreateInvoice extends CreateRecord
             $invoice->save();
 
             // Customer Serives
-            foreach ($data['inv_customer_services'] as $inv_customer_service) {
+            foreach ($data['invCustomerServices'] as $inv_customer_service) {
                 $customerService = CustomerService::find($inv_customer_service);
 
                 $invCustomerService = new InvCustomerService();
@@ -90,7 +90,7 @@ class CreateInvoice extends CreateRecord
             }
 
             // Extra Cost
-            foreach ($data['inv_extra_costs'] as $extra_cost) {
+            foreach ($data['invExtraCosts'] as $extra_cost) {
                 $extraCost = ExtraCost::find($extra_cost);
 
                 $invExtraCost = new InvExtraCost();

@@ -21,12 +21,16 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;
 
-    protected static ?string $title = 'Detail Faktur';
+    public function getTitle(): string|Htmlable
+    {
+        return 'Detail Faktur - ' . $this->record->code;
+    }
 
     protected function getActions(): array
     {
@@ -45,6 +49,7 @@ class ViewInvoice extends ViewRecord
                     ->schema([
                         Section::make('Data Pelanggan')
                             ->inlineLabel()
+                            ->collapsible()
                             ->schema([
                                 TextEntry::make('user.name')
                                     ->label('Nama')
@@ -66,6 +71,7 @@ class ViewInvoice extends ViewRecord
 
                         Section::make('Items')
                             ->inlineLabel()
+                            ->collapsible()
                             ->schema([
                                 RepeatableEntry::make('invCustomerServices')
                                     ->label('Paket Layanan')

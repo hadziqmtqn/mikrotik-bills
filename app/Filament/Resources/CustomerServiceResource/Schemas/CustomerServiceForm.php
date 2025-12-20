@@ -81,7 +81,8 @@ class CustomerServiceForm
                                             ->label('Harga')
                                             ->required()
                                             ->numeric()
-                                            ->prefix('Rp'),
+                                            ->prefix('Rp')
+                                            ->placeholder('Masukkan harga layaranan'),
                                     ])
                             ]),
 
