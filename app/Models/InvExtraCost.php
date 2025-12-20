@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\InvExtraCostObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy([InvExtraCostObserver::class])]
 class InvExtraCost extends Model
 {
     protected $fillable = [
@@ -16,5 +19,10 @@ class InvExtraCost extends Model
     public function extraCost(): BelongsTo
     {
         return $this->belongsTo(ExtraCost::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 }

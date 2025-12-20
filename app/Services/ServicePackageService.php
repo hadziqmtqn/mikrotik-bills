@@ -3,21 +3,17 @@
 namespace App\Services;
 
 use App\Models\ServicePackage;
-use App\Models\UserProfile;
+use Illuminate\Database\Eloquent\Builder;
 
 class ServicePackageService
 {
-    public static function dropdownOptions($userId): array
+    public static function options($planType = null, $serviceType = null, $activeOnly = false): array
     {
-        $userProfile = UserProfile::where('user_id', $userId)
-            ->first();
-
-        if (!$userProfile) {
-            return [];
-        }
-
-        return ServicePackage::planType($userProfile->account_type)
-            ->active()
+        return ServicePackage::query()
+            ->when($planType, fn(Builder $query) => $query->where('plan_type', $planType))
+            ->when($serviceType, fn(Builder $query) => $query->where('service_type', $serviceType))
+            ->when($activeOnly, fn(Builder $query) => $query->where('is_active', true))
+            ->get()
             ->mapWithKeys(function (ServicePackage $package) {
                 // value bisa gunakan JSON encode, label tetap tampil nama
                 return [$package->id => [

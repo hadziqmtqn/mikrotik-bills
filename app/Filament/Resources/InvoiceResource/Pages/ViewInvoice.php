@@ -69,12 +69,12 @@ class ViewInvoice extends ViewRecord
                                     ->label('No. WhatsApp'),
                             ]),
 
-                        Section::make('Items')
-                            ->inlineLabel()
+                        Section::make('Item')
                             ->collapsible()
                             ->schema([
                                 RepeatableEntry::make('invCustomerServices')
                                     ->label('Paket Layanan')
+                                    ->hiddenLabel()
                                     ->schema([
                                         TextEntry::make('customerService.reference_number')
                                             ->label('No. Referensi')
@@ -109,20 +109,6 @@ class ViewInvoice extends ViewRecord
                                             ->money('idr')
                                             ->weight(FontWeight::Bold)
                                     ]),
-
-                                RepeatableEntry::make('invExtraCosts')
-                                    ->label('Biaya Tambahan')
-                                    ->visible(fn(Invoice $invoice): bool => $invoice->invExtraCosts->isNotEmpty())
-                                    ->schema([
-                                        TextEntry::make('extraCost.name')
-                                            ->label('Nama')
-                                            ->inlineLabel(),
-
-                                        TextEntry::make('fee')
-                                            ->label('Biaya')
-                                            ->money('IDR')
-                                            ->inlineLabel(),
-                                    ])
                             ])
                     ]),
 

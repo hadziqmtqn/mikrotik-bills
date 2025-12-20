@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('extra_cost_id');
-            $table->decimal('fee', 20, 0);
+            $table->decimal('fee', 20, 0)->default(0);
             $table->timestamps();
 
             $table->foreign('invoice_id')->references('id')->on('invoices')->cascadeOnDelete();

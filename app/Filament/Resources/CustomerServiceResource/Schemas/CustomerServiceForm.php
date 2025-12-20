@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
 use App\Enums\PackageTypeService;
+use App\Enums\ServiceType;
 use App\Models\CustomerService;
 use App\Models\ServicePackage;
 use App\Models\UserProfile;
 use App\Services\ExtraCostService;
+use App\Services\ServicePackageService;
 use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
@@ -18,7 +20,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Illuminate\Database\Eloquent\Builder;
 
 class CustomerServiceForm
 {
@@ -47,23 +48,36 @@ class CustomerServiceForm
 
                                 Grid::make()
                                     ->schema([
+                                        ToggleButtons::make('service_type')
+                                            ->label('Jenis Layanan')
+                                            ->options(ServiceType::options())
+                                            ->inline()
+                                            ->columnSpanFull()
+                                            ->required()
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set): void {
+                                                $set('service_package_id', []);
+                                                $set('price', null);
+                                            }),
+
                                         Select::make('service_package_id')
                                             ->label('Paket layanan')
                                             ->required()
-                                            ->relationship('servicePackage', 'package_name', function (Builder $query, Get $get) {
+                                            ->options(function (Get $get): array {
                                                 $accountType = UserProfile::userId($get('user_id'))
                                                     ->first();
+                                                $serviceType = $get('service_type');
 
-                                                // If account type is not found, return an empty query
-                                                if (!$accountType) {
-                                                    $query->whereRaw('1 = 0'); // No results
-                                                }
+                                                if (!$accountType || !$serviceType) return [];
 
-                                                $query->where('is_active', true);
-                                                $query->where('plan_type', $accountType?->account_type);
+                                                return collect(ServicePackageService::options(
+                                                    planType: $accountType->account_type,
+                                                    serviceType: $serviceType,
+                                                    activeOnly: true
+                                                ))
+                                                    ->map(fn($item) => $item['name'])
+                                                    ->toArray();
                                             })
-                                            ->preload()
-                                            ->searchable()
                                             ->reactive()
                                             ->native(false)
                                             ->afterStateUpdated(function ($state, callable $set) {
@@ -82,11 +96,13 @@ class CustomerServiceForm
                                             ->required()
                                             ->numeric()
                                             ->prefix('Rp')
-                                            ->placeholder('Masukkan harga layaranan'),
+                                            ->placeholder('Masukkan harga layaranan')
+                                            ->readOnly(),
                                     ])
                             ]),
 
                         Section::make('Biaya Lain')
+                            ->visibleOn('create')
                             ->schema([
                                 CheckboxList::make('inv_extra_costs')
                                     ->label('Biaya Tambahan')
