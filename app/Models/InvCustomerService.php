@@ -11,7 +11,15 @@ class InvCustomerService extends Model
         'invoice_id',
         'customer_service_id',
         'amount',
+        'include_bill'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'include_bill' => 'boolean'
+        ];
+    }
 
     public function invoice(): BelongsTo
     {

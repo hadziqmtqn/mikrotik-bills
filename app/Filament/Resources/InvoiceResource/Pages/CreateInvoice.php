@@ -103,4 +103,13 @@ class CreateInvoice extends CreateRecord
             return $invoice;
         });
     }
+
+    /*protected function afterCreate(): void
+    {
+        $invoice = $this->record;
+
+        $invoice->update([
+            'total_price' => 0
+        ]);
+    }*/
 }
