@@ -105,10 +105,9 @@ class CustomerServiceTable
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
-                    DeleteAction::make(),
-                    RestoreAction::make(),
-                    ForceDeleteAction::make(),
+                    DeleteAction::make()->modalHeading('Hapus Layanan Pelanggan'),
+                    RestoreAction::make()->modalHeading('Pulihkan Data'),
+                    ForceDeleteAction::make()->modalHeading('Hapus Selamanya'),
                 ])
             ])
             ->bulkActions([

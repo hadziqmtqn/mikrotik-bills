@@ -189,7 +189,8 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->spaUrlExceptions([
                 '*/users/*'
-            ]);
+            ])
+            ->readOnlyRelationManagersOnResourceViewPagesByDefault(false);
     }
 
     function filterResourceNavigationItems($resource) {

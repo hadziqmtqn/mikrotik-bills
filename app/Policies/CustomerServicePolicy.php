@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -32,9 +33,7 @@ class CustomerServicePolicy
 
     public function delete(User $user, CustomerService $customerService): bool
     {
-        $customerService->loadCount('invCustomerServices');
-
-        return $user->can('delete_customer::service') && $customerService->invoice_items_count === 0;
+        return $user->can('delete_customer::service') && $customerService->status === StatusData::PENDING->value;
     }
 
     public function restore(User $user, CustomerService $customerService): bool

@@ -28,11 +28,6 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
         ];
     }
 
-    public function isReadOnly(): bool
-    {
-        return false;
-    }
-
     public function form(Form $form): Form
     {
         $invoice = $this->getOwnerRecord();

@@ -11,6 +11,7 @@ use App\Filament\Resources\ServicePackageResource\Pages\ViewServicePackage;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Helpers\DateHelper;
 use App\Models\CustomerService;
+use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -22,7 +23,16 @@ use Filament\Support\Enums\IconPosition;
 class ViewCustomerService extends ViewRecord
 {
     protected static string $resource = CustomerServiceResource::class;
+
     protected static ?string $title = 'Detail Layanan';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make()
+                ->modalHeading('Hapus Layanan Pelanggan')
+        ];
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {

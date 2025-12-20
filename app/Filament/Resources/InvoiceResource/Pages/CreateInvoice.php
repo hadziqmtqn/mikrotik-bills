@@ -9,6 +9,7 @@ use App\Models\ExtraCost;
 use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
+use App\Services\RecalculateInvoiceTotalService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
@@ -104,12 +105,8 @@ class CreateInvoice extends CreateRecord
         });
     }
 
-    /*protected function afterCreate(): void
+    protected function afterCreate(): void
     {
-        $invoice = $this->record;
-
-        $invoice->update([
-            'total_price' => 0
-        ]);
-    }*/
+        RecalculateInvoiceTotalService::totalPrice($this->record);
+    }
 }
