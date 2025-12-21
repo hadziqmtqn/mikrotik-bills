@@ -12,6 +12,8 @@ use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\ServicePackage;
 use App\Services\CustomerService\CreateCSService;
+use App\Services\CustomerService\CreateInvCSService;
+use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
@@ -73,32 +75,41 @@ class CreateCustomerService extends CreateRecord
             );
 
             // TODO Create Invoice Customer Service Items
-            $invCustomerService = new InvCustomerService();
+            /*$invCustomerService = new InvCustomerService();
             $invCustomerService->invoice_id = $invoice->id;
             $invCustomerService->customer_service_id = $customerService->id;
-            $invCustomerService->amount = $customerService->price;
+            $invCustomerService->amount = $customerService->price;*/
 
             /**
              * Ini berlaku pada saat pertama pasang baru
              * - Jika jenis layanan PPoE, nominal tagihan layanan utama tidak dibebankan
              * - Jika jenis layanan Hostpot, nominal tagihan layanan utama dibabankan
             */
-            if ($servicePackage?->service_type === ServiceType::PPPOE->value) {
+            /*if ($servicePackage?->service_type === ServiceType::PPPOE->value) {
                 $invCustomerService->include_bill = $servicePackage?->payment_type === PaymentType::PREPAID->value;
-            }
+            }*/
+            CreateInvCSService::handle(
+                invoiceId: $invoice->id,
+                customerService: $customerService,
+                includeBill: $servicePackage?->service_type === ServiceType::PPPOE->value && $servicePackage?->payment_type === PaymentType::PREPAID->value
+            );
             
-            $invCustomerService->save();
+            //$invCustomerService->save();
 
             // TODO Create Extra Cost Items
             if (count($data['inv_extra_costs']) > 0) {
                 foreach ($data['inv_extra_costs'] as $inv_extra_cost) {
                     $extraCost = ExtraCost::find($inv_extra_cost);
 
-                    $invExtraCost = new InvExtraCost();
+                    /*$invExtraCost = new InvExtraCost();
                     $invExtraCost->invoice_id = $invoice->id;
                     $invExtraCost->extra_cost_id = $extraCost?->id;
                     $invExtraCost->fee = $extraCost?->fee;
-                    $invExtraCost->save();
+                    $invExtraCost->save();*/
+                    CreateInvExtraCostService::handle(
+                        invoiceId: $invoice->id,
+                        extraCost: $extraCost
+                    );
                 }
             }
 

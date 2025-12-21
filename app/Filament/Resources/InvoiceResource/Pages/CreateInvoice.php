@@ -9,6 +9,8 @@ use App\Models\ExtraCost;
 use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
+use App\Services\CustomerService\CreateInvCSService;
+use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\RecalculateInvoiceTotalService;
 use Filament\Notifications\Notification;
@@ -90,22 +92,31 @@ class CreateInvoice extends CreateRecord
             foreach ($data['invCustomerServices'] as $inv_customer_service) {
                 $customerService = CustomerService::find($inv_customer_service);
 
-                $invCustomerService = new InvCustomerService();
+                /*$invCustomerService = new InvCustomerService();
                 $invCustomerService->invoice_id = $invoice->id;
                 $invCustomerService->customer_service_id = $customerService?->id;
                 $invCustomerService->amount = $customerService?->price;
-                $invCustomerService->save();
+                $invCustomerService->save();*/
+                CreateInvCSService::handle(
+                    invoiceId: $invoice->id,
+                    customerService: $customerService,
+                    includeBill: true
+                );
             }
 
             // Extra Cost
             foreach ($data['invExtraCosts'] as $extra_cost) {
                 $extraCost = ExtraCost::find($extra_cost);
 
-                $invExtraCost = new InvExtraCost();
+                /*$invExtraCost = new InvExtraCost();
                 $invExtraCost->invoice_id = $invoice->id;
                 $invExtraCost->extra_cost_id = $extraCost?->id;
                 $invExtraCost->fee = $extraCost?->fee;
-                $invExtraCost->save();
+                $invExtraCost->save();*/
+                CreateInvExtraCostService::handle(
+                    invoiceId: $invoice,
+                    extraCost: $extraCost
+                );
             }
 
             return $invoice;

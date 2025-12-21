@@ -13,6 +13,8 @@ use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
 use App\Services\CustomerService\CreateCSService;
+use App\Services\CustomerService\CreateInvCSService;
+use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\RecalculateInvoiceTotalService;
 use Faker\Factory;
@@ -79,7 +81,7 @@ class CustomerServiceSeeder extends Seeder
             );
 
             // TODO Item Customer Service
-            $invCustomerService = InvCustomerService::query()
+            /*$invCustomerService = InvCustomerService::query()
                 ->where('customer_service_id', $customerService->id)
                 ->lockForUpdate()
                 ->firstOrNew();
@@ -87,16 +89,25 @@ class CustomerServiceSeeder extends Seeder
             $invCustomerService->customer_service_id = $customerService->id;
             $invCustomerService->amount = $customerService->price;
             $invCustomerService->include_bill = $servicePackage->payment_type === PaymentType::PREPAID->value;
-            $invCustomerService->save();
+            $invCustomerService->save();*/
+            CreateInvCSService::handle(
+                invoiceId: $invoice->id,
+                customerService: $customerService,
+                includeBill: $servicePackage->payment_type === PaymentType::PREPAID->value
+            );
 
             // TODO Extra Cost
             if ($isPpoe) {
                 foreach ($extraCosts as $key => $extraCost) {
-                    $invExtraCost = new InvExtraCost();
+                    /*$invExtraCost = new InvExtraCost();
                     $invExtraCost->invoice_id = $invoice->id;
                     $invExtraCost->extra_cost_id = $key;
                     $invExtraCost->fee = $extraCost;
-                    $invExtraCost->save();
+                    $invExtraCost->save();*/
+                    CreateInvExtraCostService::handle(
+                        invoiceId: $invoice->id,
+                        extraCost: $extraCosts
+                    );
                 }
             }
 

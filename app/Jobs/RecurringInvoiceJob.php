@@ -8,6 +8,8 @@ use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Services\CustomerService\CreateInvCSService;
+use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Bus\Queueable;
@@ -60,20 +62,29 @@ class RecurringInvoiceJob implements ShouldQueue
 
             // Customer Serives
             foreach ($user->customerServices as $customerService) {
-                $invCustomerService = new InvCustomerService();
+                /*$invCustomerService = new InvCustomerService();
                 $invCustomerService->invoice_id = $invoice->id;
                 $invCustomerService->customer_service_id = $customerService->id;
                 $invCustomerService->amount = $customerService->price;
-                $invCustomerService->save();
+                $invCustomerService->save();*/
+                CreateInvCSService::handle(
+                    invoiceId: $invoice->id,
+                    customerService: $customerService,
+                    includeBill: true
+                );
             }
 
             // Extra Cost
             foreach ($extraCosts as $extraCost) {
-                $invExtraCost = new InvExtraCost();
+                /*$invExtraCost = new InvExtraCost();
                 $invExtraCost->invoice_id = $invoice->id;
                 $invExtraCost->extra_cost_id = $extraCost->id;
                 $invExtraCost->fee = $extraCost->fee;
-                $invExtraCost->save();
+                $invExtraCost->save();*/
+                CreateInvExtraCostService::handle(
+                    invoiceId: $invoice->id,
+                    extraCost: $extraCost
+                );
             }
         });
     }
