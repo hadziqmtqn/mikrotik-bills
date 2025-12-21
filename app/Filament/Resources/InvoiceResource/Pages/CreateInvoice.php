@@ -7,8 +7,6 @@ use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Models\CustomerService;
 use App\Models\ExtraCost;
 use App\Models\InvCustomerService;
-use App\Models\InvExtraCost;
-use App\Models\Invoice;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
@@ -75,12 +73,6 @@ class CreateInvoice extends CreateRecord
         */
 
         return DB::transaction(function () use ($data) {
-            /*$invoice = new Invoice();
-            $invoice->user_id = $data['user_id'];
-            $invoice->date = $data['date'];
-            $invoice->due_date = $data['due_date'];
-            $invoice->note = 'Dibuat manual oleh admin';
-            $invoice->save();*/
             $invoice = CreateInvoiceService::handle(
                 userId: $data['userid'],
                 date: $data['date'],
@@ -92,11 +84,6 @@ class CreateInvoice extends CreateRecord
             foreach ($data['invCustomerServices'] as $inv_customer_service) {
                 $customerService = CustomerService::find($inv_customer_service);
 
-                /*$invCustomerService = new InvCustomerService();
-                $invCustomerService->invoice_id = $invoice->id;
-                $invCustomerService->customer_service_id = $customerService?->id;
-                $invCustomerService->amount = $customerService?->price;
-                $invCustomerService->save();*/
                 CreateInvCSService::handle(
                     invoiceId: $invoice->id,
                     customerService: $customerService,
@@ -108,11 +95,6 @@ class CreateInvoice extends CreateRecord
             foreach ($data['invExtraCosts'] as $extra_cost) {
                 $extraCost = ExtraCost::find($extra_cost);
 
-                /*$invExtraCost = new InvExtraCost();
-                $invExtraCost->invoice_id = $invoice->id;
-                $invExtraCost->extra_cost_id = $extraCost?->id;
-                $invExtraCost->fee = $extraCost?->fee;
-                $invExtraCost->save();*/
                 CreateInvExtraCostService::handle(
                     invoiceId: $invoice,
                     extraCost: $extraCost

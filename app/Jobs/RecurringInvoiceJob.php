@@ -4,9 +4,6 @@ namespace App\Jobs;
 
 use App\Enums\BillingType;
 use App\Models\ExtraCost;
-use App\Models\InvCustomerService;
-use App\Models\InvExtraCost;
-use App\Models\Invoice;
 use App\Models\User;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvExtraCostService;
@@ -47,12 +44,6 @@ class RecurringInvoiceJob implements ShouldQueue
         DB::transaction(function () use ($extraCosts) {
             $user = $this->user;
 
-            /*$invoice = new Invoice();
-            $invoice->user_id = $user->id;
-            $invoice->date = now();
-            $invoice->due_date = now()->addDays($this->setting()?->due_date_after_new_service);
-            $invoice->note = 'Dibuat otomatis oleh sistem';
-            $invoice->save();*/
             $invoice = CreateInvoiceService::handle(
                 userId: $user->id,
                 date: now(),
@@ -62,11 +53,6 @@ class RecurringInvoiceJob implements ShouldQueue
 
             // Customer Serives
             foreach ($user->customerServices as $customerService) {
-                /*$invCustomerService = new InvCustomerService();
-                $invCustomerService->invoice_id = $invoice->id;
-                $invCustomerService->customer_service_id = $customerService->id;
-                $invCustomerService->amount = $customerService->price;
-                $invCustomerService->save();*/
                 CreateInvCSService::handle(
                     invoiceId: $invoice->id,
                     customerService: $customerService,
@@ -76,11 +62,6 @@ class RecurringInvoiceJob implements ShouldQueue
 
             // Extra Cost
             foreach ($extraCosts as $extraCost) {
-                /*$invExtraCost = new InvExtraCost();
-                $invExtraCost->invoice_id = $invoice->id;
-                $invExtraCost->extra_cost_id = $extraCost->id;
-                $invExtraCost->fee = $extraCost->fee;
-                $invExtraCost->save();*/
                 CreateInvExtraCostService::handle(
                     invoiceId: $invoice->id,
                     extraCost: $extraCost

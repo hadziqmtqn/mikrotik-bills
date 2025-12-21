@@ -4,11 +4,7 @@ namespace Database\Seeders\Service;
 
 use App\Enums\PaymentType;
 use App\Enums\ServiceType;
-use App\Models\CustomerService;
 use App\Models\ExtraCost;
-use App\Models\InvExtraCost;
-use App\Models\Invoice;
-use App\Models\InvCustomerService;
 use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
@@ -33,7 +29,7 @@ class CustomerServiceSeeder extends Seeder
             ->limit(40)
             ->get();
 
-        $extraCosts = ExtraCost::pluck('fee', 'id');
+        $extraCosts = ExtraCost::all();
 
         foreach ($users as $user) {
             $servicePackage = ServicePackage::where('plan_type', $user->userProfile?->account_type)
@@ -45,14 +41,6 @@ class CustomerServiceSeeder extends Seeder
             $isPpoe = $servicePackage->service_type === ServiceType::PPPOE->value;
 
             // TODO Customer Service
-            /*$customerService = new CustomerService();
-            $customerService->service_package_id = $servicePackage->id;
-            $customerService->user_id = $user->id;
-            $customerService->daily_price = $servicePackage->daily_price;
-            $customerService->price = $servicePackage->package_price;
-            $customerService->package_type = $isPpoe ? 'subscription' : 'one-time';
-            $customerService->status = $faker->randomElement(['active', 'pending']);
-            $customerService->save();*/
             $customerService = CreateCSService::handle(
                 userId: $user->id,
                 servicePackage: $servicePackage,
@@ -62,16 +50,6 @@ class CustomerServiceSeeder extends Seeder
 
             // TODO Invoice
             $date = now()->subMonth();
-
-            /*$invoice = Invoice::query()
-                ->where('user_id', $user->id)
-                ->firstOrNew();
-            $invoice->user_id = $user->id;
-            $invoice->date = $date;
-            $invoice->due_date = $date->addDays(7);
-            $invoice->status = $customerService->status == 'active' ? 'paid' : 'unpaid';
-            $invoice->save();*/
-
             $invoice = CreateInvoiceService::handle(
                 userId: $customerService->user_id,
                 date: $date,
@@ -81,15 +59,6 @@ class CustomerServiceSeeder extends Seeder
             );
 
             // TODO Item Customer Service
-            /*$invCustomerService = InvCustomerService::query()
-                ->where('customer_service_id', $customerService->id)
-                ->lockForUpdate()
-                ->firstOrNew();
-            $invCustomerService->invoice_id = $invoice->id;
-            $invCustomerService->customer_service_id = $customerService->id;
-            $invCustomerService->amount = $customerService->price;
-            $invCustomerService->include_bill = $servicePackage->payment_type === PaymentType::PREPAID->value;
-            $invCustomerService->save();*/
             CreateInvCSService::handle(
                 invoiceId: $invoice->id,
                 customerService: $customerService,
@@ -98,15 +67,10 @@ class CustomerServiceSeeder extends Seeder
 
             // TODO Extra Cost
             if ($isPpoe) {
-                foreach ($extraCosts as $key => $extraCost) {
-                    /*$invExtraCost = new InvExtraCost();
-                    $invExtraCost->invoice_id = $invoice->id;
-                    $invExtraCost->extra_cost_id = $key;
-                    $invExtraCost->fee = $extraCost;
-                    $invExtraCost->save();*/
+                foreach ($extraCosts as $extraCost) {
                     CreateInvExtraCostService::handle(
                         invoiceId: $invoice->id,
-                        extraCost: $extraCosts
+                        extraCost: $extraCost
                     );
                 }
             }
