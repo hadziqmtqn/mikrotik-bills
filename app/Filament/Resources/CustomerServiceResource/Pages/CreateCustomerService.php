@@ -11,6 +11,7 @@ use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\ServicePackage;
+use App\Services\CustomerService\CreateCSService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -40,13 +41,19 @@ class CreateCustomerService extends CreateRecord
         return DB::transaction(function () use ($data) {
             $servicePackage = ServicePackage::find($data['service_package_id']);
 
-            $customerService = new CustomerService();
+            /*$customerService = new CustomerService();
             $customerService->user_id = $data['user_id'];
             $customerService->service_package_id = $servicePackage?->id;
             $customerService->daily_price = $servicePackage->daily_price;
             $customerService->price = $servicePackage?->package_price;
             $customerService->package_type = $data['package_type'];
-            $customerService->save();
+            $customerService->save();*/
+
+            $customerService = CreateCSService::insertCustomerService(
+                userId: $data['user_id'],
+                servicePackage: $servicePackage,
+                packageType: $data['package_type'],
+            );
 
             // TODO Create Invoice
             $invoice = new Invoice();
@@ -62,6 +69,11 @@ class CreateCustomerService extends CreateRecord
             $invCustomerService->customer_service_id = $customerService->id;
             $invCustomerService->amount = $customerService->price;
 
+            /**
+             * Ini berlaku pada saat pertama pasang baru
+             * - Jika jenis layanan PPoE, nominal tagihan layanan utama tidak dibebankan
+             * - Jika jenis layanan Hostpot, nominal tagihan layanan utama dibabankan
+            */
             if ($servicePackage?->service_type === ServiceType::PPPOE->value) {
                 $invCustomerService->include_bill = $servicePackage?->payment_type === PaymentType::PREPAID->value;
             }

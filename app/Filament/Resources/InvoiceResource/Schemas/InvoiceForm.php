@@ -5,7 +5,7 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 use App\Enums\AccountType;
 use App\Enums\BillingType;
 use App\Models\Invoice;
-use App\Services\CustomerServicesService;
+use App\Services\CustomerService\CSService;
 use App\Services\ExtraCostService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
@@ -98,7 +98,7 @@ class InvoiceForm
 
                                         if (!$userId) return [];
 
-                                        return collect(CustomerServicesService::options(userId: $userId))
+                                        return collect(CSService::options(userId: $userId))
                                             ->map(fn($data) => $data['name'])
                                             ->toArray();
                                     })
@@ -107,7 +107,7 @@ class InvoiceForm
 
                                         if (!$userId) return [];
 
-                                        return collect(CustomerServicesService::options(userId: $userId))
+                                        return collect(CSService::options(userId: $userId))
                                             ->map(fn($data) => 'Rp' . number_format($data['price'], 0, ',', '.') . ' (' . $data['packageType'] . ')')
                                             ->toArray();
                                     })
@@ -146,7 +146,7 @@ class InvoiceForm
                                             $total = 0;
                                         }else {
                                             // Ambil data item layanan
-                                            $totalInvoice = collect(CustomerServicesService::options($userId))
+                                            $totalInvoice = collect(CSService::options($userId))
                                                 ->only(collect($get('invCustomerServices') ?? []))
                                                 ->sum('price');
 

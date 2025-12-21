@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Observers\CustomerServiceObserver;
+use App\Services\InvoiceSettingService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -66,5 +68,13 @@ class CustomerService extends Model
     protected function filterByReferenceNumber(Builder $query, $referenceNumber): Builder
     {
         return $query->where('reference_number', $referenceNumber);
+    }
+
+    // TODO Attributes
+    protected function nextBillingDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => InvoiceSettingService::nextRepetitionDate()
+        );
     }
 }

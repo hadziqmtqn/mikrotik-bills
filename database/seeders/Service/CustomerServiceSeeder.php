@@ -12,6 +12,7 @@ use App\Models\InvCustomerService;
 use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
+use App\Services\CustomerService\CreateCSService;
 use App\Services\RecalculateInvoiceTotalService;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
@@ -41,14 +42,20 @@ class CustomerServiceSeeder extends Seeder
             $isPpoe = $servicePackage->service_type === ServiceType::PPPOE->value;
 
             // TODO Customer Service
-            $customerService = new CustomerService();
+            /*$customerService = new CustomerService();
             $customerService->service_package_id = $servicePackage->id;
             $customerService->user_id = $user->id;
             $customerService->daily_price = $servicePackage->daily_price;
             $customerService->price = $servicePackage->package_price;
             $customerService->package_type = $isPpoe ? 'subscription' : 'one-time';
             $customerService->status = $faker->randomElement(['active', 'pending']);
-            $customerService->save();
+            $customerService->save();*/
+            $customerService = CreateCSService::insertCustomerService(
+                userId: $user->id,
+                servicePackage: $servicePackage,
+                packageType: ($isPpoe ? 'subscription' : 'one-time'),
+                status: $faker->randomElement(['active', 'pending'])
+            );
 
             // TODO Invoice
             $date = now()->subMonth();

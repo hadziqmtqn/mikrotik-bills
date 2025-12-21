@@ -69,7 +69,7 @@ class ViewCustomerService extends ViewRecord
                                     ->label('No. WhatsApp'),
                             ]),
 
-                        Section::make('Detail Paket')
+                        Section::make('Detail Layanan')
                             ->inlineLabel()
                             ->schema([
                                 TextEntry::make('servicePackage.code')
@@ -131,12 +131,20 @@ class ViewCustomerService extends ViewRecord
                                     ->weight(FontWeight::Bold),
 
                                 TextEntry::make('start_date')
-                                    ->label('Tanggal Mulai Aktif')
-                                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : '-')
-                                    ->visible(fn(CustomerService $record): bool => $record->status === StatusData::ACTIVE->value),
+                                    ->label('Aktif Sejak')
+                                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : '-'),
+
+                                Group::make()
+                                    ->visible(fn(CustomerService $record): bool => $record->status === StatusData::ACTIVE->value && $record->package_type === PackageTypeService::SUBSCRIPTION->value)
+                                    ->schema([
+                                        TextEntry::make('next_billing_date')
+                                            ->label('Tagihan Berikutnya')
+                                            ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state) : '-')
+                                    ]),
                             ]),
 
                         Section::make('Note')
+                            ->collapsed()
                             ->schema([
                                 TextEntry::make('notes')
                                     ->hiddenLabel()
