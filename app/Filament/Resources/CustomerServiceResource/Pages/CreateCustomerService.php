@@ -12,9 +12,11 @@ use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\ServicePackage;
 use App\Services\CustomerService\CreateCSService;
+use App\Services\CustomerService\CreateInvoiceService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -49,19 +51,26 @@ class CreateCustomerService extends CreateRecord
             $customerService->package_type = $data['package_type'];
             $customerService->save();*/
 
-            $customerService = CreateCSService::insertCustomerService(
+            $customerService = CreateCSService::handle(
                 userId: $data['user_id'],
                 servicePackage: $servicePackage,
                 packageType: $data['package_type'],
             );
 
             // TODO Create Invoice
-            $invoice = new Invoice();
+            /*$invoice = new Invoice();
             $invoice->user_id = $customerService->user_id;
             $invoice->date = now();
             $invoice->due_date = now()->addDays($this->setting()?->due_date_after_new_service);
             $invoice->note = 'Dibuat secara otomatis oleh sistem';
-            $invoice->save();
+            $invoice->save();*/
+            $date = Carbon::parse($data['date']);
+
+            $invoice = CreateInvoiceService::handle(
+                userId: $customerService->user_id,
+                date: $date,
+                dueDate: $date->addDays($this->setting()?->due_date_after_new_service)
+            );
 
             // TODO Create Invoice Customer Service Items
             $invCustomerService = new InvCustomerService();

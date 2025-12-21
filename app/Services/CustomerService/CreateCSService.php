@@ -7,7 +7,14 @@ use App\Models\ServicePackage;
 
 class CreateCSService
 {
-    public static function insertCustomerService($userId, ServicePackage $servicePackage, string $packageType = null, string $status = null): CustomerService
+    /**
+     * @param $userId
+     * @param ServicePackage $servicePackage
+     * @param string|null $packageType
+     * @param string|null $status
+     * @return CustomerService
+     */
+    public static function handle($userId, ServicePackage $servicePackage, string $packageType = null, string $status = null): CustomerService
     {
         $customerService = new CustomerService();
         $customerService->service_package_id = $servicePackage->id;

@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
 use App\Services\CustomerService\CreateCSService;
+use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\RecalculateInvoiceTotalService;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
@@ -50,7 +51,7 @@ class CustomerServiceSeeder extends Seeder
             $customerService->package_type = $isPpoe ? 'subscription' : 'one-time';
             $customerService->status = $faker->randomElement(['active', 'pending']);
             $customerService->save();*/
-            $customerService = CreateCSService::insertCustomerService(
+            $customerService = CreateCSService::handle(
                 userId: $user->id,
                 servicePackage: $servicePackage,
                 packageType: ($isPpoe ? 'subscription' : 'one-time'),
@@ -60,14 +61,22 @@ class CustomerServiceSeeder extends Seeder
             // TODO Invoice
             $date = now()->subMonth();
 
-            $invoice = Invoice::query()
+            /*$invoice = Invoice::query()
                 ->where('user_id', $user->id)
                 ->firstOrNew();
             $invoice->user_id = $user->id;
             $invoice->date = $date;
             $invoice->due_date = $date->addDays(7);
             $invoice->status = $customerService->status == 'active' ? 'paid' : 'unpaid';
-            $invoice->save();
+            $invoice->save();*/
+
+            $invoice = CreateInvoiceService::handle(
+                userId: $customerService->user_id,
+                date: $date,
+                dueDate: $date->addDays(7),
+                defaultNote: 'Data dummy',
+                defaultStatus: $customerService->status == 'active' ? 'paid' : 'unpaid'
+            );
 
             // TODO Item Customer Service
             $invCustomerService = InvCustomerService::query()

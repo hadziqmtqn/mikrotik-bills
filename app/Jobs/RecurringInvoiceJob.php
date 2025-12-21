@@ -8,6 +8,7 @@ use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Services\CustomerService\CreateInvoiceService;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,12 +45,18 @@ class RecurringInvoiceJob implements ShouldQueue
         DB::transaction(function () use ($extraCosts) {
             $user = $this->user;
 
-            $invoice = new Invoice();
+            /*$invoice = new Invoice();
             $invoice->user_id = $user->id;
             $invoice->date = now();
             $invoice->due_date = now()->addDays($this->setting()?->due_date_after_new_service);
             $invoice->note = 'Dibuat otomatis oleh sistem';
-            $invoice->save();
+            $invoice->save();*/
+            $invoice = CreateInvoiceService::handle(
+                userId: $user->id,
+                date: now(),
+                dueDate: now()->addDays($this->setting()?->due_date_after_new_service),
+                defaultNote: 'Dibuat otomatis oleh sistem'
+            );
 
             // Customer Serives
             foreach ($user->customerServices as $customerService) {

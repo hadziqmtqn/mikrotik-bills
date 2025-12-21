@@ -9,6 +9,7 @@ use App\Models\ExtraCost;
 use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
+use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\RecalculateInvoiceTotalService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -72,12 +73,18 @@ class CreateInvoice extends CreateRecord
         */
 
         return DB::transaction(function () use ($data) {
-            $invoice = new Invoice();
+            /*$invoice = new Invoice();
             $invoice->user_id = $data['user_id'];
             $invoice->date = $data['date'];
             $invoice->due_date = $data['due_date'];
             $invoice->note = 'Dibuat manual oleh admin';
-            $invoice->save();
+            $invoice->save();*/
+            $invoice = CreateInvoiceService::handle(
+                userId: $data['userid'],
+                date: $data['date'],
+                dueDate: $data['due_date'],
+                defaultNote: 'Dibuat manual oleh admin'
+            );
 
             // Customer Serives
             foreach ($data['invCustomerServices'] as $inv_customer_service) {

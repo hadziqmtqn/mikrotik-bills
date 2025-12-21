@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CSService
 {
+    /**
+     * @param $userId
+     * @return array
+     */
     public static function options($userId): array
     {
         return CustomerService::query()

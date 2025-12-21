@@ -12,6 +12,7 @@ use App\Services\ExtraCostService;
 use App\Services\ServicePackageService;
 use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
@@ -77,6 +78,10 @@ class CustomerServiceForm
                                             ->afterStateUpdated(function ($state, callable $set): void {
                                                 $set('service_package_id', []);
                                                 $set('price', null);
+
+                                                if ($state === ServiceType::HOTSPOT->value) {
+                                                    $set('date', null);
+                                                }
                                             }),
 
                                         Select::make('service_package_id')
@@ -140,6 +145,16 @@ class CustomerServiceForm
                     ->schema([
                         Section::make()
                             ->schema([
+                                DatePicker::make('date')
+                                    ->label('Tanggal Pemasangan')
+                                    ->date()
+                                    ->maxDate(now())
+                                    ->native(false)
+                                    ->required()
+                                    ->placeholder('Masukkan tanggal pemasangan')
+                                    ->visible(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
+                                    ->closeOnDateSelection(),
+
                                 ToggleButtons::make('package_type')
                                     ->label('Jenis Paket')
                                     ->options(PackageTypeService::options())
