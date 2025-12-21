@@ -110,7 +110,12 @@ class ViewCustomerService extends ViewRecord
                                 TextEntry::make('price')
                                     ->label('Harga')
                                     ->money('idr')
-                                    ->weight(FontWeight::Bold)
+                                    ->weight(FontWeight::Bold),
+
+                                TextEntry::make('daily_price')
+                                    ->label('Harga Harian')
+                                    ->money('IDR')
+                                    ->weight(FontWeight::Bold),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),

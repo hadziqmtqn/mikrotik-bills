@@ -43,6 +43,7 @@ class CreateCustomerService extends CreateRecord
             $customerService = new CustomerService();
             $customerService->user_id = $data['user_id'];
             $customerService->service_package_id = $servicePackage?->id;
+            $customerService->daily_price = $servicePackage->daily_price;
             $customerService->price = $servicePackage?->package_price;
             $customerService->package_type = $data['package_type'];
             $customerService->save();

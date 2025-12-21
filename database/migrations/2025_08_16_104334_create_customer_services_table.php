@@ -13,7 +13,8 @@ return new class extends Migration {
             $table->string('reference_number')->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('service_package_id');
-            $table->decimal('price', 20, 0);
+            $table->decimal('daily_price', 20, 0)->nullable();
+            $table->decimal('price', 20, 0)->default(0);
             $table->enum('package_type', ['subscription', 'one-time']);
             $table->string('username')->nullable();
             $table->string('password')->nullable();

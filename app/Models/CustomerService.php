@@ -21,6 +21,7 @@ class CustomerService extends Model
         'reference_number',
         'user_id',
         'service_package_id',
+        'daily_price',
         'price',
         'package_type',
         'username',

@@ -106,8 +106,14 @@ class ViewInvoice extends ViewRecord
                                         TextEntry::make('customerService.price')
                                             ->label('Harga')
                                             ->inlineLabel()
-                                            ->money('idr')
-                                            ->weight(FontWeight::Bold)
+                                            ->money('IDR')
+                                            ->weight(FontWeight::Bold),
+
+                                        TextEntry::make('customerService.daily_price')
+                                            ->label('Harga Harian')
+                                            ->inlineLabel()
+                                            ->money('IDR')
+                                            ->weight(FontWeight::Bold),
                                     ]),
                             ])
                     ]),

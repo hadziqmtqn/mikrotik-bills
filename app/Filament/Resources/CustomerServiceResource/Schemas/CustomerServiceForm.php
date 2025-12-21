@@ -14,7 +14,6 @@ use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -153,18 +152,6 @@ class CustomerServiceForm
                         'lg' => 1,
                         'md' => 1,
                     ]),
-
-                Grid::make()
-                    ->visible(fn(?CustomerService $record): bool => $record?->exists ?? false)
-                    ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Created Date')
-                            ->content(fn(?CustomerService $record): string => $record?->created_at?->diffForHumans() ?? '-'),
-
-                        Placeholder::make('updated_at')
-                            ->label('Last Modified Date')
-                            ->content(fn(?CustomerService $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
-                    ])
             ]);
     }
 }
