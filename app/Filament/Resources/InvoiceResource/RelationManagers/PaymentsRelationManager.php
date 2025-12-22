@@ -32,7 +32,10 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
     {
         $invoice = $this->getOwnerRecord();
 
-        return PaymentForm::form($form, $invoice);
+        return PaymentForm::form(
+            form: $form,
+            invoiceId: $invoice->id
+        );
     }
 
     public function table(Table $table): Table

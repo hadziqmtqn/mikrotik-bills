@@ -54,7 +54,7 @@ class InvoiceObserver
                 $customerService->save();
 
                 // TODO Catat penggunaan layanan
-                CreateCSUsageService::handle($customerService);
+                CreateCSUsageService::handle(customerService: $customerService, invoiceId: $invoice->id);
             }
         }
     }

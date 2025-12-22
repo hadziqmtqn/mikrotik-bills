@@ -10,7 +10,7 @@ use App\Services\InvoiceSettingService;
 
 class CreateCSUsageService
 {
-    public static function handle(CustomerService $customerService): void
+    public static function handle(CustomerService $customerService, $invoiceId): void
     {
         $customerService->refresh();
         $customerService->loadMissing('customerServiceUsageLatest');
@@ -24,12 +24,13 @@ class CreateCSUsageService
              * #### Ketentuan untuk layanan sudah berjalan lebih dari 1 bulan:
              * - Tanggal aktif pada penggunaan dimulai sejak terakhir digunakan, bukan sejak aktif
             */
+
             $nextRepetitionDate = InvoiceSettingService::nextRepetitionDate();
 
-            $activeDate = $customerService->customerServiceUsageLatest?->next_billing_date ?? $customerService->start_date; // mulai aktif digunakan
+            $activeDate = $customerService->customerServiceUsageLatest?->next_billing_date ?? $customerService->installation_date; // mulai aktif digunakan atau tanggal pemasangan
             $dailyPrice = $customerService->daily_price; // harga/tagihan harian
 
-            $nextBillingDate = $nextRepetitionDate->copy()->addMonth();
+            //$nextBillingDate = $nextRepetitionDate->copy()->addMonth();
 
             /*if ($activeDate->isSameMonth($nextRepetitionDate) && $activeDate->lessThan($nextRepetitionDate)) {
                 $diffInDays = $activeDate->diffInDays($nextRepetitionDate->copy()->addMonth());
@@ -37,13 +38,19 @@ class CreateCSUsageService
                 $diffInDays = $activeDate->diffInDays($nextBillingDate);
             }*/
 
-            $diffInDays = $activeDate->diffInDays($nextBillingDate);
+            $diffInDays = $activeDate
+                ->copy()
+                ->diffInDays($nextRepetitionDate);
             $totalPrice = $dailyPrice * $diffInDays;
 
-            $customerServiceUsage = new CustomerServiceUsage();
+            $customerServiceUsage = CustomerServiceUsage::query()
+                ->lockForUpdate()
+                ->firstOrNew(['invoice_id' => $invoiceId]);
+
             $customerServiceUsage->customer_service_id = $customerService->id;
+            $customerServiceUsage->invoice_id = $invoiceId;
             $customerServiceUsage->used_since = $activeDate;
-            $customerServiceUsage->next_billing_date = $nextBillingDate;
+            $customerServiceUsage->next_billing_date = $nextRepetitionDate;
             $customerServiceUsage->days_of_usage = $diffInDays;
             $customerServiceUsage->daily_price = $dailyPrice;
             $customerServiceUsage->total_price = $totalPrice;

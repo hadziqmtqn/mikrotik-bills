@@ -43,21 +43,22 @@ class CustomerServiceSeeder extends Seeder
             if (!$servicePackage) continue;
 
             $isPpoe = $servicePackage->service_type === ServiceType::PPPOE->value;
+            $date = now()->subMonths(2);
 
             // TODO Customer Service
             $customerService = CreateCSService::handle(
                 userId: $user->id,
                 servicePackage: $servicePackage,
                 packageType: ($isPpoe ? 'subscription' : 'one-time'),
+                installationDate: ($isPpoe ? $date : null),
                 status: $faker->randomElement(['active', 'pending'])
             );
 
             // TODO Invoice
-            $date = now()->subMonths(2);
             $invoice = CreateInvoiceService::handle(
                 userId: $customerService->user_id,
                 date: $date,
-                dueDate: $date->addDays(7),
+                dueDate: $date->copy()->addDays(7),
                 defaultNote: 'Data dummy',
                 defaultStatus: $customerService->status == 'active' ? 'paid' : 'unpaid'
             );
@@ -92,7 +93,7 @@ class CustomerServiceSeeder extends Seeder
                 $payment = new Payment();
                 $payment->user_id = $user->id;
                 $payment->invoice_id = $invoice->id;
-                $payment->amount = $invoice->total_fee;
+                $payment->amount = $invoice->total_price;
                 $payment->payment_method = 'cash';
                 $payment->date = $datePaid;
                 $payment->status = 'paid';
@@ -119,6 +120,7 @@ class CustomerServiceSeeder extends Seeder
 
                     $customerServiceUsage = new CustomerServiceUsage();
                     $customerServiceUsage->customer_service_id = $customerService->id;
+                    $customerServiceUsage->invoice_id = $invoice->id;
                     $customerServiceUsage->used_since = $activeDate;
                     $customerServiceUsage->next_billing_date = $nextRepetitionDate;
                     $customerServiceUsage->days_of_usage = $diffInDays;

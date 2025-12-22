@@ -10,14 +10,16 @@ return new class extends Migration {
         Schema::create('customer_service_usages', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_service_id');
+            $table->unsignedBigInteger('invoice_id');
             $table->dateTime('used_since');
             $table->dateTime('next_billing_date');
-            $table->float('days_of_usage');
+            $table->decimal('days_of_usage', 8, 0);
             $table->decimal('daily_price', 20, 0);
             $table->decimal('total_price', 20, 0);
             $table->timestamps();
 
             $table->foreign('customer_service_id')->references('id')->on('customer_services')->cascadeOnDelete();
+            $table->foreign('invoice_id')->references('id')->on('invoices')->cascadeOnDelete();
         });
     }
 

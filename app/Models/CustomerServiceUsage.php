@@ -9,6 +9,7 @@ class CustomerServiceUsage extends Model
 {
     protected $fillable = [
         'customer_service_id',
+        'invoice_id',
         'used_since',
         'next_billing_date',
         'days_of_usage',
@@ -21,6 +22,7 @@ class CustomerServiceUsage extends Model
         return [
             'used_since' => 'datetime',
             'next_billing_date' => 'datetime',
+            'days_of_usage' => 'decimal'
         ];
     }
 

@@ -145,7 +145,7 @@ class CustomerServiceForm
                     ->schema([
                         Section::make()
                             ->schema([
-                                DatePicker::make('date')
+                                DatePicker::make('installation_date')
                                     ->label('Tanggal Pemasangan')
                                     ->date()
                                     ->maxDate(now())

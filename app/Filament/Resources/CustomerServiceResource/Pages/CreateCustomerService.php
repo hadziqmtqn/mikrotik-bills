@@ -40,20 +40,20 @@ class CreateCustomerService extends CreateRecord
     {
         return DB::transaction(function () use ($data) {
             $servicePackage = ServicePackage::find($data['service_package_id']);
+            $date = Carbon::createFromDate($data['installation_date']);
 
             $customerService = CreateCSService::handle(
                 userId: $data['user_id'],
                 servicePackage: $servicePackage,
                 packageType: $data['package_type'],
+                installationDate: $date
             );
 
             // TODO Create Invoice
-            $date = Carbon::parse($data['date']);
-
             $invoice = CreateInvoiceService::handle(
                 userId: $customerService->user_id,
                 date: $date,
-                dueDate: $date->addDays($this->setting()?->due_date_after_new_service)
+                dueDate: $date->copy()->addDays((int)$this->setting()?->due_date_after_new_service ?? 7)
             );
 
             // TODO Create Invoice Customer Service Items

@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->enum('package_type', ['subscription', 'one-time']);
             $table->string('username')->nullable();
             $table->string('password')->nullable();
+            $table->date('installation_date')->nullable();
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date_time')->nullable();
             $table->enum('status', ['pending', 'active', 'suspended', 'cancelled'])->default('pending');

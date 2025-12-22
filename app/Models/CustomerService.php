@@ -29,6 +29,7 @@ class CustomerService extends Model
         'package_type',
         'username',
         'password',
+        'installation_date',
         'start_date',
         'end_date_time',
         'status',
@@ -39,6 +40,7 @@ class CustomerService extends Model
     {
         return [
             'slug' => 'string',
+            'installation_date' => 'date',
             'start_date' => 'datetime',
             'end_date_time' => 'datetime',
         ];

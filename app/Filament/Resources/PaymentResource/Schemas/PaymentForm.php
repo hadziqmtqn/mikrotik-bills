@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PaymentResource\Schemas;
 
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
+use App\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -17,8 +18,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PaymentForm
 {
-    public static function form(Form $form, $invoice = null): Form
+    public static function form(Form $form, $invoiceId = null): Form
     {
+        $invoice = Invoice::find($invoiceId);
+
         return $form
             ->schema([
                 Section::make()
@@ -75,6 +78,7 @@ class PaymentForm
                             ->label('Tanggal Pembayaran')
                             ->required()
                             ->native(false)
+                            ->minDate($invoice?->date)
                             ->maxDate(now())
                             ->placeholder('Tanggal Pembayaran')
                             ->closeOnDateSelection(),

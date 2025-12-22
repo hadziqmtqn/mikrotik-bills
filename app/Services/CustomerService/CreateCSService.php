@@ -14,7 +14,7 @@ class CreateCSService
      * @param string|null $status
      * @return CustomerService
      */
-    public static function handle($userId, ServicePackage $servicePackage, string $packageType = null, string $status = null): CustomerService
+    public static function handle($userId, ServicePackage $servicePackage, string $packageType = null, $installationDate = null, string $status = null): CustomerService
     {
         $customerService = new CustomerService();
         $customerService->service_package_id = $servicePackage->id;
@@ -22,6 +22,7 @@ class CreateCSService
         $customerService->daily_price = $servicePackage->daily_price;
         $customerService->price = $servicePackage->package_price;
         $customerService->package_type = $packageType;
+        $customerService->installation_date = $installationDate;
 
         if ($status) {
             $customerService->status = $status;
