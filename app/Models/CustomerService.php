@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([CustomerServiceObserver::class])]
@@ -61,6 +62,12 @@ class CustomerService extends Model
     public function invCustomerServices(): HasMany
     {
         return $this->hasMany(InvCustomerService::class, 'customer_service_id');
+    }
+
+    public function customerServiceUsageLatest(): HasOne
+    {
+        return $this->hasOne(CustomerServiceUsage::class, 'customer_service_id')
+            ->latest('next_billing_date');
     }
 
     // TODO Scopes

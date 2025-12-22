@@ -13,25 +13,31 @@ class CreateCSUsageService
     public static function handle(CustomerService $customerService): void
     {
         $customerService->refresh();
+        $customerService->loadMissing('customerServiceUsageLatest');
 
         if ($customerService->status === StatusData::ACTIVE->value && $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
             /**
-             * - Jika layanan aktif pada bulan kemarin dan jadwal pembuatan ulang tagihan otmatis pada bulan ini maka total tagihan terhitung sampai bulan ini
-             * - Jika layanan aktif pada bulan yang sama dengan jadwal pembuatan ulang tagihan, maka total tagihan sampai bulan dengan
+             * #### Ketentuan untuk pasang baru:
+             * - Tanggal aktif sebelum jadwal perulangan dibulan yang sama, maka "next billing date" langsung ke bulan depan
+             * - Jika aktif setelah jadwal perulangan dibulan yang sama, "next billing date" juga langsung ke bulan depan
+             *
+             * #### Ketentuan untuk layanan sudah berjalan lebih dari 1 bulan:
+             * - Tanggal aktif pada penggunaan dimulai sejak terakhir digunakan, bukan sejak aktif
             */
             $nextRepetitionDate = InvoiceSettingService::nextRepetitionDate();
 
-            $activeDate = $customerService->start_date; // mulai aktif digunakan
+            $activeDate = $customerService->customerServiceUsageLatest?->next_billing_date ?? $customerService->start_date; // mulai aktif digunakan
             $dailyPrice = $customerService->daily_price; // harga/tagihan harian
 
-            if ($activeDate->isSameMonth($nextRepetitionDate->copy()->subMonth())) {
-                $diffInDays = $activeDate->diffInDays($nextRepetitionDate);
-                $nextBillingDate = $nextRepetitionDate;
-            }else {
-                $nextBillingDate = $nextRepetitionDate->addMonth();
-                $diffInDays = $activeDate->diffInDays($nextBillingDate);
-            }
+            $nextBillingDate = $nextRepetitionDate->copy()->addMonth();
 
+            /*if ($activeDate->isSameMonth($nextRepetitionDate) && $activeDate->lessThan($nextRepetitionDate)) {
+                $diffInDays = $activeDate->diffInDays($nextRepetitionDate->copy()->addMonth());
+            }else {
+                $diffInDays = $activeDate->diffInDays($nextBillingDate);
+            }*/
+
+            $diffInDays = $activeDate->diffInDays($nextBillingDate);
             $totalPrice = $dailyPrice * $diffInDays;
 
             $customerServiceUsage = new CustomerServiceUsage();

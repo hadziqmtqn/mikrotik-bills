@@ -2,14 +2,17 @@
 
 namespace Database\Seeders\Service;
 
+use App\Enums\PackageTypeService;
 use App\Enums\PaymentType;
 use App\Enums\ServiceType;
+use App\Enums\StatusData;
+use App\Models\CustomerServiceUsage;
 use App\Models\ExtraCost;
+use App\Models\InvoiceSetting;
 use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
 use App\Services\CustomerService\CreateCSService;
-use App\Services\CustomerService\CreateCSUsageService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
@@ -50,7 +53,7 @@ class CustomerServiceSeeder extends Seeder
             );
 
             // TODO Invoice
-            $date = now()->subMonth();
+            $date = now()->subMonths(2);
             $invoice = CreateInvoiceService::handle(
                 userId: $customerService->user_id,
                 date: $date,
@@ -100,7 +103,29 @@ class CustomerServiceSeeder extends Seeder
                 $customerService->refresh();
 
                 // TODO Create Customer Service Usage
-                CreateCSUsageService::handle($customerService);
+                if ($customerService->status === StatusData::ACTIVE->value && $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
+                    $invoiceSetting = InvoiceSetting::first();
+
+                    $activeDate = $customerService->start_date; // mulai aktif digunakan
+                    $dailyPrice = $customerService->daily_price; // harga/tagihan harian
+
+                    $nextRepetitionDate = $activeDate->copy()
+                        ->addMonthNoOverflow()
+                        ->day($invoiceSetting->repeat_every_date);
+
+                    $diffInDays = $activeDate->diffInDays($nextRepetitionDate);
+
+                    $totalPrice = $dailyPrice * $diffInDays;
+
+                    $customerServiceUsage = new CustomerServiceUsage();
+                    $customerServiceUsage->customer_service_id = $customerService->id;
+                    $customerServiceUsage->used_since = $activeDate;
+                    $customerServiceUsage->next_billing_date = $nextRepetitionDate;
+                    $customerServiceUsage->days_of_usage = $diffInDays;
+                    $customerServiceUsage->daily_price = $dailyPrice;
+                    $customerServiceUsage->total_price = $totalPrice;
+                    $customerServiceUsage->save();
+                }
             }
         }
     }
