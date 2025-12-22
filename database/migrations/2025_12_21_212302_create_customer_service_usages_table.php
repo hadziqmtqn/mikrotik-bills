@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('customer_service_id');
             $table->dateTime('used_since');
             $table->dateTime('next_billing_date');
+            $table->float('days_of_usage');
             $table->decimal('daily_price', 20, 0);
             $table->decimal('total_price', 20, 0);
             $table->timestamps();

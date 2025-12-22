@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\ServicePackage;
 use App\Models\User;
 use App\Services\CustomerService\CreateCSService;
+use App\Services\CustomerService\CreateCSUsageService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
@@ -81,7 +82,9 @@ class CustomerServiceSeeder extends Seeder
 
             // TODO Payment
             if ($invoice->status == 'paid') {
-                $datePaid = $invoice->date->addDays(2);
+                $datePaid = $invoice->date
+                    ->copy()
+                    ->addDays(2);
 
                 $payment = new Payment();
                 $payment->user_id = $user->id;
@@ -94,6 +97,10 @@ class CustomerServiceSeeder extends Seeder
 
                 $customerService->start_date = $datePaid;
                 $customerService->save();
+                $customerService->refresh();
+
+                // TODO Create Customer Service Usage
+                CreateCSUsageService::handle($customerService);
             }
         }
     }

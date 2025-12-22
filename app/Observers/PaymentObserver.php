@@ -23,20 +23,4 @@ class PaymentObserver
             $invoice->save();
         }
     }
-
-    public function updated(Payment $payment): void
-    {
-    }
-
-    public function saved(Payment $payment): void
-    {
-    }
-
-    public function deleted(Payment $payment): void
-    {
-    }
-
-    public function restored(Payment $payment): void
-    {
-    }
 }

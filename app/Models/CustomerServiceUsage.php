@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
-use App\Observers\CustomerServiceUsageObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[ObservedBy([CustomerServiceUsageObserver::class])]
 class CustomerServiceUsage extends Model
 {
     protected $fillable = [
         'customer_service_id',
         'used_since',
         'next_billing_date',
+        'days_of_usage',
         'daily_price',
         'total_price',
     ];

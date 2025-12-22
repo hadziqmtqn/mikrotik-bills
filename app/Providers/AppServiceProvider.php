@@ -3,13 +3,11 @@
 namespace App\Providers;
 
 use App\Models\CustomerService;
-use App\Models\CustomerServiceUsage;
 use App\Models\InvCustomerService;
 use App\Models\InvExtraCost;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Observers\CustomerServiceObserver;
-use App\Observers\CustomerServiceUsageObserver;
 use App\Observers\InvCustomerServiceObserver;
 use App\Observers\InvExtraCostObserver;
 use App\Observers\InvoiceObserver;
@@ -36,6 +34,5 @@ class AppServiceProvider extends ServiceProvider
         InvExtraCost::observe(InvExtraCostObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Payment::observe(PaymentObserver::class);
-        CustomerServiceUsage::observe(CustomerServiceUsageObserver::class);
     }
 }
