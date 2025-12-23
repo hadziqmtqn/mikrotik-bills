@@ -89,7 +89,9 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->button()
+                    ->outlined(),
             ])
             ->bulkActions([
                 //

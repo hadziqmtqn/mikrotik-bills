@@ -5,8 +5,9 @@ namespace App\Observers;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\Invoice;
-use App\Services\CustomerService\CreateCSUsageService;
+use App\Services\CustomerService\CustomerServiceUsageService;
 use App\Traits\InvoiceSettingTrait;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -21,6 +22,9 @@ class InvoiceObserver
         $invoice->code = 'INV' . Str::padLeft($invoice->serial_number, 6, '0');
     }
 
+    /**
+     * @throws Exception
+     */
     public function updated(Invoice $invoice): void
     {
         $invoice->refresh();
@@ -54,7 +58,7 @@ class InvoiceObserver
                 $customerService->save();
 
                 // TODO Catat penggunaan layanan
-                CreateCSUsageService::handle(customerService: $customerService, invoiceId: $invoice->id);
+                CustomerServiceUsageService::handle(customerService: $customerService, invoiceId: $invoice->id);
             }
         }
     }

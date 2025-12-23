@@ -7,9 +7,14 @@ use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\CustomerServiceUsage;
 use App\Services\InvoiceSettingService;
+use Exception;
+use Illuminate\Support\Carbon;
 
-class CreateCSUsageService
+class CustomerServiceUsageService
 {
+    /**
+     * @throws Exception
+     */
     public static function handle(CustomerService $customerService, $invoiceId): void
     {
         $customerService->refresh();
@@ -28,33 +33,49 @@ class CreateCSUsageService
             $nextRepetitionDate = InvoiceSettingService::nextRepetitionDate();
 
             $activeDate = $customerService->customerServiceUsageLatest?->next_billing_date ?? $customerService->installation_date; // mulai aktif digunakan atau tanggal pemasangan
+
+            if (!$activeDate) {
+                throw new Exception('Active date (installation_date or next_billing_date) is required');
+            }
+
+            // Pastikan dalam bentuk Carbon instance
+            $activeDate = Carbon::parse($activeDate);
+            $nextRepetitionDate = Carbon::parse($nextRepetitionDate);
+
             $dailyPrice = $customerService->daily_price; // harga/tagihan harian
-
-            //$nextBillingDate = $nextRepetitionDate->copy()->addMonth();
-
-            /*if ($activeDate->isSameMonth($nextRepetitionDate) && $activeDate->lessThan($nextRepetitionDate)) {
-                $diffInDays = $activeDate->diffInDays($nextRepetitionDate->copy()->addMonth());
-            }else {
-                $diffInDays = $activeDate->diffInDays($nextBillingDate);
-            }*/
 
             $diffInDays = $activeDate
                 ->copy()
                 ->diffInDays($nextRepetitionDate);
-            $totalPrice = $dailyPrice * $diffInDays;
+
+            $daysOfusage = (int) $diffInDays;
+            $totalPrice = $dailyPrice * $daysOfusage;
 
             $customerServiceUsage = CustomerServiceUsage::query()
-                ->lockForUpdate()
-                ->firstOrNew(['invoice_id' => $invoiceId]);
+                ->where([
+                    'customer_service_id' => $customerService->id,
+                    'invoice_id' => $invoiceId,
+                ])
+                ->first();
 
-            $customerServiceUsage->customer_service_id = $customerService->id;
-            $customerServiceUsage->invoice_id = $invoiceId;
-            $customerServiceUsage->used_since = $activeDate;
-            $customerServiceUsage->next_billing_date = $nextRepetitionDate;
-            $customerServiceUsage->days_of_usage = $diffInDays;
-            $customerServiceUsage->daily_price = $dailyPrice;
-            $customerServiceUsage->total_price = $totalPrice;
-            $customerServiceUsage->save();
+            if (!$customerServiceUsage) {
+                CustomerServiceUsage::create([
+                    'customer_service_id' => $customerService->id,
+                    'invoice_id' => $invoiceId,
+                    'used_since' => $activeDate,
+                    'next_billing_date' => $nextRepetitionDate,
+                    'days_of_usage' => $daysOfusage,
+                    'daily_price' => $dailyPrice,
+                    'total_price' => $totalPrice,
+                ]);
+            }
         }
+    }
+
+    public static function delete($invoiceId): void
+    {
+        CustomerServiceUsage::query()
+            ->where('invoice_id', $invoiceId)
+            ->delete();
     }
 }

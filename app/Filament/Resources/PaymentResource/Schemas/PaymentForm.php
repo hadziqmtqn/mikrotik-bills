@@ -87,6 +87,7 @@ class PaymentForm
                 Section::make('Bukti Pembayaran')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('proof_of_payment')
+                            ->label('Bukti Pembayaran')
                             ->hiddenLabel()
                             ->required(fn(Get $get): bool => $get('payment_method') === PaymentMethod::BANK_TRANSFER->value)
                             ->disk('s3')
@@ -110,8 +111,8 @@ class PaymentForm
                         ToggleButtons::make('status')
                             ->hiddenLabel()
                             ->inline()
-                            ->options(StatusData::options(['partially_paid', 'paid', 'cancelled']))
-                            ->colors(StatusData::colors(['partially_paid', 'paid', 'cancelled']))
+                            ->options(StatusData::options(['paid', 'cancelled']))
+                            ->colors(StatusData::colors(['paid', 'cancelled']))
                             ->default('paid')
                             ->required()
                     ]),
