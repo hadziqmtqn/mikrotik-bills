@@ -17,7 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\View\View;
 use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 
-class InvoiceHistory extends ManageRelatedRecords
+class ManageInvoiceHistory extends ManageRelatedRecords
 {
     protected static string $resource = CustomerServiceResource::class;
     protected static string $relationship = 'invCustomerServices';

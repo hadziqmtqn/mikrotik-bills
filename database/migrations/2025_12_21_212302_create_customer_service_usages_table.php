@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('invoice_id');
             $table->dateTime('used_since');
             $table->dateTime('next_billing_date');
-            $table->decimal('days_of_usage', 8, 0);
+            $table->integer('days_of_usage');
             $table->decimal('daily_price', 20, 0);
             $table->decimal('total_price', 20, 0);
             $table->timestamps();

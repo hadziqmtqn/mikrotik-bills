@@ -30,11 +30,15 @@ class MakeRecurringInvoiceCommand extends Command
                 $users = User::query()
                     ->with([
                         'customerServices' => function ($query) {
+                            // 1. layanan aktif
                             $query->where('status', StatusData::ACTIVE->value);
+                            // 2. layanan berlangganan
                             $query->where('package_type', PackageTypeService::SUBSCRIPTION->value);
+                            // 3. limit layanan bulanan
                             $query->whereHas('servicePackage', function ($query) {
                                 $query->where('validity_unit', TimeLimitType::BULAN->value);
                             });
+                            // 4. layanan belum punya tagihan pada bulan ini
                             $query->whereDoesntHave('invCustomerServices.invoice', function ($query) {
                                 $query->whereMonth('date', now()->month)
                                     ->whereYear('date', now()->year)
@@ -49,11 +53,15 @@ class MakeRecurringInvoiceCommand extends Command
                     ])
                     ->whereHas('roles', fn($query) => $query->where('name', 'user'))
                     ->whereHas('customerServices', function ($query) {
+                        // 1. punya layanan aktif
                         $query->where('status', StatusData::ACTIVE->value);
+                        // 2. punya paket langganan
                         $query->where('package_type', PackageTypeService::SUBSCRIPTION->value);
+                        // 3. jenis paket langganan bulanan
                         $query->whereHas('servicePackage', function ($query) {
                             $query->where('validity_unit', TimeLimitType::BULAN->value);
                         });
+                        // 4. paket belum punya tagihan pada bulan ini
                         $query->whereDoesntHave('invCustomerServices.invoice', function ($query) {
                             $query->whereMonth('date', now()->month)
                                 ->whereYear('date', now()->year)

@@ -72,6 +72,11 @@ class CustomerService extends Model
             ->latest('next_billing_date');
     }
 
+    public function customerServiceUsages(): HasMany
+    {
+        return $this->hasMany(CustomerServiceUsage::class, 'customer_service_id');
+    }
+
     // TODO Scopes
     #[Scope]
     protected function filterByReferenceNumber(Builder $query, $referenceNumber): Builder

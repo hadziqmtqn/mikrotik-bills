@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\CustomerServiceResource;
 
+use App\Filament\Resources\CustomerServiceResource\Pages\ManageCustomerServiceUsage;
+use App\Filament\Resources\CustomerServiceResource\Pages\ManageInvoiceHistory;
 use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceForm;
 use App\Filament\Resources\CustomerServiceResource\Tables\CustomerServiceTable;
 use App\Models\CustomerService;
@@ -62,7 +64,8 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
             'index' => Pages\ListCustomerServices::route('/'),
             'create' => Pages\CreateCustomerService::route('/create'),
             'view' => Pages\ViewCustomerService::route('/{record}'),
-            'invoice_history' => Pages\InvoiceHistory::route('/{record}/invoice-history'),
+            'usage' => ManageCustomerServiceUsage::route('/{record}/usages'),
+            'invoice_history' => ManageInvoiceHistory::route('/{record}/invoice-history'),
         ];
     }
 
@@ -115,7 +118,8 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
     {
         return $page->generateNavigationItems([
             Pages\ViewCustomerService::class,
-            Pages\InvoiceHistory::class
+            ManageCustomerServiceUsage::class,
+            ManageInvoiceHistory::class
         ]);
     }
 }

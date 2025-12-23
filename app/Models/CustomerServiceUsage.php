@@ -22,7 +22,6 @@ class CustomerServiceUsage extends Model
         return [
             'used_since' => 'datetime',
             'next_billing_date' => 'datetime',
-            'days_of_usage' => 'decimal'
         ];
     }
 
