@@ -30,8 +30,14 @@ class ManageCustomerServiceUsage extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('id')
             ->columns([
-                Tables\Columns\TextColumn::make('used_since')
+                Tables\Columns\TextColumn::make('period_start')
                     ->label('Digunakan Sejak')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
+
+                Tables\Columns\TextColumn::make('period_end')
+                    ->label('Sampai')
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
@@ -58,7 +64,7 @@ class ManageCustomerServiceUsage extends ManageRelatedRecords
                     ->money('IDR'),
             ])
             ->deferLoading()
-            ->defaultSort('used_since', 'DESC')
+            ->defaultSort('period_start', 'DESC')
             ->filters([
                 //
             ])

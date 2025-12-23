@@ -11,7 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('customer_service_id');
             $table->unsignedBigInteger('invoice_id');
-            $table->dateTime('used_since');
+            $table->dateTime('period_start');
+            $table->dateTime('period_end');
             $table->dateTime('next_billing_date');
             $table->integer('days_of_usage');
             $table->decimal('daily_price', 20, 0);

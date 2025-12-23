@@ -69,7 +69,7 @@ class CustomerService extends Model
     public function customerServiceUsageLatest(): HasOne
     {
         return $this->hasOne(CustomerServiceUsage::class, 'customer_service_id')
-            ->latest('next_billing_date');
+            ->latest('period_end');
     }
 
     public function customerServiceUsages(): HasMany

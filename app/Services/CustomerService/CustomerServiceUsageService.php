@@ -6,7 +6,7 @@ use App\Enums\PackageTypeService;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\CustomerServiceUsage;
-use App\Services\InvoiceSettingService;
+use App\Models\InvoiceSetting;
 use Exception;
 use Illuminate\Support\Carbon;
 
@@ -20,37 +20,57 @@ class CustomerServiceUsageService
         $customerService->refresh();
         $customerService->loadMissing('customerServiceUsageLatest');
 
-        if ($customerService->status === StatusData::ACTIVE->value && $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
-            /**
-             * #### Ketentuan untuk pasang baru:
-             * - Tanggal aktif sebelum jadwal perulangan dibulan yang sama, maka "next billing date" langsung ke bulan depan
-             * - Jika aktif setelah jadwal perulangan dibulan yang sama, "next billing date" juga langsung ke bulan depan
-             *
-             * #### Ketentuan untuk layanan sudah berjalan lebih dari 1 bulan:
-             * - Tanggal aktif pada penggunaan dimulai sejak terakhir digunakan, bukan sejak aktif
-            */
+        if ($customerService->status === StatusData::ACTIVE->value &&
+            $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
 
-            $nextRepetitionDate = InvoiceSettingService::nextRepetitionDate();
+            $invoiceSetting = InvoiceSetting::first();
+            $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
 
-            $activeDate = $customerService->customerServiceUsageLatest?->next_billing_date ?? $customerService->installation_date; // mulai aktif digunakan atau tanggal pemasangan
-
-            if (!$activeDate) {
-                throw new Exception('Active date (installation_date or next_billing_date) is required');
+            $installationDate = $customerService->installation_date;
+            if (!$installationDate) {
+                throw new Exception('Installation date is required');
             }
 
-            // Pastikan dalam bentuk Carbon instance
-            $activeDate = Carbon::parse($activeDate);
-            $nextRepetitionDate = Carbon::parse($nextRepetitionDate);
+            $installationDate = Carbon::parse($installationDate);
+            $now = Carbon::now();
 
-            $dailyPrice = $customerService->daily_price; // harga/tagihan harian
+            // Tentukan periode mulai
+            $lastPeriodEnd = $customerService->customerServiceUsageLatest?->period_end;
+            $periodStart = $lastPeriodEnd
+                ? Carbon::parse($lastPeriodEnd)
+                : $installationDate->copy();
 
-            $diffInDays = $activeDate
-                ->copy()
-                ->diffInDays($nextRepetitionDate);
+            // Tentukan tanggal billing bulan ini
+            $currentBillingDate = Carbon::create($now->year, $now->month, $billingDay);
 
-            $daysOfusage = (int) $diffInDays;
-            $totalPrice = $dailyPrice * $daysOfusage;
+            // Logika untuk menentukan period_end dan next_billing_date
+            if (!$lastPeriodEnd) {
+                // LAYANAN BARU
+                if ($installationDate->day <= $billingDay && $installationDate->isSameMonth($now)) {
+                    // Instalasi sebelum atau pada tanggal billing bulan ini
+                    // Invoice dibuat untuk bulan ini, period_end = tanggal 5 bulan ini
+                    $periodEnd = $currentBillingDate->copy();
+                    $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
+                } else {
+                    // Instalasi setelah tanggal billing bulan ini atau bulan lalu
+                    // Invoice dibuat untuk bulan depan, period_end = tanggal 5 bulan depan
+                    $periodEnd = $currentBillingDate->copy()->addMonthNoOverflow();
+                    $nextBillingDate = $periodEnd->copy()->addMonthNoOverflow();
+                }
+            } else {
+                // LAYANAN LAMA (ada periode sebelumnya)
+                // Hitung dari akhir periode terakhir sampai tanggal 5 bulan ini
+                // Ini akan merangkum semua bulan yang terlewat dalam 1 invoice
+                $periodEnd = $currentBillingDate->copy();
+                $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
+            }
 
+            // Hitung jumlah hari dan total harga
+            $diffInDays = $periodStart->diffInDays($periodEnd);
+            $dailyPrice = $customerService->daily_price;
+            $totalPrice = $dailyPrice * $diffInDays;
+
+            // Cek apakah sudah ada record untuk invoice ini
             $customerServiceUsage = CustomerServiceUsage::query()
                 ->where([
                     'customer_service_id' => $customerService->id,
@@ -62,9 +82,10 @@ class CustomerServiceUsageService
                 CustomerServiceUsage::create([
                     'customer_service_id' => $customerService->id,
                     'invoice_id' => $invoiceId,
-                    'used_since' => $activeDate,
-                    'next_billing_date' => $nextRepetitionDate,
-                    'days_of_usage' => $daysOfusage,
+                    'period_start' => $periodStart,
+                    'period_end' => $periodEnd,
+                    'next_billing_date' => $nextBillingDate,
+                    'days_of_usage' => $diffInDays,
                     'daily_price' => $dailyPrice,
                     'total_price' => $totalPrice,
                 ]);

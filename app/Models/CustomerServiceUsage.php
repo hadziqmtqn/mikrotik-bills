@@ -10,7 +10,8 @@ class CustomerServiceUsage extends Model
     protected $fillable = [
         'customer_service_id',
         'invoice_id',
-        'used_since',
+        'period_start',
+        'period_end',
         'next_billing_date',
         'days_of_usage',
         'daily_price',
@@ -20,7 +21,8 @@ class CustomerServiceUsage extends Model
     protected function casts(): array
     {
         return [
-            'used_since' => 'datetime',
+            'period_start' => 'datetime',
+            'period_end' => 'datetime',
             'next_billing_date' => 'datetime',
         ];
     }

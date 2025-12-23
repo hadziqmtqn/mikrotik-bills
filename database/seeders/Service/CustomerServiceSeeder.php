@@ -117,17 +117,18 @@ class CustomerServiceSeeder extends Seeder
                     if ($customerService->status === StatusData::ACTIVE->value &&
                         $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
 
-                        $usedSince = $period['period_start'];
-                        $nextBillingDate = $period['period_end'];
-                        $diffInDays = $usedSince->diffInDays($nextBillingDate);
+                        $periodStart = $period['period_start'];
+                        $periodEnd = $period['period_end'];
+                        $diffInDays = $periodStart->diffInDays($periodEnd);
                         $dailyPrice = $customerService->daily_price;
                         $totalPrice = $dailyPrice * $diffInDays;
 
                         $customerServiceUsage = new CustomerServiceUsage();
                         $customerServiceUsage->customer_service_id = $customerService->id;
                         $customerServiceUsage->invoice_id = $invoice->id;
-                        $customerServiceUsage->used_since = $usedSince;
-                        $customerServiceUsage->next_billing_date = $nextBillingDate;
+                        $customerServiceUsage->period_start = $periodStart;
+                        $customerServiceUsage->period_end = $periodEnd;
+                        $customerServiceUsage->next_billing_date = $period['next_billing_date'];
                         $customerServiceUsage->days_of_usage = $diffInDays;
                         $customerServiceUsage->daily_price = $dailyPrice;
                         $customerServiceUsage->total_price = $totalPrice;
@@ -165,10 +166,13 @@ class CustomerServiceSeeder extends Seeder
         while ($currentInvoiceDate->lte($endDate)) {
             $periodEnd = $currentInvoiceDate->copy();
 
+            $nextBillingDate = $currentInvoiceDate->copy()->addMonthNoOverflow();
+
             $periods[] = [
                 'invoice_date' => $currentInvoiceDate->copy(),
                 'period_start' => $periodStart->copy(),
                 'period_end' => $periodEnd->copy(),
+                'next_billing_date' => $nextBillingDate->copy(),
                 'period_name' => $currentInvoiceDate->locale('id')->translatedFormat('F Y'),
             ];
 
