@@ -42,12 +42,6 @@ class ManageCustomerServiceUsage extends ManageRelatedRecords
                     ->searchable()
                     ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
 
-                Tables\Columns\TextColumn::make('next_billing_date')
-                    ->label('Tagihan Berikutnya')
-                    ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
-
                 Tables\Columns\TextColumn::make('days_of_usage')
                     ->label('Penggunaan')
                     ->sortable()
@@ -62,6 +56,12 @@ class ManageCustomerServiceUsage extends ManageRelatedRecords
                     ->label('Total Tagihan')
                     ->sortable()
                     ->money('IDR'),
+
+                Tables\Columns\TextColumn::make('next_billing_date')
+                    ->label('Tagihan Berikutnya')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
             ])
             ->deferLoading()
             ->defaultSort('period_start', 'DESC')

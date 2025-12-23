@@ -13,6 +13,11 @@ use Illuminate\Support\Carbon;
 class CustomerServiceUsageService
 {
     /**
+     * Handle pembuatan usage untuk invoice
+     *
+     * PENTING: Method ini HANYA dipanggil untuk invoice SUBSCRIPTION,
+     * TIDAK untuk invoice instalasi
+     *
      * @throws Exception
      */
     public static function handle(CustomerService $customerService, $invoiceId): void
@@ -20,79 +25,68 @@ class CustomerServiceUsageService
         $customerService->refresh();
         $customerService->loadMissing('customerServiceUsageLatest');
 
-        if ($customerService->status === StatusData::ACTIVE->value &&
-            $customerService->package_type === PackageTypeService::SUBSCRIPTION->value) {
+        if ($customerService->status !== StatusData::ACTIVE->value ||
+            $customerService->package_type !== PackageTypeService::SUBSCRIPTION->value) {
+            return;
+        }
 
-            $invoiceSetting = InvoiceSetting::first();
-            $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
+        $invoiceSetting = InvoiceSetting::first();
+        $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
 
-            $installationDate = $customerService->installation_date;
-            if (!$installationDate) {
-                throw new Exception('Installation date is required');
-            }
+        $installationDate = $customerService->installation_date;
+        if (!$installationDate) {
+            throw new Exception('Installation date is required');
+        }
 
-            $installationDate = Carbon::parse($installationDate);
-            $now = Carbon::now();
+        $installationDate = Carbon::parse($installationDate);
+        $now = Carbon::now();
+        $currentBillingDate = Carbon::create($now->year, $now->month, $billingDay);
 
-            // Tentukan periode mulai
-            $lastPeriodEnd = $customerService->customerServiceUsageLatest?->period_end;
-            $periodStart = $lastPeriodEnd
-                ? Carbon::parse($lastPeriodEnd)
-                : $installationDate->copy();
+        // Tentukan periode mulai
+        $lastUsage = $customerService->customerServiceUsageLatest;
+        $lastPeriodEnd = $lastUsage?->period_end;
+        $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
 
-            // Tentukan tanggal billing bulan ini
-            $currentBillingDate = Carbon::create($now->year, $now->month, $billingDay);
+        if (!$lastPeriodEnd) {
+            // LAYANAN BARU - Periode mulai dari installation_date
+            $periodStart = $installationDate->copy();
+            $periodEnd = $installationDate;
+        } else {
+            // LAYANAN LAMA - Periode mulai dari akhir periode terakhir
+            $periodStart = Carbon::parse($lastPeriodEnd);
+            $periodEnd = $currentBillingDate->copy();
+        }
 
-            // Logika untuk menentukan period_end dan next_billing_date
-            if (!$lastPeriodEnd) {
-                // LAYANAN BARU
-                if ($installationDate->day <= $billingDay && $installationDate->isSameMonth($now)) {
-                    // Instalasi sebelum atau pada tanggal billing bulan ini
-                    // Invoice dibuat untuk bulan ini, period_end = tanggal 5 bulan ini
-                    $periodEnd = $currentBillingDate->copy();
-                    $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
-                } else {
-                    // Instalasi setelah tanggal billing bulan ini atau bulan lalu
-                    // Invoice dibuat untuk bulan depan, period_end = tanggal 5 bulan depan
-                    $periodEnd = $currentBillingDate->copy()->addMonthNoOverflow();
-                    $nextBillingDate = $periodEnd->copy()->addMonthNoOverflow();
-                }
-            } else {
-                // LAYANAN LAMA (ada periode sebelumnya)
-                // Hitung dari akhir periode terakhir sampai tanggal 5 bulan ini
-                // Ini akan merangkum semua bulan yang terlewat dalam 1 invoice
-                $periodEnd = $currentBillingDate->copy();
-                $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
-            }
+        // Hitung jumlah hari dan total harga
+        $diffInDays = $periodStart->diffInDays($periodEnd);
+        $dailyPrice = $customerService->daily_price;
+        $totalPrice = $dailyPrice * $diffInDays;
 
-            // Hitung jumlah hari dan total harga
-            $diffInDays = $periodStart->diffInDays($periodEnd);
-            $dailyPrice = $customerService->daily_price;
-            $totalPrice = $dailyPrice * $diffInDays;
+        // Cek apakah sudah ada record untuk invoice ini
+        $existingUsage = CustomerServiceUsage::query()
+            ->where([
+                'customer_service_id' => $customerService->id,
+                'invoice_id' => $invoiceId,
+            ])
+            ->first();
 
-            // Cek apakah sudah ada record untuk invoice ini
-            $customerServiceUsage = CustomerServiceUsage::query()
-                ->where([
-                    'customer_service_id' => $customerService->id,
-                    'invoice_id' => $invoiceId,
-                ])
-                ->first();
-
-            if (!$customerServiceUsage) {
-                CustomerServiceUsage::create([
-                    'customer_service_id' => $customerService->id,
-                    'invoice_id' => $invoiceId,
-                    'period_start' => $periodStart,
-                    'period_end' => $periodEnd,
-                    'next_billing_date' => $nextBillingDate,
-                    'days_of_usage' => $diffInDays,
-                    'daily_price' => $dailyPrice,
-                    'total_price' => $totalPrice,
-                ]);
-            }
+        if (!$existingUsage) {
+            CustomerServiceUsage::create([
+                'customer_service_id' => $customerService->id,
+                'invoice_id' => $invoiceId,
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
+                'next_billing_date' => $nextBillingDate,
+                'days_of_usage' => $diffInDays,
+                'daily_price' => $dailyPrice,
+                'total_price' => $totalPrice,
+            ]);
         }
     }
 
+    /**
+     * Delete usage berdasarkan invoice_id
+     */
     public static function delete($invoiceId): void
     {
         CustomerServiceUsage::query()
