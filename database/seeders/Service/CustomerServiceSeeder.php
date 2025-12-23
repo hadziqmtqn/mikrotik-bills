@@ -33,7 +33,7 @@ class CustomerServiceSeeder extends Seeder
                 continue;
             }
 
-            $installationDate = now()->subMonths(2)->startOfDay();
+            $installationDate = now();
             $isSubscription = $servicePackage->service_type === ServiceType::PPPOE->value;
 
             CreateCSService::handle(

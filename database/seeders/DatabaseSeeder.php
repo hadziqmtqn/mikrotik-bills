@@ -8,6 +8,7 @@ use Database\Seeders\Auth\SuperAdminSeeder;
 use Database\Seeders\Auth\UserSeeder;
 use Database\Seeders\Network\RouterSeeder;
 use Database\Seeders\Reference\BankAccountSeeder;
+use Database\Seeders\Service\CreatePaymentSeeder;
 use Database\Seeders\Service\CustomerServiceSeeder;
 use Database\Seeders\Service\ExtraCostSeeder;
 use Database\Seeders\Service\ServicePackageSeeder;
@@ -33,7 +34,9 @@ class DatabaseSeeder extends Seeder
             ExtraCostSeeder::class,
             // PAYMENT
             InvoiceSettingSeeder::class,
+            // Customer Service Dummy
             CustomerServiceSeeder::class,
+            CreatePaymentSeeder::class
         ]);
     }
 }
