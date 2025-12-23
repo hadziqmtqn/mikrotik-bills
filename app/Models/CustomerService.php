@@ -88,7 +88,7 @@ class CustomerService extends Model
     protected function nextBillingDate(): Attribute
     {
         return Attribute::make(
-            get: fn() => InvoiceSettingService::nextRepetitionDate()
+            get: fn() => $this->customerServiceUsageLatest?->next_billing_date
         );
     }
 }

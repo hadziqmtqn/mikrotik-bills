@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\Invoice;
-use App\Services\CustomerService\CustomerServiceUsageService;
 use App\Traits\InvoiceSettingTrait;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -46,20 +45,6 @@ class InvoiceObserver
                     'status' => StatusData::CANCELLED->value,
                     'notes' => 'Layanan pelanggan dibatalkan otomatis karena tagihan tidak dibayar setelah tanggal jatuh tempo.',
                 ]);
-        }
-
-        // Jika faktur lunas, aktifkan semua layanan pelanggan
-        if ($invoice->status === StatusData::PAID->value) {
-            $invCustomerServices = $invoice->invCustomerServices;
-            foreach ($invCustomerServices as $item) {
-                $customerService = $item->customerService;
-
-                $customerService->status = StatusData::ACTIVE->value;
-                $customerService->save();
-
-                // TODO Catat penggunaan layanan
-                CustomerServiceUsageService::handle(customerService: $customerService, invoiceId: $invoice->id);
-            }
         }
     }
 }

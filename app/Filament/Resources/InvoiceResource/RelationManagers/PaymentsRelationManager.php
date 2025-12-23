@@ -75,7 +75,7 @@ class PaymentsRelationManager extends RelationManager implements HasShieldPermis
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Tambah Pembayaran')
+                    ->label('Catat Pembayaran')
                     ->createAnother(false)
                     ->visible(fn() => $invoice->status === StatusData::UNPAID->value && $invoice?->payments()->count() === 0)
                     ->closeModalByClickingAway(false)
