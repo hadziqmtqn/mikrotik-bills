@@ -16,6 +16,7 @@ class CustomerServiceUsage extends Model
         'days_of_usage',
         'daily_price',
         'total_price',
+        'mark_done'
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class CustomerServiceUsage extends Model
             'period_start' => 'datetime',
             'period_end' => 'datetime',
             'next_billing_date' => 'datetime',
+            'mark_done' => 'boolean'
         ];
     }
 

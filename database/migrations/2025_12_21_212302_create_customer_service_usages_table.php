@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->integer('days_of_usage');
             $table->decimal('daily_price', 20, 0);
             $table->decimal('total_price', 20, 0);
+            $table->boolean('mark_done')->default(false);
             $table->timestamps();
 
             $table->foreign('customer_service_id')->references('id')->on('customer_services')->cascadeOnDelete();
