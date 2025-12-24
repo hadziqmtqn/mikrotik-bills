@@ -4,7 +4,6 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
 use App\Helpers\IdrCurrency;
-use App\Models\CustomerService;
 use App\Models\ExtraCost;
 use App\Models\Invoice;
 use App\Services\CustomerService\CSService;
@@ -66,29 +65,8 @@ class InvoiceForm
                                     ->native(false)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set): void {
-                                        $set('inv_customer_services', []);
+                                        $set('customer_services', []);
                                     })
-                            ]),
-
-                        Section::make('Masa Faktur')
-                            ->columns()
-                            ->schema([
-                                DatePicker::make('date')
-                                    ->label('Tanggal')
-                                    ->native(false)
-                                    ->default(now())
-                                    ->required()
-                                    ->placeholder('Masukkan tanggal faktur')
-                                    ->closeOnDateSelection(),
-
-                                DatePicker::make('due_date')
-                                    ->label('Tanggal Jatuh Tempo')
-                                    ->native(false)
-                                    ->required()
-                                    ->default(now()->setDay(20))
-                                    ->maxDate(now()->endOfMonth())
-                                    ->placeholder('Masukkan tanggal jatuh tempo')
-                                    ->closeOnDateSelection(),
                             ]),
 
                         Section::make('Item Tagihan')
@@ -131,7 +109,28 @@ class InvoiceForm
                                             ->reactive(),
                                     ])
                                     ->addActionLabel('Tambah Item')
-                            ])
+                            ]),
+
+                        Section::make('Masa Faktur')
+                            ->columns()
+                            ->schema([
+                                DatePicker::make('date')
+                                    ->label('Tanggal')
+                                    ->native(false)
+                                    ->default(now())
+                                    ->required()
+                                    ->placeholder('Masukkan tanggal faktur')
+                                    ->closeOnDateSelection(),
+
+                                DatePicker::make('due_date')
+                                    ->label('Tanggal Jatuh Tempo')
+                                    ->native(false)
+                                    ->required()
+                                    ->default(now()->setDay(20))
+                                    ->maxDate(now()->endOfMonth())
+                                    ->placeholder('Masukkan tanggal jatuh tempo')
+                                    ->closeOnDateSelection(),
+                            ]),
                     ]),
 
                 Group::make()
@@ -139,12 +138,13 @@ class InvoiceForm
                     ->schema([
                         Section::make('Ringkasan')
                             ->collapsible()
-                            ->schema(function (Get $get): array {
+                            ->schema(function (?Invoice $invoice, Get $get): array {
+                                $userId = $invoice?->user_id ?? $get('user_id');
                                 $customerService = $get('customer_services');
 
-                                if (! $customerService) return [];
+                                if (!$userId || !$customerService) return [];
 
-                                $schema = self::itemSummary($customerService);
+                                $schema = self::itemSummary($userId, $customerService);
 
                                 $items = $schema['schema'];
 
@@ -157,42 +157,50 @@ class InvoiceForm
             ]);
     }
 
-    private static function itemSummary($items): array
+    private static function itemSummary($userId, $items): array
     {
         $schema = [];
         $totalBill = 0;
         $number = 0;
 
-        foreach ($items as $item) {
+        $collection = collect($items);
+
+        $customerServiceIds = $collection
+            ->pluck('customer_service_id')
+            ->all();
+
+        $extraCostIds = $collection
+            ->pluck('extra_costs')
+            ->flatten()
+            ->all();
+
+        $customerServices = CSService::options(userId: $userId, selfIds: $customerServiceIds);
+        $extraCosts = ExtraCost::whereIn('id', $extraCostIds)
+            ->get();
+
+        $extraCostTotal = $extraCosts->sum('fee');
+
+        $extraCostSchemas = [];
+        foreach ($extraCosts as $extraCost) {
+            $fee = $extraCost->fee;
+            $extraCostSchemas[] = Placeholder::make($extraCost->name)
+                ->content(IdrCurrency::convert($fee));
+        }
+
+        foreach ($customerServices as $customerService) {
             $number++;
 
-            $customerService = CustomerService::with('servicePackage')
-                ->find($item['customer_service_id']);
-            $extraCosts = ExtraCost::whereIn('id', $item['extra_costs'] ?? [])
-                ->get();
+            $price = $customerService['price'];
 
-            $customerServicePrice = (int)$customerService?->price;
+            $schema[] = Section::make('Item ' . $number)
+                ->schema(
+                    array_merge([
+                        Placeholder::make($customerService['name'])
+                            ->content(IdrCurrency::convert($price))
+                    ], $extraCostSchemas)
+                );
 
-            $customerServiceItems = [
-                Placeholder::make($customerService?->servicePackage?->package_name ?? 'N/A')
-                    ->content(IdrCurrency::convert($customerServicePrice))
-            ];
-
-            $extraCostItems = [];
-            $extraCostFees = 0;
-            foreach ($extraCosts as $extraCost) {
-                $fee = $extraCost->fee;
-                $extraCostItems[] = Placeholder::make($extraCost->name)
-                    ->content(IdrCurrency::convert($fee));
-
-                $extraCostFees += $fee;
-            }
-
-
-            $schema[] = Section::make('Item #' . $number)
-                ->schema(array_merge($customerServiceItems, $extraCostItems));
-
-            $totalBill += $customerServicePrice + $extraCostFees;
+            $totalBill += $price + $extraCostTotal;
         }
 
         return [
