@@ -20,6 +20,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Illuminate\Support\HtmlString;
 
 class InvoiceForm
 {
@@ -156,6 +157,7 @@ class InvoiceForm
 
                                         CheckboxList::make('extra_costs')
                                             ->label('Biaya Tambahan')
+                                            ->bulkToggleable()
                                             ->options(function (Get $get): array {
                                                 $customerServiceId = $get('customer_service_id');
 
@@ -165,9 +167,7 @@ class InvoiceForm
                                                     ->map(fn($item) => $item['name'])
                                                     ->toArray();
                                             })
-                                            //->multiple()
                                             ->required()
-                                            //->native(false)
                                             ->debounce()
                                             ->reactive(),
                                     ])
@@ -179,6 +179,7 @@ class InvoiceForm
                     ->columnSpan(['lg' => 1])
                     ->schema([
                         Section::make('Ringkasan')
+                            ->collapsible()
                             /*->schema([
                                 Placeholder::make('total')
                                     ->label('Total Faktur')
@@ -207,7 +208,14 @@ class InvoiceForm
                                     ->reactive(),
                             ])*/
                             ->schema(function (Get $get): array {
-                                return self::itemSummary($get('customer_services'));
+                                $schema = self::itemSummary($get('customer_services'));
+
+                                $items = $schema['schema'];
+
+                                return array_merge($items, [
+                                    Placeholder::make('Total Tagihan')
+                                        ->content(fn(): string|HtmlString => new HtmlString('<span style="font-weight: bold; color: #00bb00; font-size: large">'. IdrCurrency::convert($schema['totalBill']) .'</span>'))
+                                ]);
                             })
                     ]),
             ]);
@@ -216,33 +224,44 @@ class InvoiceForm
     private static function itemSummary($items): array
     {
         $schema = [];
+        $totalBill = 0;
+        $number = 0;
+
         foreach ($items as $item) {
+            $number++;
+
             $customerService = CustomerService::with('servicePackage')
                 ->find($item['customer_service_id']);
-
-            $customerServiceItems = [
-                Placeholder::make($customerService?->servicePackage?->package_name ?? 'N/A'),
-                Placeholder::make('')
-                    ->content(IdrCurrency::convert((int)$customerService?->price))
-            ];
-
             $extraCosts = ExtraCost::whereIn('id', $item['extra_costs'] ?? [])
                 ->get();
 
-            $extraCostItems = [];
+            $customerServicePrice = (int)$customerService?->price;
 
+            $customerServiceItems = [
+                Placeholder::make($customerService?->servicePackage?->package_name ?? 'N/A')
+                    ->content(IdrCurrency::convert($customerServicePrice))
+            ];
+
+            $extraCostItems = [];
+            $extraCostFees = 0;
             foreach ($extraCosts as $extraCost) {
-                $extraCostItems[] = Placeholder::make($extraCost->name);
-                $extraCostItems[] = Placeholder::make('')
-                    ->content(IdrCurrency::convert($extraCost->fee));
+                $fee = $extraCost->fee;
+                $extraCostItems[] = Placeholder::make($extraCost->name)
+                    ->content(IdrCurrency::convert($fee));
+
+                $extraCostFees += $fee;
             }
 
 
-            $schema[] = Section::make()
-                ->columns()
+            $schema[] = Section::make('Item #' . $number)
                 ->schema(array_merge($customerServiceItems, $extraCostItems));
+
+            $totalBill += $customerServicePrice + $extraCostFees;
         }
 
-        return $schema;
+        return [
+            'schema' => $schema,
+            'totalBill' => $totalBill
+        ];
     }
 }
