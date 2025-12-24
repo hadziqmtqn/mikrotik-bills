@@ -41,7 +41,8 @@ class InvoiceForm
                                     ->dehydrated(false)
                                     ->reactive()
                                     ->afterStateUpdated(function (callable $set): void {
-                                        $set('user_id', null);
+                                        $set('user_id', []);
+                                        $set('customer_services', []);
                                     }),
 
                                 Select::make('user_id')
@@ -75,6 +76,7 @@ class InvoiceForm
                                     ->label('Item Layanan')
                                     ->hiddenLabel()
                                     ->required()
+                                    ->defaultItems(0)
                                     ->schema([
                                         Select::make('customer_service_id')
                                             ->label('Layanan')
@@ -104,7 +106,6 @@ class InvoiceForm
                                                     ->map(fn($item) => $item['name'])
                                                     ->toArray();
                                             })
-                                            ->required()
                                             ->debounce()
                                             ->reactive(),
                                     ])
@@ -118,6 +119,7 @@ class InvoiceForm
                                     ->label('Tanggal')
                                     ->native(false)
                                     ->default(now())
+                                    ->maxDate(now())
                                     ->required()
                                     ->placeholder('Masukkan tanggal faktur')
                                     ->closeOnDateSelection(),

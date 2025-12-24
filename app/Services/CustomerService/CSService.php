@@ -23,20 +23,19 @@ class CSService
                 $query->active();
                 $query->whereNull('deleted_at');
             })
-            ->where([
-                'user_id' => $userId,
-                'package_type' => PackageTypeService::SUBSCRIPTION->value
-            ])
+            ->where('user_id', $userId)
             ->where(function (Builder $query) {
+                // layanan berlangganan yang belum punya tagihan dibulan ini
                 $query->whereDoesntHave('invCustomerServices.invoice', function (Builder $query) {
                     $query->whereMonth('date', now()->month)
                         ->whereYear('date', now()->year);
                 });
 
-                $query->orWhereHas('invCustomerServices.invoice.payments', function (Builder $query) {
+                // atau, layanan yang punya transaksi lunas pada bulan kemarin
+                /*$query->orWhereHas('invCustomerServices.invoice.payments', function (Builder $query) {
                     $query->where('status', StatusData::PAID->value);
                     $query->whereDate('date', '<=', now()->subMonth()->lastOfMonth());
-                });
+                });*/
             })
             ->when($selfIds, fn(Builder $query) => $query->whereIn('id', $selfIds))
             ->get()
