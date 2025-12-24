@@ -93,47 +93,6 @@ class InvoiceForm
 
                         Section::make('Item Tagihan')
                             ->schema([
-                                /*CheckboxList::make('invCustomerServices')
-                                    ->label('Item Layanan')
-                                    ->bulkToggleable()
-                                    ->options(function (?Invoice $invoice, Get $get): array {
-                                        $userId = $invoice?->user_id ?? $get('user_id');
-
-                                        if (!$userId) return [];
-
-                                        return collect(CSService::options(userId: $userId))
-                                            ->map(fn($data) => $data['name'])
-                                            ->toArray();
-                                    })
-                                    ->descriptions(function (?Invoice $invoice, Get $get): array {
-                                        $userId = $invoice?->user_id ?? $get('user_id');
-
-                                        if (!$userId) return [];
-
-                                        return collect(CSService::options(userId: $userId))
-                                            ->map(fn($data) => 'Rp' . number_format($data['price'], 0, ',', '.') . ' (' . $data['packageType'] . ')')
-                                            ->toArray();
-                                    })
-                                    ->required()
-                                    ->reactive(),
-
-                                CheckboxList::make('invExtraCosts')
-                                    ->label('Biaya Tambahan')
-                                    ->bulkToggleable()
-                                    ->columns()
-                                    ->options(function (Get $get): array {
-                                        //$customerServiceId = $get('')
-                                        return collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                            ->map(fn($item) => $item['name'])
-                                            ->toArray();
-                                    })
-                                    ->descriptions(function (): array {
-                                        return collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                            ->map(fn($data) => 'Rp' . number_format($data['fee'], 0, ',', '.'))
-                                            ->toArray();
-                                    })
-                                    ->reactive()*/
-
                                 Repeater::make('customer_services')
                                     ->label('Item Layanan')
                                     ->hiddenLabel()
@@ -180,35 +139,12 @@ class InvoiceForm
                     ->schema([
                         Section::make('Ringkasan')
                             ->collapsible()
-                            /*->schema([
-                                Placeholder::make('total')
-                                    ->label('Total Faktur')
-                                    ->content(function (Get $get): string|HtmlString {
-                                        $userId = $get('user_id');
-
-                                        if (!$userId) {
-                                            $total = 0;
-                                        }else {
-                                            // Ambil data item layanan
-                                            $totalInvoice = collect(CSService::options($userId))
-                                                ->only(collect($get('invCustomerServices') ?? []))
-                                                ->sum('price');
-
-                                            // Ambil data biaya tambahan
-                                            $totalExtra = collect(ExtraCostService::options(BillingType::RECURRING->value))
-                                                ->only(collect($get('invExtraCosts') ?? []))
-                                                ->sum('fee');
-
-                                            $total = $totalInvoice + $totalExtra;
-                                            $total = number_format($total, 0, ',', '.');
-                                        }
-
-                                        return new HtmlString('<span style="font-weight: bold; color: #00bb00; font-size: large">Rp '. $total .'</span>');
-                                    })
-                                    ->reactive(),
-                            ])*/
                             ->schema(function (Get $get): array {
-                                $schema = self::itemSummary($get('customer_services'));
+                                $customerService = $get('customer_services');
+
+                                if (! $customerService) return [];
+
+                                $schema = self::itemSummary($customerService);
 
                                 $items = $schema['schema'];
 

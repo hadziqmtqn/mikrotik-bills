@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
+use App\Enums\PackageTypeService;
 use App\Enums\PaymentType;
 use App\Enums\ServiceType;
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
@@ -40,12 +41,15 @@ class CreateCustomerService extends CreateRecord
     {
         return DB::transaction(function () use ($data) {
             $servicePackage = ServicePackage::find($data['service_package_id']);
-            $date = Carbon::createFromDate($data['installation_date']);
+            $instalationDate = $data['installation_date'] ?? null;
+            $servicetype = $servicePackage?->service_type;
+            $isHostpot = $servicetype === ServiceType::HOTSPOT->value;
+            $date = $isHostpot ? Carbon::now() : ($instalationDate ? Carbon::createFromDate($instalationDate) : null);
 
             $customerService = CreateCSService::handle(
                 userId: $data['user_id'],
                 servicePackage: $servicePackage,
-                packageType: $data['package_type'],
+                packageType: $isHostpot ? PackageTypeService::ONE_TIME->value : PackageTypeService::SUBSCRIPTION->value,
                 installationDate: $date
             );
 
@@ -66,7 +70,7 @@ class CreateCustomerService extends CreateRecord
             CreateInvCSService::handle(
                 invoiceId: $invoice->id,
                 customerService: $customerService,
-                includeBill: $servicePackage?->service_type === ServiceType::PPPOE->value && $servicePackage?->payment_type === PaymentType::PREPAID->value
+                includeBill: $servicetype === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
             );
 
             // TODO Create Extra Cost Items

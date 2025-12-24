@@ -15,6 +15,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class PaymentForm
 {
@@ -78,7 +79,7 @@ class PaymentForm
                             ->label('Tanggal Pembayaran')
                             ->required()
                             ->native(false)
-                            ->minDate($invoice?->date)
+                            ->minDate($invoice ? Carbon::parse($invoice->date)->toDateString() : null)
                             ->maxDate(now())
                             ->placeholder('Tanggal Pembayaran')
                             ->closeOnDateSelection(),

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatusData;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -27,6 +28,8 @@ class InvoicePolicy
 
     public function update(User $user, Invoice $invoice): bool
     {
+        if ($invoice->status !== StatusData::UNPAID->value) return false;
+
         return $user->can('update_invoice', $invoice);
     }
 
