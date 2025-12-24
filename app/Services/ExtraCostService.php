@@ -2,15 +2,20 @@
 
 namespace App\Services;
 
+use App\Enums\BillingType;
+use App\Enums\StatusData;
 use App\Models\ExtraCost;
+use App\Services\CustomerService\CSService;
 
 class ExtraCostService
 {
-    public static function options($billingType = null): array
+    public static function options(mixed $customerServiceId = null): array
     {
+        $customerService = CSService::findById($customerServiceId);
+
         return ExtraCost::query()
             ->where('is_active', true)
-            ->when($billingType, fn($query) => $query->where('billing_type', $billingType))
+            ->when(($customerService?->status === StatusData::ACTIVE->value), fn($query) => $query->where('billing_type', BillingType::RECURRING->value))
             ->get()
             ->mapWithKeys(function (ExtraCost $extraCost) {
                 return [$extraCost->id => [

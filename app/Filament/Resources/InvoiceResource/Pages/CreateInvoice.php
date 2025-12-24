@@ -41,21 +41,25 @@ class CreateInvoice extends CreateRecord
     {
         // Runs before the form fields are saved to the database.
         $data = $this->form->getState();
+        $customerServices = $data['customer_services'];
 
-        $invoiceThisMonth = InvCustomerService::query()
+        $serviceItems = [];
+        foreach ($customerServices as $customerService) {
+            $serviceItems[] = $customerService['customer_service_id'];
+        }
+
+        $unpaidInvoices = InvCustomerService::query()
             ->whereHas('invoice', function (Builder $query) use ($data) {
                 $query->where('user_id', $data['user_id']);
-                $query->whereIn('status', [StatusData::PAID->value, StatusData::UNPAID->value]);
-                $query->whereMonth('date', date('m', strtotime($data['date'])));
-                $query->whereYear('date', date('Y', strtotime($data['date'])));
+                $query->where('status', StatusData::UNPAID->value);
             })
-            ->whereIn('id', $data['inv_customer_services'])
+            ->whereIn('id', $serviceItems)
             ->exists();
 
-        if ($invoiceThisMonth) {
+        if ($unpaidInvoices) {
             Notification::make()
                 ->warning()
-                ->title('Faktur bulan ini telah dibuat dengan status lunas atau belum dibayar')
+                ->title('Harap lunasi tagihan layanan yang belum lunas')
                 ->send();
 
             throw new Halt();
@@ -67,6 +71,7 @@ class CreateInvoice extends CreateRecord
      */
     protected function handleRecordCreation(array $data): Model
     {
+        dd($data);
         /**
          * Cek tagihan sesuai layanan pelanggan pada bulan saat ini dengan status sudah lunas atau masih tertunda
          * jika ada tolak pembuatan faktur baru agar tidak duplikat

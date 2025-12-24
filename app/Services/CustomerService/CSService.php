@@ -23,7 +23,7 @@ class CSService
             })
             ->where([
                 'user_id' => $userId,
-                'status' => StatusData::ACTIVE->value,
+                //'status' => StatusData::ACTIVE->value,
                 'package_type' => PackageTypeService::SUBSCRIPTION->value
             ])
             ->where(function (Builder $query) {
@@ -48,5 +48,10 @@ class CSService
                 ]];
             })
             ->toArray();
+    }
+
+    public static function findById($id): ?CustomerService
+    {
+        return CustomerService::find($id);
     }
 }

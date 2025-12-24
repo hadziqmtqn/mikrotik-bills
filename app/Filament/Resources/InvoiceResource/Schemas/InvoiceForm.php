@@ -3,22 +3,23 @@
 namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
-use App\Enums\BillingType;
+use App\Helpers\IdrCurrency;
+use App\Models\CustomerService;
+use App\Models\ExtraCost;
 use App\Models\Invoice;
 use App\Services\CustomerService\CSService;
 use App\Services\ExtraCostService;
+use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
 
 class InvoiceForm
 {
@@ -45,17 +46,18 @@ class InvoiceForm
 
                                 Select::make('user_id')
                                     ->label('Pelanggan')
-                                    ->relationship(name: 'user', titleAttribute: 'name', modifyQueryUsing: function (Builder $query, callable $get) {
+                                    ->options(function (Get $get): array {
                                         $accountType = $get('account_type');
 
-                                        $query->whereHas('roles', fn(Builder $query) => $query->where('name', 'user'));
-                                        $query->whereHas('userProfile', function (Builder $query) use ($accountType) {
-                                            $query->when($accountType, fn(Builder $query) => $query->where('account_type', $accountType));
-                                        });
-                                        $query->where('is_active', true);
-                                        $query->orderBy('name');
+                                        if (!$accountType) {
+                                            return [];
+                                        }
+
+                                        return UserService::options(
+                                            accountType: $accountType,
+                                            onlyHasServices: true
+                                        );
                                     })
-                                    ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->name . ' (' . $record->userProfile?->ppoe_name . ')')
                                     ->searchable()
                                     ->preload()
                                     ->disabled(fn(Get $get): bool => !$get('account_type'))
@@ -90,7 +92,7 @@ class InvoiceForm
 
                         Section::make('Item Tagihan')
                             ->schema([
-                                CheckboxList::make('invCustomerServices')
+                                /*CheckboxList::make('invCustomerServices')
                                     ->label('Item Layanan')
                                     ->bulkToggleable()
                                     ->options(function (?Invoice $invoice, Get $get): array {
@@ -118,7 +120,8 @@ class InvoiceForm
                                     ->label('Biaya Tambahan')
                                     ->bulkToggleable()
                                     ->columns()
-                                    ->options(function (): array {
+                                    ->options(function (Get $get): array {
+                                        //$customerServiceId = $get('')
                                         return collect(ExtraCostService::options(BillingType::RECURRING->value))
                                             ->map(fn($item) => $item['name'])
                                             ->toArray();
@@ -128,7 +131,47 @@ class InvoiceForm
                                             ->map(fn($data) => 'Rp' . number_format($data['fee'], 0, ',', '.'))
                                             ->toArray();
                                     })
-                                    ->reactive()
+                                    ->reactive()*/
+
+                                Repeater::make('customer_services')
+                                    ->label('Item Layanan')
+                                    ->hiddenLabel()
+                                    ->required()
+                                    ->schema([
+                                        Select::make('customer_service_id')
+                                            ->label('Layanan')
+                                            ->options(function (?Invoice $invoice, Get $get): array {
+                                                $userId = $invoice?->user_id ?? $get('../../user_id');
+
+                                                if (!$userId) return [];
+
+                                                return collect(CSService::options(userId: $userId))
+                                                    ->map(fn($data) => $data['name'])
+                                                    ->toArray();
+                                            })
+                                            ->required()
+                                            ->native(false)
+                                            ->debounce()
+                                            ->reactive(),
+
+                                        CheckboxList::make('extra_costs')
+                                            ->label('Biaya Tambahan')
+                                            ->options(function (Get $get): array {
+                                                $customerServiceId = $get('customer_service_id');
+
+                                                if (!$customerServiceId) return [];
+
+                                                return collect(ExtraCostService::options($customerServiceId))
+                                                    ->map(fn($item) => $item['name'])
+                                                    ->toArray();
+                                            })
+                                            //->multiple()
+                                            ->required()
+                                            //->native(false)
+                                            ->debounce()
+                                            ->reactive(),
+                                    ])
+                                    ->addActionLabel('Tambah Item')
                             ])
                     ]),
 
@@ -136,7 +179,7 @@ class InvoiceForm
                     ->columnSpan(['lg' => 1])
                     ->schema([
                         Section::make('Ringkasan')
-                            ->schema([
+                            /*->schema([
                                 Placeholder::make('total')
                                     ->label('Total Faktur')
                                     ->content(function (Get $get): string|HtmlString {
@@ -162,8 +205,44 @@ class InvoiceForm
                                         return new HtmlString('<span style="font-weight: bold; color: #00bb00; font-size: large">Rp '. $total .'</span>');
                                     })
                                     ->reactive(),
-                            ])
+                            ])*/
+                            ->schema(function (Get $get): array {
+                                return self::itemSummary($get('customer_services'));
+                            })
                     ]),
             ]);
+    }
+
+    private static function itemSummary($items): array
+    {
+        $schema = [];
+        foreach ($items as $item) {
+            $customerService = CustomerService::with('servicePackage')
+                ->find($item['customer_service_id']);
+
+            $customerServiceItems = [
+                Placeholder::make($customerService?->servicePackage?->package_name ?? 'N/A'),
+                Placeholder::make('')
+                    ->content(IdrCurrency::convert((int)$customerService?->price))
+            ];
+
+            $extraCosts = ExtraCost::whereIn('id', $item['extra_costs'] ?? [])
+                ->get();
+
+            $extraCostItems = [];
+
+            foreach ($extraCosts as $extraCost) {
+                $extraCostItems[] = Placeholder::make($extraCost->name);
+                $extraCostItems[] = Placeholder::make('')
+                    ->content(IdrCurrency::convert($extraCost->fee));
+            }
+
+
+            $schema[] = Section::make()
+                ->columns()
+                ->schema(array_merge($customerServiceItems, $extraCostItems));
+        }
+
+        return $schema;
     }
 }

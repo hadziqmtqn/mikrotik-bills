@@ -53,7 +53,7 @@ class CustomerServiceForm
                                             return [];
                                         }
 
-                                        return UserService::dropdownOptions(
+                                        return UserService::options(
                                             selfId: $record?->user_id,
                                             accountType: $accountType
                                         );

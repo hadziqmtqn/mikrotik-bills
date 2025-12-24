@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserService
 {
-    public static function dropdownOptions($selfId = null, $accountType = null): array
+    public static function options($selfId = null, $accountType = null, $onlyHasServices = false): array
     {
         return User::with('userProfile')
             ->whereHas('userProfile', function (Builder $query) use ($accountType) {
@@ -17,6 +17,7 @@ class UserService
             ->when($selfId, function (Builder $query) use ($selfId) {
                 return $query->where('id', $selfId);
             })
+            ->when($onlyHasServices, fn(Builder $query) => $query->whereHas('customerServices'))
             ->orderBy('name')
             ->active()
             ->get()
