@@ -59,7 +59,7 @@ class CreateCustomerService extends CreateRecord
             // TODO Create Invoice Customer Service Items
             /**
              * Ini berlaku pada saat pertama pasang baru
-             * - Jika jenis layanan PPoE, nominal tagihan layanan utama tidak dibebankan
+             * - Dikenakan tagihan di awal jika jenis pembayaran paket adalah PREPAID (PRA BAYAR)
              * - Jika jenis layanan Hostpot, nominal tagihan layanan utama dibabankan
             */
 

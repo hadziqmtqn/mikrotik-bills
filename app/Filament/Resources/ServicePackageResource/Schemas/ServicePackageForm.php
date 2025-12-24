@@ -53,14 +53,23 @@ class ServicePackageForm
                                             $set('data_limit', null);
                                             $set('data_limit_unit', []);
                                         }
+
+                                        $set('payment_type', []);
                                     })
                                     ->columnSpanFull(),
 
                                 Radio::make('payment_type')
                                     ->label('Tipe Pembayaran')
-                                    ->options(PaymentType::options())
+                                    ->options(function (Get $get): array {
+                                        $serviceType = $get('service_type');
+
+                                        if (! $serviceType) return [];
+
+                                        return PaymentType::options(($serviceType === ServiceType::HOTSPOT->value ? [PaymentType::PREPAID->value] : []));
+                                    })
                                     ->inline()
                                     ->required()
+                                    ->reactive()
                                     ->columnSpanFull(),
 
                                 TextInput::make('package_name')
@@ -207,6 +216,7 @@ class ServicePackageForm
                                     ->visible(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
                                     ->prefix('Rp')
                                     ->default(0)
+                                    ->placeholder('Harga paket harian')
                                     ->helperText('Harga paket harian')
                                     ->reactive()
                                     ->debounce()
@@ -221,6 +231,7 @@ class ServicePackageForm
                                     ->prefix('Rp')
                                     ->default(0)
                                     ->readOnly(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
+                                    ->placeholder('Masukkan harga paket')
                                     ->helperText(fn(Get $get): string => $get('service_type') === ServiceType::PPPOE->value ? 'Harga paket harian x 30 hari' : 'Harga paket layanan ini'),
 
                                 TextInput::make('price_before_discount')
@@ -228,6 +239,7 @@ class ServicePackageForm
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->default(0)
+                                    ->placeholder('Harga sebelum diskon, jika ada')
                                     ->helperText('Harga sebelum diskon, jika ada'),
                             ])
                     ])->columnSpan(['lg' => 2]),

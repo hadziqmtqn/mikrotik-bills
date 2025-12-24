@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CustomerServiceResource\Tables;
 
 use App\Enums\PackageTypeService;
+use App\Enums\PaymentType;
 use App\Enums\ServiceType;
 use App\Enums\StatusData;
 use App\Helpers\DateHelper;
@@ -46,6 +47,11 @@ class CustomerServiceTable
 
                 TextColumn::make('servicePackage.package_name')
                     ->label('Paket Layanan')
+                    ->searchable(),
+
+                TextColumn::make('servicePackage.payment_type')
+                    ->label('Jenis Pembayaran')
+                    ->formatStateUsing(fn($state): string => PaymentType::tryFrom($state)?->getLabel() ?? $state)
                     ->searchable(),
 
                 TextColumn::make('price')

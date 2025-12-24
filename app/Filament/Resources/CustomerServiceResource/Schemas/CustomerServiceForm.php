@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\CustomerServiceResource\Schemas;
 
 use App\Enums\AccountType;
-use App\Enums\PackageTypeService;
 use App\Enums\ServiceType;
 use App\Models\CustomerService;
 use App\Models\ServicePackage;
@@ -150,17 +149,10 @@ class CustomerServiceForm
                                     ->date()
                                     ->maxDate(now())
                                     ->native(false)
-                                    ->required()
                                     ->placeholder('Masukkan tanggal pemasangan')
-                                    ->visible(fn(Get $get): bool => $get('service_type') === ServiceType::PPPOE->value)
-                                    ->closeOnDateSelection(),
-
-                                ToggleButtons::make('package_type')
-                                    ->label('Jenis Paket')
-                                    ->options(PackageTypeService::options())
-                                    ->colors(PackageTypeService::colors())
-                                    ->required()
-                                    ->inline()
+                                    ->required(fn(Get $get): bool => is_null($get('service_type')) || $get('service_type') !== ServiceType::HOTSPOT->value)
+                                    ->disabled(fn(Get $get): bool => is_null($get('service_type')) || $get('service_type') === ServiceType::HOTSPOT->value)
+                                    ->closeOnDateSelection()
                             ])
                     ])
                     ->columnSpan([
