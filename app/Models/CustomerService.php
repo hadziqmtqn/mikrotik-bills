@@ -77,6 +77,11 @@ class CustomerService extends Model
         return $this->hasMany(CustomerServiceUsage::class, 'customer_service_id');
     }
 
+    public function additionalServiceFees(): HasMany
+    {
+        return $this->hasMany(AdditionalServiceFee::class, 'customer_service_id');
+    }
+
     // TODO Scopes
     #[Scope]
     protected function filterByReferenceNumber(Builder $query, $referenceNumber): Builder

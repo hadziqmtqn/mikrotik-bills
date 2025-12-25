@@ -93,4 +93,14 @@ class CustomerServiceUsageService
             ->where('invoice_id', $invoiceId)
             ->delete();
     }
+
+    public static function lastUsagePeriod(array $customerServiceIds): Carbon
+    {
+        $lastPeriod = CustomerServiceUsage::query()
+            ->whereIn('customer_service_id', $customerServiceIds)
+            ->orderByDesc('period_end')
+            ->value('period_end');
+
+        return $lastPeriod ? Carbon::parse($lastPeriod)->addDay() : Carbon::now();
+    }
 }

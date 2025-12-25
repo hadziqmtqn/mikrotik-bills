@@ -10,6 +10,7 @@ use App\Models\InvCustomerService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
+use App\Services\CustomerService\CSService;
 use App\Services\RecalculateInvoiceTotalService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -77,16 +78,31 @@ class CreateInvoice extends CreateRecord
          * jika ada tolak pembuatan faktur baru agar tidak duplikat
         */
 
-        return DB::transaction(function () use ($data) {
+        $collection = collect($data['customer_services']);
+
+        $customerServiceIds = $collection
+            ->pluck('customer_service_id')
+            ->all();
+
+        $extraCostIds = $collection
+            ->pluck('extra_costs')
+            ->flatten()
+            ->all();
+
+        $customerServices = CSService::options(userId: $data['user_id'], selfIds: $customerServiceIds);
+        //dd($extraCostIds);
+
+        return DB::transaction(function () use ($data, $customerServices, $extraCostIds) {
+
             $invoice = CreateInvoiceService::handle(
-                userId: $data['userid'],
+                userId: $data['user_id'],
                 date: $data['date'],
                 dueDate: $data['due_date'],
                 defaultNote: 'Dibuat manual oleh admin'
             );
 
             // Customer Serives
-            foreach ($data['invCustomerServices'] as $inv_customer_service) {
+            /*foreach ($data['invCustomerServices'] as $inv_customer_service) {
                 $customerService = CustomerService::find($inv_customer_service);
 
                 CreateInvCSService::handle(
@@ -94,16 +110,27 @@ class CreateInvoice extends CreateRecord
                     customerService: $customerService,
                     includeBill: true
                 );
+            }*/
+
+            foreach ($customerServices as $key => $customerService) {
+                CreateInvCSService::handle(
+                    invoiceId: $invoice->id,
+                    customerService: CustomerService::find($key),
+                    includeBill: true
+                );
             }
 
             // Extra Cost
-            foreach ($data['invExtraCosts'] as $extra_cost) {
+            /*foreach ($data['invExtraCosts'] as $extra_cost) {
                 $extraCost = ExtraCost::find($extra_cost);
 
                 CreateInvExtraCostService::handle(
                     invoiceId: $invoice,
                     extraCost: $extraCost
                 );
+            }*/
+            foreach ($extraCostIds as $extraCostId) {
+
             }
 
             return $invoice;

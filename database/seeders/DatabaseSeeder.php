@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             InvoiceSettingSeeder::class,
             // Customer Service Dummy
             CustomerServiceSeeder::class,
-            CreatePaymentSeeder::class
+            //CreatePaymentSeeder::class
         ]);
     }
 }

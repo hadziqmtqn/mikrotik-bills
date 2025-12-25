@@ -4,7 +4,6 @@ namespace App\Services\CustomerService;
 
 use App\Enums\PackageTypeService;
 use App\Enums\PaymentType;
-use App\Enums\StatusData;
 use App\Models\CustomerService;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -43,12 +42,16 @@ class CSService
                 $servicePackage = $customerService->servicePackage;
                 $packageType = $customerService->package_type;
 
+                // nominal tagihan tidak dibebankan
+                $excludeBill = !$customerService->start_date && $servicePackage?->payment_type === PaymentType::POSTPAID->value;
+
                 return [$customerService->id => [
                     'name' => $servicePackage?->package_name,
                     'dailyPrice' => $customerService->daily_price,
                     // jika layanan baru (start_date masih kosong alias layan belum aktif), maka harga item menjadi 0
                     // jika sudah aktif tampilkan harga asli
-                    'price' => !$customerService->start_date && $servicePackage?->payment_type === PaymentType::POSTPAID->value ? 0 : $customerService->price,
+                    'price' => $excludeBill ? 0 : $customerService->price,
+                    'includeBill' => !$excludeBill,
                     'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType
                 ]];
             })

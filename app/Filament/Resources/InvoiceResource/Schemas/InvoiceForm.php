@@ -7,6 +7,7 @@ use App\Helpers\IdrCurrency;
 use App\Models\ExtraCost;
 use App\Models\Invoice;
 use App\Services\CustomerService\CSService;
+use App\Services\CustomerService\CustomerServiceUsageService;
 use App\Services\ExtraCostService;
 use App\Services\UserService;
 use Filament\Forms\Components\CheckboxList;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\HtmlString;
 
 class InvoiceForm
@@ -77,6 +79,7 @@ class InvoiceForm
                                     ->hiddenLabel()
                                     ->required()
                                     ->defaultItems(0)
+                                    ->debounce()
                                     ->schema([
                                         Select::make('customer_service_id')
                                             ->label('Layanan')
@@ -94,22 +97,23 @@ class InvoiceForm
                                             ->debounce()
                                             ->reactive(),
 
-                                        CheckboxList::make('extra_costs')
-                                            ->label('Biaya Tambahan')
-                                            ->bulkToggleable()
-                                            ->options(function (Get $get): array {
-                                                $customerServiceId = $get('customer_service_id');
-
-                                                if (!$customerServiceId) return [];
-
-                                                return collect(ExtraCostService::options($customerServiceId))
-                                                    ->map(fn($item) => $item['name'])
-                                                    ->toArray();
-                                            })
-                                            ->debounce()
-                                            ->reactive(),
                                     ])
-                                    ->addActionLabel('Tambah Item')
+                                    ->addActionLabel('Tambah Item'),
+
+                                CheckboxList::make('extra_costs')
+                                    ->label('Biaya Tambahan')
+                                    ->bulkToggleable()
+                                    ->options(function (Get $get): array {
+                                        $customerServiceId = $get('customer_service_id');
+
+                                        if (!$customerServiceId) return [];
+
+                                        return collect(ExtraCostService::options($customerServiceId))
+                                            ->map(fn($item) => $item['name'])
+                                            ->toArray();
+                                    })
+                                    ->debounce()
+                                    ->reactive(),
                             ]),
 
                         Section::make('Masa Faktur')
@@ -119,16 +123,36 @@ class InvoiceForm
                                     ->label('Tanggal')
                                     ->native(false)
                                     ->default(now())
+                                    ->minDate(function (Get $get): Carbon|null {
+                                        $customerServices = $get('customer_services');
+
+                                        if (! $customerServices) return null;
+
+                                        $collection = collect($customerServices);
+
+                                        $customerServiceIds = $collection
+                                            ->pluck('customer_service_id')
+                                            ->all();
+
+                                        return CustomerServiceUsageService::lastUsagePeriod($customerServiceIds);
+                                    })
                                     ->maxDate(now())
                                     ->required()
                                     ->placeholder('Masukkan tanggal faktur')
+                                    ->reactive()
                                     ->closeOnDateSelection(),
 
                                 DatePicker::make('due_date')
                                     ->label('Tanggal Jatuh Tempo')
                                     ->native(false)
                                     ->required()
-                                    ->default(now()->setDay(20))
+                                    ->minDate(function (Get $get): Carbon|null {
+                                        $date = $get('date');
+
+                                        if (!$date) return Carbon::now();
+
+                                        return Carbon::parse($date);
+                                    })
                                     ->maxDate(now()->endOfMonth())
                                     ->placeholder('Masukkan tanggal jatuh tempo')
                                     ->closeOnDateSelection(),
