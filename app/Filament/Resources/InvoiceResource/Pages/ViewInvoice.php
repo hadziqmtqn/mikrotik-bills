@@ -11,9 +11,12 @@ use App\Filament\Resources\InvoiceResource\Actions\InvoiceActions;
 use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Filament\Resources\UserResource\UserResource;
 use App\Helpers\DateHelper;
+use App\Helpers\IdrCurrency;
 use App\Models\CustomerService;
+use App\Models\InvCustomerService;
 use App\Models\Invoice;
 use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -107,13 +110,28 @@ class ViewInvoice extends ViewRecord
                                             ->label('Harga')
                                             ->inlineLabel()
                                             ->money('IDR')
-                                            ->weight(FontWeight::Bold),
+                                            ->weight(FontWeight::Bold)
+                                            ->hintIcon(
+                                                fn(InvCustomerService $invCustomerService): string|null => $invCustomerService->include_bill ? 'heroicon-o-information-circle' : null,
+                                                fn(InvCustomerService $invCustomerService): string|null => $invCustomerService->include_bill ? 'Dibebankan' : 'Tidak dibebankan'
+                                            ),
 
                                         TextEntry::make('customerService.daily_price')
                                             ->label('Harga Harian')
                                             ->inlineLabel()
                                             ->money('IDR')
                                             ->weight(FontWeight::Bold),
+
+                                        KeyValueEntry::make('extra_costs')
+                                            ->label('Biaya Tambahan')
+                                            ->keyLabel('Nama')
+                                            ->valueLabel('Biaya')
+                                            ->getStateUsing(
+                                                fn ($record) => collect($record->extra_costs)->mapWithKeys(fn ($item) => [
+                                                    $item['name'] => IdrCurrency::convert($item['fee']),
+                                                ])
+                                                    ->toArray()
+                                            )
                                     ]),
                             ])
                     ]),
