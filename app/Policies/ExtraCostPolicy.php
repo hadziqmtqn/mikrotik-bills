@@ -32,8 +32,8 @@ class ExtraCostPolicy
 
     public function delete(User $user, ExtraCost $extraCost): bool
     {
-        $extraCost->loadCount('invExtraCosts');
+        $extraCost->loadCount('additionalServiceFees');
 
-        return $user->can('delete_extra::cost') && $extraCost->inv_extra_costs_count == 0;
+        return $user->can('delete_extra::cost') && $extraCost->additional_service_fees_count == 0;
     }
 }

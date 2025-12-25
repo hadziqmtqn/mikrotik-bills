@@ -6,7 +6,6 @@ use App\Enums\BillingType;
 use App\Models\ExtraCost;
 use App\Models\User;
 use App\Services\CustomerService\CreateInvCSService;
-use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Bus\Queueable;
@@ -57,14 +56,6 @@ class RecurringInvoiceJob implements ShouldQueue
                     invoiceId: $invoice->id,
                     customerService: $customerService,
                     includeBill: true
-                );
-            }
-
-            // Extra Cost
-            foreach ($extraCosts as $extraCost) {
-                CreateInvExtraCostService::handle(
-                    invoiceId: $invoice->id,
-                    extraCost: $extraCost
                 );
             }
         });

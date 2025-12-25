@@ -34,8 +34,8 @@ class ExtraCost extends Model
         });
     }
 
-    public function invExtraCosts(): HasMany
+    public function additionalServiceFees(): HasMany
     {
-        return $this->hasMany(InvExtraCost::class, 'extra_cost_id');
+        return $this->hasMany(AdditionalServiceFee::class, 'extra_cost_id');
     }
 }

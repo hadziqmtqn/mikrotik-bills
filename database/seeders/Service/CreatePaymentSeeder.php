@@ -6,17 +6,13 @@ use App\Enums\PackageTypeService;
 use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
-use App\Models\ExtraCost;
 use App\Models\Payment;
 use App\Services\CustomerService\CreateInvCSService;
-use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\CustomerService\CustomerServiceUsageService;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class CreatePaymentSeeder extends Seeder
 {
@@ -37,19 +33,11 @@ class CreatePaymentSeeder extends Seeder
         }
     }
 
-    private function extraCosts($billingType = null): Collection
-    {
-        return ExtraCost::when($billingType, fn(Builder $query) => $query->where('billing_type', $billingType))
-            ->get();
-    }
-
     /**
      * @throws Exception
      */
     private function firstStep(CustomerService $customerService): void
     {
-        $extraCosts = $this->extraCosts();
-
         $userId = $customerService->user_id;
         $date = Carbon::parse($customerService->installation_date);
 
@@ -68,24 +56,13 @@ class CreatePaymentSeeder extends Seeder
             includeBill: false
         );
 
-        // 3. create extra costs
-        $totalFee = 0;
-        foreach ($extraCosts as $extraCost) {
-            CreateInvExtraCostService::handle(
-                invoiceId: $invoice->id,
-                extraCost: $extraCost
-            );
-
-            $totalFee += $extraCost->fee;
-        }
-
-        // 4. create payment
+        // 3. create payment
         $payment = new Payment();
         $payment->user_id = $userId;
         $payment->invoice_id = $invoice->id;
         $payment->payment_method = PaymentMethod::CASH->value;
         $payment->date = $date->copy();
-        $payment->amount = $totalFee;
+        $payment->amount = 0;
         $payment->status = StatusData::PAID->value;
         $payment->save();
 
