@@ -100,14 +100,16 @@
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($item->customerService?->price) }}</td>
                     </tr>
 
-                    @foreach($item->extra_costs as $extraCost)
-                        <tr>
-                            <td class="ci-border-b ci-py-3 ci-pl-2">{{ $extraCost['name'] }}</td>
-                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
-                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
-                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
-                        </tr>
-                    @endforeach
+                    @if($item->extra_costs)
+                        @foreach($item->extra_costs as $extraCost)
+                            <tr>
+                                <td class="ci-border-b ci-py-3 ci-pl-2">{{ $extraCost['name'] }}</td>
+                                <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
+                                <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
+                                <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
                 @endforeach
                 <tr>
                     <td colspan="5">
