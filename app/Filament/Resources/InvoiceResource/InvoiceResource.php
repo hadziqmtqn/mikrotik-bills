@@ -94,7 +94,6 @@ class InvoiceResource extends Resource implements HasShieldPermissions
             ->with([
                 'user.userProfile',
                 'invCustomerServices.customerService',
-                'invExtraCosts.extraCost'
             ])
             ->whereHas('invCustomerServices.customerService', fn($query) => $query->whereNull('deleted_at'));
     }

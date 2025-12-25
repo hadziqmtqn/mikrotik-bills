@@ -105,13 +105,13 @@ class CustomerServiceUsageService
             ->delete();
     }
 
-    public static function lastUsagePeriod(array $customerServiceIds): Carbon
+    public static function lastUsagePeriod(array $customerServiceIds): string
     {
         $lastPeriod = CustomerServiceUsage::query()
             ->whereIn('customer_service_id', $customerServiceIds)
             ->orderByDesc('period_end')
             ->value('period_end');
 
-        return $lastPeriod ? Carbon::parse($lastPeriod)->addDay() : Carbon::now();
+        return $lastPeriod ? Carbon::parse($lastPeriod)->addDay()->toDateString() : Carbon::now()->toDateString();
     }
 }

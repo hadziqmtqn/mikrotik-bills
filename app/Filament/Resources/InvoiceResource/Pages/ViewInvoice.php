@@ -112,8 +112,8 @@ class ViewInvoice extends ViewRecord
                                             ->money('IDR')
                                             ->weight(FontWeight::Bold)
                                             ->hintIcon(
-                                                fn(InvCustomerService $invCustomerService): string|null => $invCustomerService->include_bill ? 'heroicon-o-information-circle' : null,
-                                                fn(InvCustomerService $invCustomerService): string|null => $invCustomerService->include_bill ? 'Dibebankan' : 'Tidak dibebankan'
+                                                'heroicon-o-information-circle',
+                                                fn(InvCustomerService $invCustomerService): string => $invCustomerService->include_bill ? 'Dibebankan' : 'Tidak dibebankan'
                                             ),
 
                                         TextEntry::make('customerService.daily_price')

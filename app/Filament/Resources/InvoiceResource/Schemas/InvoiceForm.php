@@ -104,7 +104,7 @@ class InvoiceForm
                                 DatePicker::make('date')
                                     ->label('Tanggal')
                                     ->native(false)
-                                    ->minDate(function (Get $get): Carbon|null {
+                                    ->minDate(function (Get $get): string|null {
                                         $customerServices = $get('customer_services');
 
                                         if (! $customerServices) return null;

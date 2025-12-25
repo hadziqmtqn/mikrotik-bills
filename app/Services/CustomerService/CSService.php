@@ -2,6 +2,7 @@
 
 namespace App\Services\CustomerService;
 
+use App\Enums\BillingType;
 use App\Enums\PackageTypeService;
 use App\Enums\PaymentType;
 use App\Models\AdditionalServiceFee;
@@ -34,12 +35,6 @@ class CSService
                     $query->whereMonth('date', now()->month)
                         ->whereYear('date', now()->year);
                 });
-
-                // atau, layanan yang punya transaksi lunas pada bulan kemarin
-                /*$query->orWhereHas('invCustomerServices.invoice.payments', function (Builder $query) {
-                    $query->where('status', StatusData::PAID->value);
-                    $query->whereDate('date', '<=', now()->subMonth()->lastOfMonth());
-                });*/
             })
             ->when($selfIds, fn(Builder $query) => $query->whereIn('id', $selfIds))
             ->get()
@@ -58,12 +53,23 @@ class CSService
                     'price' => $excludeBill ? 0 : $customerService->price,
                     'includeBill' => !$excludeBill,
                     'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType,
-                    'additionalServiceFees' => $customerService->additionalServiceFees->map(function (AdditionalServiceFee $additionalServiceFee) {
-                        return [
-                            'name' => $additionalServiceFee->extraCost?->name,
-                            'fee' => $additionalServiceFee->fee
-                        ];
+                    'additionalServiceFees' => $customerService->additionalServiceFees->filter(function (AdditionalServiceFee $fee) use ($customerService) {
+                        // 1. Jika start_date kosong → tampilkan semua
+                        if (is_null($customerService->start_date)) {
+                            return true;
+                        }
+
+                        // 2. Jika start_date terisi → hanya recurring
+                        return $fee->extraCost?->billingType === BillingType::RECURRING->value;
                     })
+                        ->map(function (AdditionalServiceFee $additionalServiceFee) {
+                            return [
+                                'extra_cost_id' => $additionalServiceFee->extra_cost_id,
+                                'name' => $additionalServiceFee->extraCost?->name,
+                                'fee' => $additionalServiceFee->fee,
+                            ];
+                        })
+                        ->values()
                 ]];
             })
             ->toArray();
