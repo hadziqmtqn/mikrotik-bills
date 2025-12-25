@@ -4,6 +4,7 @@ namespace App\Services\CustomerService;
 
 use App\Enums\PackageTypeService;
 use App\Enums\PaymentType;
+use App\Models\AdditionalServiceFee;
 use App\Models\CustomerService;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -17,7 +18,11 @@ class CSService
     public static function options($userId, array $selfIds = null): array
     {
         return CustomerService::query()
-            ->with('servicePackage')
+            ->with([
+                'servicePackage',
+                'additionalServiceFees' => fn($query) => $query->where('is_active', true),
+                'additionalServiceFees.extraCost'
+            ])
             ->whereHas('user', function (Builder $query) {
                 $query->active();
                 $query->whereNull('deleted_at');
@@ -52,7 +57,13 @@ class CSService
                     // jika sudah aktif tampilkan harga asli
                     'price' => $excludeBill ? 0 : $customerService->price,
                     'includeBill' => !$excludeBill,
-                    'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType
+                    'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType,
+                    'additionalServiceFees' => $customerService->additionalServiceFees->map(function (AdditionalServiceFee $additionalServiceFee) {
+                        return [
+                            'name' => $additionalServiceFee->extraCost?->name,
+                            'fee' => $additionalServiceFee->fee
+                        ];
+                    })
                 ]];
             })
             ->toArray();

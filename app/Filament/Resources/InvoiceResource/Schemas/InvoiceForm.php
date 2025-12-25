@@ -4,13 +4,10 @@ namespace App\Filament\Resources\InvoiceResource\Schemas;
 
 use App\Enums\AccountType;
 use App\Helpers\IdrCurrency;
-use App\Models\ExtraCost;
 use App\Models\Invoice;
 use App\Services\CustomerService\CSService;
 use App\Services\CustomerService\CustomerServiceUsageService;
-use App\Services\ExtraCostService;
 use App\Services\UserService;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
@@ -99,21 +96,6 @@ class InvoiceForm
 
                                     ])
                                     ->addActionLabel('Tambah Item'),
-
-                                CheckboxList::make('extra_costs')
-                                    ->label('Biaya Tambahan')
-                                    ->bulkToggleable()
-                                    ->options(function (Get $get): array {
-                                        $customerServiceId = $get('customer_service_id');
-
-                                        if (!$customerServiceId) return [];
-
-                                        return collect(ExtraCostService::options($customerServiceId))
-                                            ->map(fn($item) => $item['name'])
-                                            ->toArray();
-                                    })
-                                    ->debounce()
-                                    ->reactive(),
                             ]),
 
                         Section::make('Masa Faktur')
@@ -122,7 +104,6 @@ class InvoiceForm
                                 DatePicker::make('date')
                                     ->label('Tanggal')
                                     ->native(false)
-                                    ->default(now())
                                     ->minDate(function (Get $get): Carbon|null {
                                         $customerServices = $get('customer_services');
 
@@ -201,30 +182,30 @@ class InvoiceForm
             ->all();
 
         $customerServices = CSService::options(userId: $userId, selfIds: $customerServiceIds);
-        $extraCosts = ExtraCost::whereIn('id', $extraCostIds)
-            ->get();
-
-        $extraCostTotal = $extraCosts->sum('fee');
-
-        $extraCostSchemas = [];
-        foreach ($extraCosts as $extraCost) {
-            $fee = $extraCost->fee;
-            $extraCostSchemas[] = Placeholder::make($extraCost->name)
-                ->content(IdrCurrency::convert($fee));
-        }
 
         foreach ($customerServices as $customerService) {
             $number++;
 
             $price = $customerService['price'];
 
+            $customerServiceSchema = [
+                Placeholder::make($customerService['name'])
+                    ->content(IdrCurrency::convert($price))
+            ];
+
+            $extraCostSchema = [];
+            $extraCostTotal = 0;
+            foreach ($customerService['additionalServiceFees'] as $additionalServiceFee) {
+                $fee = $additionalServiceFee['fee'];
+
+                $extraCostSchema[] = Placeholder::make($additionalServiceFee['name'])
+                    ->content(IdrCurrency::convert($fee));
+
+                $extraCostTotal += $fee;
+            }
+
             $schema[] = Section::make('Item ' . $number)
-                ->schema(
-                    array_merge([
-                        Placeholder::make($customerService['name'])
-                            ->content(IdrCurrency::convert($price))
-                    ], $extraCostSchemas)
-                );
+                ->schema(array_merge($customerServiceSchema, $extraCostSchema));
 
             $totalBill += $price + $extraCostTotal;
         }
