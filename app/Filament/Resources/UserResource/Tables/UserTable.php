@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\UserResource\Tables;
 
 use App\Enums\AccountType;
-use App\Filament\Exports\UserExporter;
 use App\Helpers\DateHelper;
 use Exception;
 use Filament\Tables\Actions\ActionGroup;
@@ -11,7 +10,6 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\RestoreAction;
@@ -32,12 +30,6 @@ class UserTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->headerActions([
-                ExportAction::make()
-                    ->exporter(UserExporter::class)
-                    ->chunkSize(100)
-                    ->fileDisk('s3')
-            ])
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
@@ -90,6 +82,7 @@ class UserTable
                     ->toggledHiddenByDefault(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->deferLoading()
             ->filters([
                 SelectFilter::make('account_type')
                     ->label('Tipe Akun')

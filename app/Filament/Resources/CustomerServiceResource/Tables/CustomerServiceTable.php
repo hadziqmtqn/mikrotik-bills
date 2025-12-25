@@ -43,7 +43,8 @@ class CustomerServiceTable
                     ->badge()
                     ->color(fn($state): string => ServiceType::tryFrom($state)?->getColor() ?? 'gray')
                     ->formatStateUsing(fn($state): string => ServiceType::tryFrom($state)?->getLabel() ?? $state)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('servicePackage.package_name')
                     ->label('Paket Layanan')
@@ -52,7 +53,8 @@ class CustomerServiceTable
                 TextColumn::make('servicePackage.payment_type')
                     ->label('Jenis Pembayaran')
                     ->formatStateUsing(fn($state): string => PaymentType::tryFrom($state)?->getLabel() ?? $state)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('price')
                     ->label('Harga')
@@ -80,6 +82,7 @@ class CustomerServiceTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filtersFormColumns(4)
+            ->deferLoading()
             ->filters([
                 SelectFilter::make('service_type')
                     ->label('Jenis Layanan')

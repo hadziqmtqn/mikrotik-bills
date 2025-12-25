@@ -9,6 +9,8 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $title = 'Tambah Pelanggan';
+
     protected function getHeaderActions(): array
     {
         return [
