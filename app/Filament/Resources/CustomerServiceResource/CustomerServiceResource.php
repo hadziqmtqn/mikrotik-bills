@@ -77,7 +77,8 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
                 'user.userProfile',
                 'servicePackage',
                 'invCustomerServices',
-                'additionalServiceFees.extraCost'
+                'additionalServiceFees.extraCost',
+                'customerServiceUsages.invoice'
             ])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,

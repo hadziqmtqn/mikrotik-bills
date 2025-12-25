@@ -33,4 +33,9 @@ class CustomerServiceUsage extends Model
     {
         return $this->belongsTo(CustomerService::class);
     }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
 }

@@ -4,18 +4,15 @@ namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Enums\StatusData;
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource\Actions\PrintInvoiceAction;
 use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Helpers\DateHelper;
-use App\Models\Application;
-use App\Models\BankAccount;
 use App\Models\InvCustomerService;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\View\View;
-use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 
 class ManageInvoiceHistory extends ManageRelatedRecords
 {
@@ -64,37 +61,18 @@ class ManageInvoiceHistory extends ManageRelatedRecords
                     ->toggledHiddenByDefault(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->deferLoading()
             ->filters([
                 //
             ])
             ->actions([
                 ActionGroup::make([
-                    Html2MediaAction::make('export')
-                        ->label('Cetak')
-                        ->icon('heroicon-o-printer')
-                        ->color('primary')
-                        ->modalHeading('Cetak Invoice')
-                        ->modalDescription('Apakah Anda yakin ingin mencetak invoice ini?')
-                        ->successNotificationTitle('Invoice berhasil dicetak.')
-                        ->savePdf()
-                        ->content(function (InvCustomerService $record): View {
-                            $record->loadMissing('invoice.user:id,name,email', 'invoice.user.userProfile', 'invoice.invCustomerServices.customerService.servicePackage');
-
-                            return view('filament.resources.invoice-resource.pages.print', [
-                                'invoice' => $record->invoice,
-                                'application' => Application::first(),
-                                'bankAccounts' => BankAccount::where('is_active', true)
-                                    ->orderBy('bank_name')
-                                    ->get(),
-                            ]);
-                        })
-                        ->filename(fn(InvCustomerService $record): string => 'invoice-' . $record->invoice?->code . '-' . DateHelper::indonesiaDate($record->invoice?->date) . '.pdf'),
+                    PrintInvoiceAction::table(),
 
                     ViewAction::make()
                         ->url(fn(InvCustomerService $record): string => InvoiceResource::getUrl('view', ['record' => $record->invoice?->slug])),
                 ])
-                ->link()
-                ->label('Action'),
+                ->button()
             ]);
     }
 }

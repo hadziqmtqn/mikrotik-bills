@@ -3,10 +3,12 @@
 namespace App\Services\CustomerService;
 
 use App\Enums\PackageTypeService;
+use App\Enums\PaymentType;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\CustomerServiceUsage;
 use App\Models\InvoiceSetting;
+use App\Repositories\CustomerService\InvCustomerServiceRepository;
 use Exception;
 use Illuminate\Support\Carbon;
 
@@ -23,7 +25,10 @@ class CustomerServiceUsageService
     public static function handle(CustomerService $customerService, $invoiceId): void
     {
         $customerService->refresh();
-        $customerService->loadMissing('customerServiceUsageLatest');
+        $customerService->loadMissing([
+            'customerServiceUsageLatest',
+            'servicePackage'
+        ]);
 
         if ($customerService->status !== StatusData::ACTIVE->value ||
             $customerService->package_type !== PackageTypeService::SUBSCRIPTION->value) {
@@ -60,7 +65,13 @@ class CustomerServiceUsageService
         // Hitung jumlah hari dan total harga
         $diffInDays = $periodStart->diffInDays($periodEnd);
         $dailyPrice = $customerService->daily_price;
-        $totalPrice = $dailyPrice * $diffInDays;
+
+        if ($customerService->servicePackage?->payment_type === PaymentType::POSTPAID->value) {
+            $totalPrice = $dailyPrice * $diffInDays;
+        }else {
+            $totalPrice = InvCustomerServiceRepository::totalBilling(customerServiceId: $customerService->id, invoiceId: $invoiceId);
+        }
+
 
         // Cek apakah sudah ada record untuk invoice ini
         $existingUsage = CustomerServiceUsage::query()

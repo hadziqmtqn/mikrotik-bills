@@ -3,6 +3,7 @@
     use App\Enums\StatusData;
     use Illuminate\Support\Carbon;
     use App\Enums\PaymentMethod;
+    use App\Helpers\IdrCurrency;
 @endphp
 
 <link rel="stylesheet" href="{{ asset('css/invoice/style.css') }}">
@@ -94,18 +95,19 @@
                 @foreach($invoice->invCustomerServices as $item)
                     <tr>
                         <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->customerService?->servicePackage?->package_name }}</td>
-                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($item->customerService?->price) }}</td>
                         <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
-                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->customerService?->price,0,',','.') }}</td>
+                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($item->customerService?->price) }}</td>
                     </tr>
-                @endforeach
-                @foreach($invoice->invExtraCosts as $item)
-                    <tr>
-                        <td class="ci-border-b ci-py-3 ci-pl-2">{{ $item->extraCost?->name }}</td>
-                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
-                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
-                        <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">Rp{{ number_format($item->fee,0,',','.') }}</td>
-                    </tr>
+
+                    @foreach($item->extra_costs as $extraCost)
+                        <tr>
+                            <td class="ci-border-b ci-py-3 ci-pl-2">{{ $extraCost['name'] }}</td>
+                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
+                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-center">1</td>
+                            <td class="ci-border-b ci-py-3 ci-pl-2 ci-text-right">{{ IdrCurrency::convert($extraCost['fee']) }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
                 <tr>
                     <td colspan="5">

@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\CustomerServiceResource\Pages;
 
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
+use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Helpers\DateHelper;
+use App\Models\CustomerServiceUsage;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,22 +32,20 @@ class ManageCustomerServiceUsage extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('id')
             ->columns([
+                Tables\Columns\TextColumn::make('invoice.code')
+                    ->label('Kode Fakturr')
+                    ->searchable()
+                    ->color('primary')
+                    ->url(fn(CustomerServiceUsage $customerServiceUsage): string => InvoiceResource::getUrl('view', ['record' => $customerServiceUsage->invoice])),
+
                 Tables\Columns\TextColumn::make('period_start')
-                    ->label('Digunakan Sejak')
+                    ->label('Periode')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
-
-                Tables\Columns\TextColumn::make('period_end')
-                    ->label('Sampai')
-                    ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(fn($state): string => DateHelper::indonesiaDate($state, 'D MMM Y')),
-
-                Tables\Columns\TextColumn::make('days_of_usage')
-                    ->label('Penggunaan')
-                    ->sortable()
-                    ->suffix(' Hari'),
+                    ->formatStateUsing(function (CustomerServiceUsage $customerServiceUsage): string {
+                        return DateHelper::indonesiaDate($customerServiceUsage->period_start, 'D MMM Y') . ' - ' . DateHelper::indonesiaDate($customerServiceUsage->period_end, 'D MMM Y');
+                    })
+                    ->description(fn(CustomerServiceUsage $customerServiceUsage): string => 'Penggunaan: ' . $customerServiceUsage->days_of_usage . ' hari'),
 
                 Tables\Columns\TextColumn::make('daily_price')
                     ->label('Tagihan Harian')
