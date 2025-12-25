@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\Invoice;
+use App\Services\RecalculateInvoiceTotalService;
 use App\Traits\InvoiceSettingTrait;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -19,6 +20,13 @@ class InvoiceObserver
         $invoice->slug = Str::uuid()->toString();
         $invoice->serial_number = Invoice::max('serial_number') + 1;
         $invoice->code = 'INV' . Str::padLeft($invoice->serial_number, 6, '0');
+    }
+
+    public function saved(Invoice $invoice): void
+    {
+        if ($invoice->status === StatusData::UNPAID->value) {
+            RecalculateInvoiceTotalService::totalPrice($invoice);
+        }
     }
 
     /**

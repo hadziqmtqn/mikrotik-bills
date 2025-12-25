@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\InvoiceResource;
 
-use App\Filament\Resources\InvoiceResource\RelationManagers\InvExtraCostsRelationManager;
 use App\Filament\Resources\InvoiceResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\InvoiceResource\Schemas\InvoiceForm;
 use App\Filament\Resources\InvoiceResource\Tables\InvoiceTable;
@@ -103,7 +102,6 @@ class InvoiceResource extends Resource implements HasShieldPermissions
     public static function getRelations(): array
     {
         return [
-            InvExtraCostsRelationManager::class,
             PaymentsRelationManager::class
         ];
     }

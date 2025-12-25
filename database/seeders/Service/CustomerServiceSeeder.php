@@ -43,7 +43,7 @@ class CustomerServiceSeeder extends Seeder
                 servicePackage: $servicePackage,
                 packageType: $isSubscription ? PackageTypeService::SUBSCRIPTION->value : PackageTypeService::ONE_TIME->value,
                 installationDate: $installationDate,
-                status: $faker->randomElement(['active', 'pending'])
+                status: $faker->randomElement(['pending'])
             );
 
             if ($isSubscription) {

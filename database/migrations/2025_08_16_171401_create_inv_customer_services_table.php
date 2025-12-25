@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('customer_service_id');
             $table->decimal('amount', 20, 0)->default(0);
             $table->boolean('include_bill')->default(true);
+            $table->json('extra_costs')->nullable();
             $table->timestamps();
 
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');

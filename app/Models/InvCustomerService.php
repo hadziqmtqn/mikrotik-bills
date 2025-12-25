@@ -14,13 +14,15 @@ class InvCustomerService extends Model
         'invoice_id',
         'customer_service_id',
         'amount',
-        'include_bill'
+        'include_bill',
+        'extra_costs'
     ];
 
     protected function casts(): array
     {
         return [
-            'include_bill' => 'boolean'
+            'include_bill' => 'boolean',
+            'extra_costs' => 'array'
         ];
     }
 

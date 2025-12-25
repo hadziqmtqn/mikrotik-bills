@@ -8,10 +8,11 @@ use App\Enums\ServiceType;
 use App\Filament\Resources\CustomerServiceResource\CustomerServiceResource;
 use App\Models\ExtraCost;
 use App\Models\ServicePackage;
+use App\Services\CustomerService\AdditionalServiceFeeService;
 use App\Services\CustomerService\CreateCSService;
 use App\Services\CustomerService\CreateInvCSService;
-use App\Services\CustomerService\CreateInvExtraCostService;
 use App\Services\CustomerService\CreateInvoiceService;
+use App\Services\RecalculateInvoiceTotalService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -67,7 +68,7 @@ class CreateCustomerService extends CreateRecord
              * - Jika jenis layanan Hostpot, nominal tagihan layanan utama dibabankan
             */
 
-            CreateInvCSService::handle(
+            $invCustomerService = CreateInvCSService::handle(
                 invoiceId: $invoice->id,
                 customerService: $customerService,
                 includeBill: $servicetype === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
@@ -75,15 +76,18 @@ class CreateCustomerService extends CreateRecord
 
             // TODO Create Extra Cost Items
             if (count($data['inv_extra_costs']) > 0) {
-                foreach ($data['inv_extra_costs'] as $inv_extra_cost) {
-                    $extraCost = ExtraCost::find($inv_extra_cost);
-
-                    CreateInvExtraCostService::handle(
-                        invoiceId: $invoice->id,
-                        extraCost: $extraCost
-                    );
-                }
+                AdditionalServiceFeeService::handleBulk(
+                    customerServiceId: $customerService->id,
+                    extraCosts: ExtraCost::query()
+                        ->whereIn('id', $data['inv_extra_costs'])
+                        ->get(),
+                    invCustomerService: $invCustomerService
+                );
             }
+
+            // TODO Recalculate total price
+            $invoice->refresh();
+            RecalculateInvoiceTotalService::totalPrice($invoice);
 
             return $customerService;
         });

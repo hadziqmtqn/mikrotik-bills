@@ -68,12 +68,4 @@ class Invoice extends Model
     {
         return $query->where('status', $status);
     }
-
-    // TODO Attrobutes
-    protected function totalFee(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->invExtraCosts->sum('fee')
-        );
-    }
 }
