@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('customer_service_id');
             $table->unsignedBigInteger('extra_cost_id');
             $table->decimal('fee', 20, 0);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->foreign('customer_service_id')->references('id')->on('customer_services')->cascadeOnDelete();

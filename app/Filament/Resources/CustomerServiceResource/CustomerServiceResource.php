@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CustomerServiceResource;
 
 use App\Filament\Resources\CustomerServiceResource\Pages\ManageCustomerServiceUsage;
 use App\Filament\Resources\CustomerServiceResource\Pages\ManageInvoiceHistory;
+use App\Filament\Resources\CustomerServiceResource\RelationManagers\AdditionalServiceFeesRelationManager;
 use App\Filament\Resources\CustomerServiceResource\Schemas\CustomerServiceForm;
 use App\Filament\Resources\CustomerServiceResource\Tables\CustomerServiceTable;
 use App\Models\CustomerService;
@@ -75,7 +76,8 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
             ->with([
                 'user.userProfile',
                 'servicePackage',
-                'invCustomerServices'
+                'invCustomerServices',
+                'additionalServiceFees.extraCost'
             ])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
@@ -121,5 +123,12 @@ class CustomerServiceResource extends Resource implements HasShieldPermissions
             ManageCustomerServiceUsage::class,
             ManageInvoiceHistory::class
         ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            AdditionalServiceFeesRelationManager::class
+        ];
     }
 }

@@ -11,7 +11,15 @@ class AdditionalServiceFee extends Model
         'customer_service_id',
         'extra_cost_id',
         'fee',
+        'is_active'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean'
+        ];
+    }
 
     public function extraCost(): BelongsTo
     {
