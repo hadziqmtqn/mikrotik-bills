@@ -147,6 +147,7 @@ class CustomerServiceForm
                                 DatePicker::make('installation_date')
                                     ->label('Tanggal Pemasangan')
                                     ->date()
+                                    ->minDate(now()->subMonth()->startOfMonth())
                                     ->maxDate(now())
                                     ->native(false)
                                     ->placeholder('Masukkan tanggal pemasangan')

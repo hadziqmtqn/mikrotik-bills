@@ -74,7 +74,7 @@ class PaymentObserver
 
                 CustomerServiceUsageService::handle(
                     customerService: $invCustomerService->customerService,
-                    invoiceId: $invoice->id
+                    invoice: $invoice
                 );
             }
         }

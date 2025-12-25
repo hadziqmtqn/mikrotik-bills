@@ -69,7 +69,7 @@ class CreatePaymentSeeder extends Seeder
         // 5. create customer service usage
         CustomerServiceUsageService::handle(
             customerService: $customerService,
-            invoiceId: $invoice->id
+            invoice: $invoice
         );
     }
 }

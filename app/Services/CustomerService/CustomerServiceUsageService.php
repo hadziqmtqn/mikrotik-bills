@@ -7,6 +7,7 @@ use App\Enums\PaymentType;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\CustomerServiceUsage;
+use App\Models\Invoice;
 use App\Models\InvoiceSetting;
 use App\Repositories\CustomerService\InvCustomerServiceRepository;
 use Exception;
@@ -22,7 +23,7 @@ class CustomerServiceUsageService
      *
      * @throws Exception
      */
-    public static function handle(CustomerService $customerService, $invoiceId): void
+    public static function handle(CustomerService $customerService, Invoice $invoice): void
     {
         $customerService->refresh();
         $customerService->loadMissing([
@@ -35,6 +36,7 @@ class CustomerServiceUsageService
             return;
         }
 
+        $invoiceId = $invoice->id;
         $invoiceSetting = InvoiceSetting::first();
         $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
 
@@ -50,7 +52,17 @@ class CustomerServiceUsageService
         // Tentukan periode mulai
         $lastUsage = $customerService->customerServiceUsageLatest;
         $lastPeriodEnd = $lastUsage?->period_end;
-        $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
+
+        /**
+         * - Jika tanggal pesangan dibulan kemarin, maka tanggal next_billing_date bulan sekarang
+        */
+
+        $lastMonth = $now->copy()->subMonth();
+        if ($installationDate->year === $lastMonth->year && $installationDate->month === $lastMonth->month) {
+            $nextBillingDate = $currentBillingDate->copy();
+        }else {
+            $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
+        }
 
         if (!$lastPeriodEnd) {
             // LAYANAN BARU - Periode mulai dari installation_date
