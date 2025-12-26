@@ -14,7 +14,7 @@ use App\Services\CustomerService\AdditionalServiceFeeService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\CustomerService\CustomerServiceUsageService;
-use App\Services\RecalculateInvoiceTotalService;
+use App\Services\CustomerService\RecalculateInvoiceTotalService;
 use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;

@@ -9,7 +9,7 @@ use App\Models\InvCustomerService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
 use App\Services\CustomerService\CSService;
-use App\Services\RecalculateInvoiceTotalService;
+use App\Services\CustomerService\RecalculateInvoiceTotalService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;

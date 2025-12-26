@@ -12,7 +12,7 @@ use App\Services\CustomerService\AdditionalServiceFeeService;
 use App\Services\CustomerService\CreateCSService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
-use App\Services\RecalculateInvoiceTotalService;
+use App\Services\CustomerService\RecalculateInvoiceTotalService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;

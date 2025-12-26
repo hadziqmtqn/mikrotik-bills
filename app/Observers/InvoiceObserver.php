@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Enums\StatusData;
 use App\Models\CustomerService;
 use App\Models\Invoice;
-use App\Services\RecalculateInvoiceTotalService;
+use App\Services\CustomerService\RecalculateInvoiceTotalService;
 use App\Traits\InvoiceSettingTrait;
 use Exception;
 use Illuminate\Support\Carbon;

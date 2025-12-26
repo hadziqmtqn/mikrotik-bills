@@ -9,7 +9,6 @@ use App\Models\CustomerService;
 use App\Models\CustomerServiceUsage;
 use App\Models\Invoice;
 use App\Models\InvoiceSetting;
-use App\Repositories\CustomerService\InvCustomerServiceRepository;
 use Exception;
 use Illuminate\Support\Carbon;
 
@@ -31,11 +30,15 @@ class CustomerServiceUsageService
             'servicePackage'
         ]);
 
+        /**
+         * Abaikan jika layanan pelanggan tidak aktif dan bukan berlangganan
+        */
         if ($customerService->status !== StatusData::ACTIVE->value ||
             $customerService->package_type !== PackageTypeService::SUBSCRIPTION->value) {
             return;
         }
 
+        $invoice->refresh();
         $invoiceId = $invoice->id;
         $invoiceSetting = InvoiceSetting::first();
         $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
@@ -76,12 +79,18 @@ class CustomerServiceUsageService
         */
 
         $lastMonth = $now->copy()->subMonth();
+
+        // Hitung jumlah hari dan total harga
+        $dailyPrice = $customerService->daily_price;
+
         if ($paymentType === PaymentType::PREPAID->value) {
             $nextBillingDate = $periodEnd->copy()->addMonths($validityPeriod);
         }else {
+            // pembayaran bulan lalu
             if ($invoicePaidDate->year === $lastMonth->year && $invoicePaidDate->month === $lastMonth->month) {
                 $nextBillingDate = $currentBillingDate->copy();
             }else {
+                // pembayaran bulan sekarang
                 if (!$lastUsage) {
                     $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
                 }else {
@@ -90,16 +99,17 @@ class CustomerServiceUsageService
             }
         }
 
-        // Hitung jumlah hari dan total harga
-        $diffInDays = $periodStart->diffInDays($periodEnd);
-        $dailyPrice = $customerService->daily_price;
-
-        if ($paymentType === PaymentType::POSTPAID->value) {
-            $totalPrice = $dailyPrice * $diffInDays;
+        if (!$lastUsage) {
+            if ($paymentType === PaymentType::PREPAID->value) {
+                $diffInDays = (int) $periodEnd->copy()->diffInDays($nextBillingDate->copy());
+            }else {
+                $diffInDays = (int) $periodStart->copy()->diffInDays($periodEnd->copy());
+            }
         }else {
-            $totalPrice = InvCustomerServiceRepository::totalBilling(customerServiceId: $customerService->id, invoiceId: $invoiceId);
+            $diffInDays = (int) $periodEnd->copy()->diffInDays($nextBillingDate->copy());
         }
 
+        $totalPrice = $dailyPrice * $diffInDays;
 
         // Cek apakah sudah ada record untuk invoice ini
         $existingUsage = CustomerServiceUsage::query()
@@ -121,6 +131,10 @@ class CustomerServiceUsageService
                 'total_price' => $totalPrice,
             ]);
         }
+
+        CustomerServiceUsage::where('customer_service_id', $customerService->id)
+            ->where('invoice_id', '!=', $invoiceId)
+            ->update(['mark_done' => true]);
     }
 
     /**

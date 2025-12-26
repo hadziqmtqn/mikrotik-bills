@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\InvCustomerService;
-use App\Services\RecalculateInvoiceTotalService;
+use App\Services\CustomerService\RecalculateInvoiceTotalService;
 
 class InvCustomerServiceObserver
 {
