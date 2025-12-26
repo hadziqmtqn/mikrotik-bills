@@ -2,8 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Enums\BillingType;
-use App\Models\ExtraCost;
 use App\Models\User;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
@@ -35,12 +33,7 @@ class RecurringInvoiceJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $extraCosts = ExtraCost::query()
-            ->where('billing_type', BillingType::RECURRING->value)
-            ->where('is_active', true)
-            ->get();
-
-        DB::transaction(function () use ($extraCosts) {
+        DB::transaction(function () {
             $user = $this->user;
 
             $invoice = CreateInvoiceService::handle(

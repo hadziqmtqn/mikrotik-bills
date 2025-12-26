@@ -65,12 +65,23 @@ class CustomerServiceTable
                     ->searchable()
                     ->formatStateUsing(fn($state): string => PackageTypeService::tryFrom($state)?->getLabel() ?? $state),
 
-                TextColumn::make('start_date')
-                    ->label('Tanggal Mulai')
+                TextColumn::make('installation_date')
+                    ->label('Tanggal Instalasi')
                     ->date()
-                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y HH:mm') : null)
-                    ->toggleable()
-                    ->toggledHiddenByDefault(),
+                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y') : null)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('start_date')
+                    ->label('Tanggal Aktivasi')
+                    ->date()
+                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y') : null)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('customerServiceUsageLatest.next_billing_date')
+                    ->label('Tgl. Tagihan Berikutnya')
+                    ->date()
+                    ->formatStateUsing(fn($state): string => $state ? DateHelper::indonesiaDate($state, 'D MMM Y') : null)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status')
                     ->label('Status')
