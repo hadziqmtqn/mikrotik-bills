@@ -39,13 +39,12 @@ class CustomerServiceUsageService
         $invoiceId = $invoice->id;
         $invoiceSetting = InvoiceSetting::first();
         $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
+        $servicePackage = $customerService->servicePackage;
+        $paymentType = $servicePackage?->payment_type;
+        $validityPeriod = $servicePackage?->validity_period;
 
-        $installationDate = $customerService->installation_date;
-        if (!$installationDate) {
-            throw new Exception('Installation date is required');
-        }
-
-        $installationDate = Carbon::parse($installationDate);
+        // Tanggal tagihan lunas pertama kali
+        $invoicePaidDate = Carbon::parse($invoice->date);
         $now = Carbon::now();
         $currentBillingDate = Carbon::create($now->year, $now->month, $billingDay);
 
@@ -53,33 +52,49 @@ class CustomerServiceUsageService
         $lastUsage = $customerService->customerServiceUsageLatest;
         $lastPeriodEnd = $lastUsage?->period_end;
 
-        /**
-         * - Jika tanggal pemasangan dibulan kemarin, maka tanggal "next_billing_date" bulan sekarang
-         * - Jika pasang bulan ini, tanggal "next_billing_date" bulan depan
-        */
-
-        $lastMonth = $now->copy()->subMonth();
-        if ($installationDate->year === $lastMonth->year && $installationDate->month === $lastMonth->month) {
-            $nextBillingDate = $currentBillingDate->copy();
-        }else {
-            $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
-        }
-
         if (!$lastPeriodEnd) {
             // LAYANAN BARU - Periode mulai dari installation_date
-            $periodStart = $installationDate->copy();
-            $periodEnd = $installationDate;
+            $periodStart = $invoicePaidDate->copy();
+            $periodEnd = $periodStart;
         } else {
             // LAYANAN LAMA - Periode mulai dari akhir periode terakhir
             $periodStart = Carbon::parse($lastPeriodEnd);
             $periodEnd = $currentBillingDate->copy();
         }
 
+        /**
+         * #### PREPAID (PRA BAYAR)
+         * - Tanggal tagihan berikutnya langsung ke beberapa bulan sejak pelunasan
+         * - Misal, tagihan lunas tanggal 23 Nov 2025 dan periode paket (validity_period) 1 bulan, maka tagihan berikutnya 23 Des 2025
+         * ---
+         *  #### POSTPAID (PASCA BAYAR)
+         * - Jika tanggal pemasangan dibulan kemarin, maka tanggal "next_billing_date" bulan sekarang
+         * - Jika pasang bulan ini, tanggal "next_billing_date" bulan depan
+         * ---
+         * - Pada tagihan dibulan yang akan datang "nex_billing_date" = period_end + validity_period
+         * - Misal, periode terakhir tgl 05 Januari 2026 + 1 bulan = 05 Februari 2026
+        */
+
+        $lastMonth = $now->copy()->subMonth();
+        if ($paymentType === PaymentType::PREPAID->value) {
+            $nextBillingDate = $periodEnd->copy()->addMonths($validityPeriod);
+        }else {
+            if ($invoicePaidDate->year === $lastMonth->year && $invoicePaidDate->month === $lastMonth->month) {
+                $nextBillingDate = $currentBillingDate->copy();
+            }else {
+                if (!$lastUsage) {
+                    $nextBillingDate = $currentBillingDate->copy()->addMonthNoOverflow();
+                }else {
+                    $nextBillingDate = $periodEnd->copy()->addMonths($validityPeriod);
+                }
+            }
+        }
+
         // Hitung jumlah hari dan total harga
         $diffInDays = $periodStart->diffInDays($periodEnd);
         $dailyPrice = $customerService->daily_price;
 
-        if ($customerService->servicePackage?->payment_type === PaymentType::POSTPAID->value) {
+        if ($paymentType === PaymentType::POSTPAID->value) {
             $totalPrice = $dailyPrice * $diffInDays;
         }else {
             $totalPrice = InvCustomerServiceRepository::totalBilling(customerServiceId: $customerService->id, invoiceId: $invoiceId);
