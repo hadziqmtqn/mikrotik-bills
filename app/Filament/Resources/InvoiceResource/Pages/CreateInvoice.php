@@ -102,13 +102,6 @@ class CreateInvoice extends CreateRecord
          * jika ada tolak pembuatan faktur baru agar tidak duplikat
         */
 
-        /*$ex = [];
-
-        foreach ($data['customer_services'] as $customer_service) {
-            $ex[] = collect($customer_service['extra_costs'])->all();
-        }
-
-        dd($ex);*/
         return DB::transaction(function () use ($data) {
             // Create invoice
             $invoice = CreateInvoiceService::handle(

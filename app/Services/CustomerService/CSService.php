@@ -53,25 +53,33 @@ class CSService
                     'price' => $excludeBill ? 0 : $customerService->price,
                     'includeBill' => !$excludeBill,
                     'packageType' => PackageTypeService::tryFrom($packageType)?->getLabel() ?? $packageType,
-                    'additionalServiceFees' => $customerService->additionalServiceFees->filter(function (AdditionalServiceFee $fee) use ($customerService) {
-                        // 1. Jika start_date kosong → tampilkan semua
-                        if (is_null($customerService->start_date)) {
-                            return true;
-                        }
-
-                        // 2. Jika start_date terisi → hanya recurring
-                        return $fee->extraCost?->billingType === BillingType::RECURRING->value;
-                    })
-                        ->map(function (AdditionalServiceFee $additionalServiceFee) {
-                            return [
-                                'extra_cost_id' => $additionalServiceFee->extra_cost_id,
-                                'name' => $additionalServiceFee->extraCost?->name,
-                                'fee' => $additionalServiceFee->fee,
-                            ];
-                        })
-                        ->values()
+                    'additionalServiceFees' => self::additionalServiceFees($customerService)
                 ]];
             })
+            ->toArray();
+    }
+
+    public static function additionalServiceFees(CustomerService $customerService): array
+    {
+        $customerService->loadMissing('additionalServiceFees.extraCost');
+
+        return $customerService->additionalServiceFees->filter(function (AdditionalServiceFee $fee) use ($customerService) {
+            // 1. Jika start_date kosong → tampilkan semua
+            if (is_null($customerService->start_date)) {
+                return true;
+            }
+
+            // 2. Jika start_date terisi → hanya recurring
+            return $fee->extraCost?->billing_type === BillingType::RECURRING->value;
+        })
+            ->map(function (AdditionalServiceFee $additionalServiceFee) {
+                return [
+                    'extra_cost_id' => $additionalServiceFee->extra_cost_id,
+                    'name' => $additionalServiceFee->extraCost?->name,
+                    'fee' => $additionalServiceFee->fee,
+                ];
+            })
+            ->values()
             ->toArray();
     }
 

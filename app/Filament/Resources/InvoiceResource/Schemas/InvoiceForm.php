@@ -176,11 +176,6 @@ class InvoiceForm
             ->pluck('customer_service_id')
             ->all();
 
-        $extraCostIds = $collection
-            ->pluck('extra_costs')
-            ->flatten()
-            ->all();
-
         $customerServices = CSService::options(userId: $userId, selfIds: $customerServiceIds);
 
         foreach ($customerServices as $customerService) {

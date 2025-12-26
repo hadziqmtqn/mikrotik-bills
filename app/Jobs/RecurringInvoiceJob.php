@@ -2,15 +2,17 @@
 
 namespace App\Jobs;
 
-use App\Models\User;
+use App\Models\CustomerServiceUsage;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
+use App\Services\CustomerService\CSService;
 use App\Traits\InvoiceSettingTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -18,14 +20,14 @@ class RecurringInvoiceJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, InvoiceSettingTrait;
 
-    protected User $user;
+    protected CustomerServiceUsage $customerServiceUsage;
 
     /**
-     * @param User $user
+     * @param CustomerServiceUsage $customerServiceUsage
      */
-    public function __construct(User $user)
+    public function __construct(CustomerServiceUsage $customerServiceUsage)
     {
-        $this->user = $user;
+        $this->customerServiceUsage = $customerServiceUsage;
     }
 
     /**
@@ -34,23 +36,31 @@ class RecurringInvoiceJob implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $user = $this->user;
+            $this->customerServiceUsage->loadMissing('customerService');
+            $customerService = $this->customerServiceUsage->customerService;
+            $now = Carbon::now();
 
+            // TODO 1. Create Invoice
             $invoice = CreateInvoiceService::handle(
-                userId: $user->id,
-                date: now(),
-                dueDate: now()->addDays($this->setting()?->due_date_after_new_service),
+                userId: $customerService?->user_id,
+                date: $now,
+                dueDate: $now->copy()->addDays($this->setting()?->due_date_after_new_service),
                 defaultNote: 'Dibuat otomatis oleh sistem'
             );
 
-            // Customer Serives
-            foreach ($user->customerServices as $customerService) {
-                CreateInvCSService::handle(
-                    invoiceId: $invoice->id,
-                    customerService: $customerService,
-                    includeBill: true
-                );
-            }
+            // TODO 2. Create Invoice Customer Service
+            CreateInvCSService::handle(
+                invoiceId: $invoice->id,
+                customerService: $customerService,
+                includeBill: true,
+                extraCosts: CSService::additionalServiceFees($customerService)
+            );
+
+            // TODO 3. Updating "inv_generated" on "Customer Service Usage" to "true"
+            $this->customerServiceUsage
+                ->update([
+                    'inv_generated' => true
+                ]);
         });
     }
 }
