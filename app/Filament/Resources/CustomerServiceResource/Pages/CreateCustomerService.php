@@ -43,8 +43,8 @@ class CreateCustomerService extends CreateRecord
         return DB::transaction(function () use ($data) {
             $servicePackage = ServicePackage::find($data['service_package_id']);
             $instalationDate = $data['installation_date'] ?? null;
-            $servicetype = $servicePackage?->service_type;
-            $isHostpot = $servicetype === ServiceType::HOTSPOT->value;
+            $serviceType = $servicePackage?->service_type;
+            $isHostpot = $serviceType === ServiceType::HOTSPOT->value;
             $date = $isHostpot ? Carbon::now() : ($instalationDate ? Carbon::createFromDate($instalationDate) : null);
 
             $customerService = CreateCSService::handle(
@@ -71,7 +71,7 @@ class CreateCustomerService extends CreateRecord
             $invCustomerService = CreateInvCSService::handle(
                 invoiceId: $invoice->id,
                 customerService: $customerService,
-                includeBill: $servicetype === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
+                includeBill: $serviceType === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
             );
 
             // TODO Create Extra Cost Items

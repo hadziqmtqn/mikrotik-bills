@@ -62,9 +62,6 @@ class PaymentResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => Pages\ListPayments::route('/'),
-            //'create' => Pages\CreatePayment::route('/create'),
-            //'edit' => Pages\EditPayment::route('/{record}/edit'),
-            //'view' => Pages\ViewPayment::route('/{record}'),
         ];
     }
 
@@ -75,7 +72,6 @@ class PaymentResource extends Resource implements HasShieldPermissions
                 'user',
                 'user.userProfile',
                 'invoice.invCustomerServices',
-                'invoice.invExtraCosts',
                 'bankAccount',
             ])
             ->withoutGlobalScopes([

@@ -6,8 +6,10 @@ use App\Enums\PaymentMethod;
 use App\Enums\StatusData;
 use App\Filament\Resources\InvoiceResource\InvoiceResource;
 use App\Helpers\DateHelper;
+use App\Helpers\IdrCurrency;
 use App\Models\Payment;
 use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -77,20 +79,22 @@ class ViewPayment
                                     ->schema([
                                         TextEntry::make('customerService.servicePackage.package_name')
                                             ->label('Paket'),
+
                                         TextEntry::make('amount')
                                             ->label('Jumlah')
                                             ->money('IDR'),
-                                    ]),
 
-                                RepeatableEntry::make('invoice.invExtraCosts')
-                                    ->label('Biaya Tambahan')
-                                    ->columns()
-                                    ->schema([
-                                        TextEntry::make('extraCost.name')
-                                            ->label('Nama'),
-                                        TextEntry::make('fee')
-                                            ->label('Jumlah')
-                                            ->money('IDR'),
+                                        KeyValueEntry::make('extra_costs')
+                                            ->label('Biaya Tambahan')
+                                            ->keyLabel('Nama')
+                                            ->valueLabel('Biaya')
+                                            ->columnSpanFull()
+                                            ->getStateUsing(
+                                                fn ($record) => collect($record->extra_costs)->mapWithKeys(fn ($item) => [
+                                                    $item['name'] => IdrCurrency::convert($item['fee']),
+                                                ])
+                                                    ->toArray()
+                                            )
                                     ]),
                             ])
                     ])

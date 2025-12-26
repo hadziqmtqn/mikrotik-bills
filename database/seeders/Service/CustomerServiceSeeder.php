@@ -4,10 +4,8 @@ namespace Database\Seeders\Service;
 
 use App\Enums\PackageTypeService;
 use App\Enums\ServiceType;
-use App\Models\ExtraCost;
 use App\Models\ServicePackage;
 use App\Models\User;
-use App\Services\CustomerService\AdditionalServiceFeeService;
 use App\Services\CustomerService\CreateCSService;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
@@ -22,7 +20,7 @@ class CustomerServiceSeeder extends Seeder
             ->with('userProfile')
             ->whereHas('roles', fn ($q) => $q->where('name', 'user'))
             ->active()
-            ->limit(10)
+            ->limit(20)
             ->get();
 
         foreach ($users as $user) {
@@ -35,23 +33,16 @@ class CustomerServiceSeeder extends Seeder
                 continue;
             }
 
-            $installationDate = now();
-            $isSubscription = $servicePackage->service_type === ServiceType::PPPOE->value;
+            $installationDate = now()->subMonth();
+            $isPpoe = $servicePackage->service_type === ServiceType::PPPOE->value;
 
-            $customerService = CreateCSService::handle(
+            CreateCSService::handle(
                 userId: $user->id,
                 servicePackage: $servicePackage,
-                packageType: $isSubscription ? PackageTypeService::SUBSCRIPTION->value : PackageTypeService::ONE_TIME->value,
+                packageType: $isPpoe ? PackageTypeService::SUBSCRIPTION->value : PackageTypeService::ONE_TIME->value,
                 installationDate: $installationDate,
-                status: $faker->randomElement(['pending'])
+                status: $faker->randomElement(['pending', 'active'])
             );
-
-            if ($isSubscription) {
-                AdditionalServiceFeeService::handleBulk(
-                    customerServiceId: $customerService->id,
-                    extraCosts: ExtraCost::all()
-                );
-            }
         }
     }
 }

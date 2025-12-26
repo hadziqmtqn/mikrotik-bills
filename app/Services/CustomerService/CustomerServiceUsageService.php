@@ -54,7 +54,8 @@ class CustomerServiceUsageService
         $lastPeriodEnd = $lastUsage?->period_end;
 
         /**
-         * - Jika tanggal pesangan dibulan kemarin, maka tanggal next_billing_date bulan sekarang
+         * - Jika tanggal pemasangan dibulan kemarin, maka tanggal "next_billing_date" bulan sekarang
+         * - Jika pasang bulan ini, tanggal "next_billing_date" bulan depan
         */
 
         $lastMonth = $now->copy()->subMonth();
