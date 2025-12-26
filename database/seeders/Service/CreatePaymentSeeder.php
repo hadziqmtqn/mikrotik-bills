@@ -48,8 +48,15 @@ class CreatePaymentSeeder extends Seeder
         $userId = $customerService->user_id;
         $date = Carbon::parse($customerService->installation_date);
         $servicePackage = $customerService->servicePackage;
+        $extraCosts = ExtraCost::all();
 
-        // 1. create invoice
+        // Create Additional seevice fee
+        AdditionalServiceFeeService::handleBulk(
+            customerServiceId: $customerService->id,
+            extraCosts: $extraCosts
+        );
+
+        // create invoice
         $invoice = CreateInvoiceService::handle(
             userId: $userId,
             date: $date->copy(),
@@ -57,22 +64,15 @@ class CreatePaymentSeeder extends Seeder
             defaultStatus: StatusData::PAID->value
         );
 
-        // 2. create invoice customer service
-        $invCustomerService = CreateInvCSService::handle(
+        // create invoice customer service
+        CreateInvCSService::handle(
             invoiceId: $invoice->id,
             customerService: $customerService,
-            includeBill: $servicePackage?->service_type === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
+            includeBill: $servicePackage?->service_type === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value,
+            extraCosts: $extraCosts->select(['id', 'name', 'fee'])->toArray()
         );
 
-        $invCustomerService->refresh();
-        // 3. Create Additional seevice fee
-        AdditionalServiceFeeService::handleBulk(
-            customerServiceId: $customerService->id,
-            extraCosts: ExtraCost::all(),
-            invCustomerService: $invCustomerService
-        );
-
-        // 4. refresh and recalculate invoice total price
+        // refresh and recalculate invoice total price
         RecalculateInvoiceTotalService::totalPrice($invoice);
         $invoice->refresh();
 

@@ -74,7 +74,7 @@ class CSService
         })
             ->map(function (AdditionalServiceFee $additionalServiceFee) {
                 return [
-                    'extra_cost_id' => $additionalServiceFee->extra_cost_id,
+                    'id' => $additionalServiceFee->extra_cost_id,
                     'name' => $additionalServiceFee->extraCost?->name,
                     'fee' => $additionalServiceFee->fee,
                 ];

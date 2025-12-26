@@ -12,6 +12,7 @@ use App\Services\CustomerService\AdditionalServiceFeeService;
 use App\Services\CustomerService\CreateCSService;
 use App\Services\CustomerService\CreateInvCSService;
 use App\Services\CustomerService\CreateInvoiceService;
+use App\Services\CustomerService\CSService;
 use App\Services\CustomerService\RecalculateInvoiceTotalService;
 use App\Traits\InvoiceSettingTrait;
 use Filament\Resources\Pages\CreateRecord;
@@ -68,20 +69,23 @@ class CreateCustomerService extends CreateRecord
              * - Jika jenis layanan Hostpot, nominal tagihan layanan utama dibabankan
             */
 
-            $invCustomerService = CreateInvCSService::handle(
+            $customerService->refresh();
+
+            CreateInvCSService::handle(
                 invoiceId: $invoice->id,
                 customerService: $customerService,
-                includeBill: $serviceType === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value
+                includeBill: $serviceType === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value,
+                extraCosts: CSService::additionalServiceFees($customerService)
             );
 
             // TODO Create Extra Cost Items
+            // Biaya tambahan sesuai yang dipilih
             if (count($data['inv_extra_costs']) > 0) {
                 AdditionalServiceFeeService::handleBulk(
                     customerServiceId: $customerService->id,
                     extraCosts: ExtraCost::query()
                         ->whereIn('id', $data['inv_extra_costs'])
                         ->get(),
-                    invCustomerService: $invCustomerService
                 );
             }
 
