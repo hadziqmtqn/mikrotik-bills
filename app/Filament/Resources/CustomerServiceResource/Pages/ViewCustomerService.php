@@ -19,6 +19,8 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\View\View;
+use Torgodly\Html2Media\Actions\Html2MediaAction;
 
 class ViewCustomerService extends ViewRecord
 {
@@ -29,6 +31,21 @@ class ViewCustomerService extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Html2MediaAction::make('print')
+                ->label('Cetak')
+                ->icon('heroicon-o-printer')
+                ->color('primary')
+                ->modalHeading('Cetak Layanan')
+                ->modalDescription('Apakah Anda yakin ingin mencetak layanan ini?')
+                ->requiresConfirmation()
+                ->successNotificationTitle('Invoice berhasil dicetak.')
+                ->savePdf()
+                ->content(function ($record): View {
+                    return \view('filament.resources.customer-service.pages.print', [
+                        'customerService' => $record
+                    ]);
+                }),
+
             DeleteAction::make()
                 ->modalHeading('Hapus Layanan Pelanggan')
         ];
