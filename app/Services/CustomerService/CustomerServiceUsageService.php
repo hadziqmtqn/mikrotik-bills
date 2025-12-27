@@ -39,22 +39,29 @@ class CustomerServiceUsageService
         }
 
         $invoice->refresh();
+
         $invoiceId = $invoice->id;
         $invoiceSetting = InvoiceSetting::first();
+        $now = Carbon::now();
+
         $billingDay = $invoiceSetting?->repeat_every_date ?? 5;
         $servicePackage = $customerService->servicePackage;
         $paymentType = $servicePackage?->payment_type;
-        $validityPeriod = $servicePackage?->validity_period;
+        $validityPeriod = $servicePackage?->validity_period ?? 1;
 
         // Tanggal tagihan lunas pertama kali
         $invoicePaidDate = Carbon::parse($invoice->date);
-        $now = Carbon::now();
         $currentBillingDate = Carbon::create($now->year, $now->month, $billingDay);
+
+        $dailyPrice = $customerService->daily_price;
 
         // Tentukan periode mulai
         $lastUsage = $customerService->customerServiceUsageLatest;
         $lastPeriodEnd = $lastUsage?->period_end;
 
+        // =========================
+        // TODO: Tentukan periode
+        // =========================
         if (!$lastPeriodEnd) {
             // LAYANAN BARU - Periode mulai dari installation_date
             $periodStart = $invoicePaidDate->copy();
@@ -80,9 +87,9 @@ class CustomerServiceUsageService
 
         $lastMonth = $now->copy()->subMonth();
 
-        // Hitung jumlah hari dan total harga
-        $dailyPrice = $customerService->daily_price;
-
+        // =========================
+        // TODO: Tentukan next billing date
+        // =========================
         if ($paymentType === PaymentType::PREPAID->value) {
             $nextBillingDate = $periodEnd->copy()->addMonths($validityPeriod);
         }else {
@@ -99,7 +106,7 @@ class CustomerServiceUsageService
             }
         }
 
-        if (!$lastUsage) {
+        /*if (!$lastUsage) {
             if ($paymentType === PaymentType::PREPAID->value) {
                 $diffInDays = (int) $periodEnd->copy()->diffInDays($nextBillingDate->copy());
             }else {
@@ -107,11 +114,25 @@ class CustomerServiceUsageService
             }
         }else {
             $diffInDays = (int) $periodEnd->copy()->diffInDays($nextBillingDate->copy());
-        }
+        }*/
 
-        $totalPrice = $dailyPrice * $diffInDays;
+        // =========================
+        // TODO: HITUNG USAGE (FLAT 30 HARI)
+        // =========================
+        //$daysOfUsage = 30 * $validityPeriod;
+        $daysOfUsage = self::calculateDaysOfUsage(
+            isNewService: !$lastUsage,
+            paymentType: $paymentType,
+            validityPeriod: $validityPeriod,
+            periodStart: $periodStart,
+            periodEnd: $periodEnd
+        );
 
-        // Cek apakah sudah ada record untuk invoice ini
+        $totalPrice  = $dailyPrice * $daysOfUsage;
+
+        // =========================
+        // TODO: Simpan usage jika belum ada
+        // =========================
         $existingUsage = CustomerServiceUsage::query()
             ->where([
                 'customer_service_id' => $customerService->id,
@@ -126,7 +147,7 @@ class CustomerServiceUsageService
                 'period_start' => $periodStart,
                 'period_end' => $periodEnd,
                 'next_billing_date' => $nextBillingDate,
-                'days_of_usage' => $diffInDays,
+                'days_of_usage' => $daysOfUsage,
                 'daily_price' => $dailyPrice,
                 'total_price' => $totalPrice,
             ]);
@@ -135,6 +156,27 @@ class CustomerServiceUsageService
         CustomerServiceUsage::where('customer_service_id', $customerService->id)
             ->where('invoice_id', '!=', $invoiceId)
             ->update(['mark_done' => true]);
+    }
+
+    private static function calculateDaysOfUsage(bool $isNewService, string $paymentType, int $validityPeriod, ?Carbon $periodStart, ?Carbon $periodEnd): int
+    {
+        // Layanan lama → selalu full
+        if (!$isNewService) {
+            return 30 * $validityPeriod;
+        }
+
+        // Layanan baru + PREPAID → full
+        if ($paymentType === PaymentType::PREPAID->value) {
+            return 30 * $validityPeriod;
+        }
+
+        // Layanan baru + POSTPAID → prorata FLAT
+        // contoh: hitung hari terpakai dalam bulan billing
+        if (!$periodStart || !$periodEnd) {
+            return 0;
+        }
+
+        return max(0, min($periodStart->diffInDays($periodEnd), 30 * $validityPeriod));
     }
 
     /**

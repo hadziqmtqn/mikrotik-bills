@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Services\CustomerService\CustomerServiceUsageService;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
 
@@ -46,7 +47,11 @@ class InvoiceActions
 
                     ToggleButtons::make('status')
                         ->options(StatusData::options(['overdue', 'cancelled']))
-                        ->inline()
+                        ->inline(),
+
+                    Textarea::make('note')
+                        ->label('Catatan')
+                        ->autosize()
                 ])
                 ->mutateFormDataUsing(function (array $data): array {
                     if ($data['status'] == 'cancelled') {

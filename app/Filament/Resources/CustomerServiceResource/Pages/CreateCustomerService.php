@@ -48,12 +48,24 @@ class CreateCustomerService extends CreateRecord
             $isHostpot = $serviceType === ServiceType::HOTSPOT->value;
             $date = $isHostpot ? Carbon::now() : ($instalationDate ? Carbon::createFromDate($instalationDate) : null);
 
+            // TODO Create Customer Service
             $customerService = CreateCSService::handle(
                 userId: $data['user_id'],
                 servicePackage: $servicePackage,
                 packageType: $isHostpot ? PackageTypeService::ONE_TIME->value : PackageTypeService::SUBSCRIPTION->value,
                 installationDate: $date
             );
+
+            // TODO Create Extra Cost Items
+            // Biaya tambahan sesuai yang dipilih
+            if (count($data['inv_extra_costs']) > 0) {
+                AdditionalServiceFeeService::handleBulk(
+                    customerServiceId: $customerService->id,
+                    extraCosts: ExtraCost::query()
+                        ->whereIn('id', $data['inv_extra_costs'])
+                        ->get(),
+                );
+            }
 
             // TODO Create Invoice
             $invoice = CreateInvoiceService::handle(
@@ -77,17 +89,6 @@ class CreateCustomerService extends CreateRecord
                 includeBill: $serviceType === ServiceType::HOTSPOT->value || $servicePackage?->payment_type === PaymentType::PREPAID->value,
                 extraCosts: CSService::additionalServiceFees($customerService)
             );
-
-            // TODO Create Extra Cost Items
-            // Biaya tambahan sesuai yang dipilih
-            if (count($data['inv_extra_costs']) > 0) {
-                AdditionalServiceFeeService::handleBulk(
-                    customerServiceId: $customerService->id,
-                    extraCosts: ExtraCost::query()
-                        ->whereIn('id', $data['inv_extra_costs'])
-                        ->get(),
-                );
-            }
 
             // TODO Recalculate total price
             $invoice->refresh();

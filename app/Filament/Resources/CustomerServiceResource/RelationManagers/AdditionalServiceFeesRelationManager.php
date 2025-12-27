@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CustomerServiceResource\RelationManagers;
 
 use App\Enums\BillingType;
 use App\Helpers\IdrCurrency;
+use App\Models\ExtraCost;
 use App\Services\ExtraCostService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -66,6 +67,11 @@ class AdditionalServiceFeesRelationManager extends RelationManager
                     ->label('Tambah Baru')
                     ->modalHeading('Tambah Biaya Tambahan')
                     ->modalWidth('md')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['fee'] = ExtraCost::find($data['extra_cost_id'])?->fee;
+
+                        return $data;
+                    })
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
